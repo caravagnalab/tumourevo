@@ -95,27 +95,20 @@ ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multi
 ch_output_docs = file("$baseDir/docs/output.md", checkIfExists: true)
 
 /*
- * Create a channel for input read files
+ * Create a channel for input csv file
  */
-if (params.readPaths) {
-    if (params.single_end) {
-        Channel
-            .from(params.readPaths)
-            .map { row -> [ row[0], [ file(row[1][0], checkIfExists: true) ] ] }
-            .ifEmpty { exit 1, "params.readPaths was empty - no input files supplied" }
-            .into { ch_read_files_fastqc; ch_read_files_trimming }
-    } else {
-        Channel
-            .from(params.readPaths)
-            .map { row -> [ row[0], [ file(row[1][0], checkIfExists: true), file(row[1][1], checkIfExists: true) ] ] }
-            .ifEmpty { exit 1, "params.readPaths was empty - no input files supplied" }
-            .into { ch_read_files_fastqc; ch_read_files_trimming }
-    }
+if (params.samples) {
+    input = Channel.fromPath(params.samples, checkIfExists: True)
+                .splitCsv(header: true).
+                .map{row ->
+                    tuple(row.dataset.toString(), row.patient.toString(), row.sample.toString(), file(row.vcf), file(row.cna_dir))}
+                .ifEmpty { exit 1, "params.samples was empty - no input files supplied" }
 } else {
-    Channel
-        .fromFilePairs(params.reads, size: params.single_end ? 1 : 2)
-        .ifEmpty { exit 1, "Cannot find any reads matching: ${params.reads}\nNB: Path needs to be enclosed in quotes!\nIf this is single-end data, please specify --single_end on the command line." }
-        .into { ch_read_files_fastqc; ch_read_files_trimming }
+    input = Channel.fromPath("$baseDir/input.csv", checkIfExists: True)
+                .splitCsv(header: true).
+                .map{row ->
+                    tuple(row.dataset.toString(), row.patient.toString(), row.sample.toString(), file(row.vcf), file(row.cna_dir))}
+                .ifEmpty { exit 1, "Default input csv file was empty - no input files supplied" }
 }
 
 // Header log info
