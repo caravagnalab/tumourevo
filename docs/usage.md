@@ -110,6 +110,163 @@ Output from different workflows, subworkflows and modules will be in a specific 
 
 An [example samplesheet](https://github.com/caravagnalab/nf-core-evoverse/blob/dev/test_input.csv) has been provided with the pipeline.
 
+## Pipeline steps
+
+### Quality control
+
+This step can be started either from XXX files or XXXX. The CSV must contain at least the columns XXX.
+
+The following parameters can be tuned for this step:
+
+- XXX
+- XXX
+  
+The available tools for this step are XXX.
+
+**NB: When running this step, XXXX***
+
+#### Examples
+
+Minimal input file:
+
+```bash
+patient,sample,lane,fastq_1,fastq_2
+patient1,test_sample,lane_1,test_1.fastq.gz,test_2.fastq.gz
+```
+
+In this example, the sample comes from multiple patients:
+
+```bash
+patient,sample,lane,fastq_1,fastq_2
+patient1,test_sample,lane_1,test_L001_1.fastq.gz,test_L001_2.fastq.gz
+patient1,test_sample,lane_2,test_L002_1.fastq.gz,test_L002_2.fastq.gz
+patient1,test_sample,lane_3,test_L003_1.fastq.gz,test_L003_2.fastq.gz
+```
+
+### Variant Annotation
+
+This step can be started either from XXX files or XXXX. The CSV must contain at least the columns XXX.
+
+The following parameters can be tuned for this step:
+
+- XXX
+- XXX
+  
+The available tools for this step are XXX.
+
+**NB: When running this step, XXXX***
+
+#### Examples
+
+Minimal input file:
+
+```bash
+patient,sample,lane,fastq_1,fastq_2
+patient1,test_sample,lane_1,test_1.fastq.gz,test_2.fastq.gz
+```
+
+In this example, the sample comes from multiple patients:
+
+```bash
+patient,sample,lane,fastq_1,fastq_2
+patient1,test_sample,lane_1,test_L001_1.fastq.gz,test_L001_2.fastq.gz
+patient1,test_sample,lane_2,test_L002_1.fastq.gz,test_L002_2.fastq.gz
+patient1,test_sample,lane_3,test_L003_1.fastq.gz,test_L003_2.fastq.gz
+```
+
+### Subclonal Deconvolution
+
+This step can be started either from XXX files or XXXX. The CSV must contain at least the columns XXX.
+
+The following parameters can be tuned for this step:
+
+- XXX
+- XXX
+  
+The available tools for this step are XXX.
+
+**NB: When running this step, XXXX***
+
+#### Examples
+
+Minimal input file:
+
+```bash
+patient,sample,lane,fastq_1,fastq_2
+patient1,test_sample,lane_1,test_1.fastq.gz,test_2.fastq.gz
+```
+
+In this example, the sample comes from multiple patients:
+
+```bash
+patient,sample,lane,fastq_1,fastq_2
+patient1,test_sample,lane_1,test_L001_1.fastq.gz,test_L001_2.fastq.gz
+patient1,test_sample,lane_2,test_L002_1.fastq.gz,test_L002_2.fastq.gz
+patient1,test_sample,lane_3,test_L003_1.fastq.gz,test_L003_2.fastq.gz
+```
+
+### Clone Tree Inference
+
+This step can be started either from XXX files or XXXX. The CSV must contain at least the columns XXX.
+
+The following parameters can be tuned for this step:
+
+- XXX
+- XXX
+  
+The available tools for this step are XXX.
+
+**NB: When running this step, XXXX***
+
+#### Examples
+
+Minimal input file:
+
+```bash
+patient,sample,lane,fastq_1,fastq_2
+patient1,test_sample,lane_1,test_1.fastq.gz,test_2.fastq.gz
+```
+
+In this example, the sample comes from multiple patients:
+
+```bash
+patient,sample,lane,fastq_1,fastq_2
+patient1,test_sample,lane_1,test_L001_1.fastq.gz,test_L001_2.fastq.gz
+patient1,test_sample,lane_2,test_L002_1.fastq.gz,test_L002_2.fastq.gz
+patient1,test_sample,lane_3,test_L003_1.fastq.gz,test_L003_2.fastq.gz
+```
+
+### Signature Deconvolution
+
+This step can be started either from XXX files or XXXX. The CSV must contain at least the columns XXX.
+
+The following parameters can be tuned for this step:
+
+- XXX
+- XXX
+  
+The available tools for this step are XXX.
+
+**NB: When running this step, XXXX***
+
+#### Examples
+
+Minimal input file:
+
+```bash
+patient,sample,lane,fastq_1,fastq_2
+patient1,test_sample,lane_1,test_1.fastq.gz,test_2.fastq.gz
+```
+
+In this example, the sample comes from multiple patients:
+
+```bash
+patient,sample,lane,fastq_1,fastq_2
+patient1,test_sample,lane_1,test_L001_1.fastq.gz,test_L001_2.fastq.gz
+patient1,test_sample,lane_2,test_L002_1.fastq.gz,test_L002_2.fastq.gz
+patient1,test_sample,lane_3,test_L003_1.fastq.gz,test_L003_2.fastq.gz
+```
+
 ### Updating the pipeline
 
 When you run the above command, Nextflow automatically pulls the pipeline code from GitHub and stores it as a cached version. When running the pipeline after this, it will always use the cached version if available - even if the pipeline has been updated since. To make sure that you're running the latest version of the pipeline, make sure that you regularly update the cached version of the pipeline:
