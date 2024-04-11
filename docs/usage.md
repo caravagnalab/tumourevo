@@ -39,27 +39,36 @@
   * [`--monochrome_logs`](#--monochrome_logs)
   * [`--multiqc_config`](#--multiqc_config)
 
-## Introduction
+# Introduction
 
-Nextflow handles job submissions on SLURM or other environments, and supervises running the jobs. Thus the Nextflow process must run until the pipeline is finished. We recommend that you put the process running in the background through `screen` / `tmux` or similar tool. Alternatively you can run nextflow within a cluster job submitted your job scheduler.
+**evoverse** is a workflow to infer a tumour evolution model from whole-genome sequencing (WGS) data. 
 
-It is recommended to limit the Nextflow Java virtual machines memory. We recommend adding the following line to your environment (typically in `~/.bashrc` or `~./bash_profile`):
+Through the analysis of variant and copy-number calls, it reconstructs the evolutionary process leading to the observed tumour genome. Most of the analyses can be done at mutliple levels: single sample, multiple samples from the same patient (multi-region/longitudinal assays), and multiple patients from distinct cohorts.
 
-```bash
-NXF_OPTS='-Xms1g -Xmx4g'
-```
+# Running the pipeline
 
-<!-- TODO nf-core: Document required command line parameters to run the pipeline-->
-
-## Running the pipeline
+## Quickstart
 
 The typical command for running the pipeline is as follows:
 
 ```bash
-nextflow run nf-core/evoverse --reads '*_R{1,2}.fastq.gz' -profile docker
+nextflow run nf-core/evoverse \
+ -r <VERSION> \
+ -profile <PROFILE> \
+ --samples <INPUT CSV> \
+ --publish_dir ./results
+ --tools <TOOLS>
 ```
 
-This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
+`-r <VERSION>` is optional but strongly recommended for reproducibility and should match the latest version.
+
+`-profile <PROFILE>` is mandatory and should reflect either your own institutional profile or any pipeline profile specified in the [profile section](##-profile).
+
+This documentation imply that any `nextflow run nf-core/evoverse` command is run with the appropriate `-r` and `-profile` commands.
+
+This will launch the pipeline and perform variant calling with the tools specified in `--tools`, see the [parameter section]([https://github.com/caravagnalab/nf-core-evoverse/tree/dev]) for details on the available tools.
+
+Unless running with the `test` profile, the paths of input files must be provided within the `<INPUT CSV>` file specified in `--samples`, see the [input section]([https://github.com/caravagnalab/nf-core-evoverse/tree/dev]) for input requirements. 
 
 Note that the pipeline will create the following files in your working directory:
 
@@ -69,6 +78,37 @@ results         # Finished results (configurable, see below)
 .nextflow_log   # Log file from Nextflow
 # Other nextflow hidden files, eg. history of pipeline runs and old logs.
 ```
+
+## Input: Sample sheet configurations
+
+You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use the parameter `--samples` to specify its location. It has to be a comma-separated file with at least 5 columns, and a header row as shown in the examples below.
+
+It is recommended to use the absolute path of the files, but a relative path should also work.
+
+For the joint analysis of multiple samples, a tumor BAM file is required for each sample, such that the number of reads of a private mutation can be retrieved for all the samples thorugh `mpileup`.
+
+Multiple samples from the same patient must be specified with the same `dataset` ID, `patient` ID, and a different `sample` ID.
+
+Multiple patients from the same dataset must be specified with the same `dataset` ID, and a different `patient` ID.
+
+**evoverse** will output sample-specific results in a different directory for _each sample_, patient-specific results in a common directory for _each patient_, and dataset-specific results in a common directory for _each dataset_.
+
+Output from different workflows, subworkflows and modules will be in a specific directory for each dataset, patient, sample and tool configuration.
+
+### Overview: Samplesheet Columns
+
+| Column    | Description                                                                                                                                                                                                                                                                                                                       |
+| --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `dataset` | **Dataset ID**; when sequencing data from multiple datasets is analysed, it designates the source dataset of each patient; must be unique for each dataset, but one dataset can contain samples from multiple patients. <br /> _Required_                                                                                      |
+| `patient` | **Patient ID**; designates the patient/subject; must be unique for each patient, but one patient can have multiple samples (e.g. from multiple regions or multiple time points). <br /> _Required_                                                                                                                                |
+| `sample`  | **Sample ID** for each sample; more than one sample for each subject is possible. <br /> _Required_                                              |
+| `vcf`  | Full path to the vcf file. <br /> _Required_                                                                                                        |
+| `vcf_tbi`  | Full path to the vcf `tabix` index file. <br /> _Required_                                                                                      |
+| `cna_dir`  | Full path to the directory containing text files from copy-number calling. <br /> _Required_                                                    |
+| `tumour_bam`  | Full path to the tumour bam file. <br /> _Required for `--step subclonal_multisample`_                                                       |
+| `tumour_bai`  | Full path to the tumour bam index file. <br /> _Required for `--step subclonal_multisample_ `                                                |
+
+An [example samplesheet](https://github.com/caravagnalab/nf-core-evoverse/blob/dev/test_input.csv) has been provided with the pipeline.
 
 ### Updating the pipeline
 
