@@ -1,6 +1,6 @@
 # ![nf-core/evoverse](docs/images/nf-core-evoverse_logo.png)
 
-**Analysis pipleine to model tumour clonal evolution from WGS data (driver annotation, quality control of copy number calls, subclonal and mutational signature deconvolution)**.
+**Tumour evolution from WGS data**
 
 [![GitHub Actions CI Status](https://github.com/nf-core/evoverse/workflows/nf-core%20CI/badge.svg)](https://github.com/nf-core/evoverse/actions)
 [![GitHub Actions Linting Status](https://github.com/nf-core/evoverse/workflows/nf-core%20linting/badge.svg)](https://github.com/nf-core/evoverse/actions)
@@ -10,8 +10,17 @@
 [![Docker](https://img.shields.io/docker/automated/nfcore/evoverse.svg)](https://hub.docker.com/r/nfcore/evoverse)
 
 ## Introduction
+**nf-core/evoverse** is a bioinformatics pipeline to model tumour evolution from whole-genome sequencing (WGS) data. The pipeline performs state-of-the-art downstream analysis of variant and copy-number calls from tumour-normal matched sequecing assays, reconstructing the evolutionary processes leading to the observed tumour genome. This analysis can be done  at the level of single samples, multiple samples from the same patient (multi-region/longitudinal assays), and of multiple patients from distinct cohorts.
 
-The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool to run tasks across multiple compute infrastructures in a very portable manner. It comes with docker containers making installation trivial and results highly reproducible.
+The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool to run tasks across multiple compute infrastructures in a very portable manner. It comes with docker containers making installation trivial and results highly reproducible. The [Nextflow DSL2]([https://www.nextflow.io](https://www.nextflow.io/docs/latest/dsl1.html)) implementation of this pipeline uses one container per process which makes it easier to maintain and update software dependencies. Where possible, these processes have been submitted to and installed from [nf-core/modules](https://github.com/nf-core/modules) in order to make them available to all nf-core pipelines, and to everyone within the Nextflow community!
+
+## Pipeline Summary
+
+- Quality Control (`CNAqc`)
+- Variant Annotation (`VEP`, `maftools`)
+- Subclonal Deconvolution (`PyClone`, `MOBSTER`, `VIBER`)
+- Clone Tree Inference (`ctree`)
+- Signature Deconvolution (`SparseSignatures`, `SigProfiler`)
 
 ## Quick Start
 
