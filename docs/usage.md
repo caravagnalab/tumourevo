@@ -145,33 +145,68 @@ patient1,test_sample,lane_3,test_L003_1.fastq.gz,test_L003_2.fastq.gz
 
 ### Variant Annotation
 
-This step can be started either from XXX files or XXXX. The CSV must contain at least the columns XXX.
+This step can be started either from `vcf`or `txt` files. Can use compressed input files (gzipped).
+The CSV must contain at least the columns:
+
+```bash
+dataset,patient,sample,vcf
+```
 
 The following parameters can be tuned for this step:
 
-- XXX
-- XXX
-  
-The available tools for this step are XXX.
+Main VEP annotation arguments:
 
-**NB: When running this step, XXXX***
+Basic options 
+`--species [species]` - Can be a latin name e.g. "homo_sapience" or "mouse".
+`--assembly [name]` - Select the assembly version to use if more than one available.
+`--fork [num_forks]` - Can improve runtime
+
+Cache options
+`--cache`  - Enables use of the cache
+`--dir_cache [directory]`  - Specify the cache directory to use. Default = "$HOME/.vep/"  
+`--cache_version`  - Use a different cache version than the assumed default (the VEP version)
+`--fasta [file|dir]`
+
+Other annotation options
+`--plugin` - plugin modules should be installed in the Plugin subdirectory of the VEP cache directory (defaults to "$HOME/.vep/")
+`--use_given_ref` - Use the provided reference allele from the input
+
+Output format options
+`--vcf`
+`--tab`
+`--json`
+`--compress_output [gzip|bgzip]`
+
+Main "vcf2maf" arguments
+`--inhibit-vep` - if you want to skip running VEP
+`--tumor-id` - to fill columns 16 and 17 of the output MAF with tumor/normal sample IDs, and to parse out genotypes and allele counts from matched genotype columns in the VCF
+`--ref-fasta [file|dir]`
+`--ncbi-build` - assembly version
+`--vep-data` - VEP cache version
+
+The available tools for this step are:
+- Ensembl Variant Effect Predictor (VEP) 
+- vcf2maf
+- maftools (summarize, analyze and visualize MAF files)
+
+**NB: Running VEP requires a VEP cache to be present. To convert a VCF into a MAF, each variant must be mapped to only one of all possible gene transcripts/isoforms that it might affect. While VEP is tolerant of chromosome format mismatches (when the input .vcf file uses the UCSC format chrN and the reference fasta uses Ensembl/NCBI format N), vcf2maf is not. Make sure the reference fasta chromosome format matches that of your input.**
 
 #### Examples
 
 Minimal input file:
 
 ```bash
-patient,sample,lane,fastq_1,fastq_2
-patient1,test_sample,lane_1,test_1.fastq.gz,test_2.fastq.gz
+dataset,patient,sample,vcf
+CLL,patient1,sample1,file_name.vcf.gz
 ```
 
 In this example, the sample comes from multiple patients:
 
 ```bash
-patient,sample,lane,fastq_1,fastq_2
-patient1,test_sample,lane_1,test_L001_1.fastq.gz,test_L001_2.fastq.gz
-patient1,test_sample,lane_2,test_L002_1.fastq.gz,test_L002_2.fastq.gz
-patient1,test_sample,lane_3,test_L003_1.fastq.gz,test_L003_2.fastq.gz
+dataset,patient,sample,vcf
+CLL,patient1,test_sample1,test_L001.vcf.gz
+CLL,patient1,test_sample2,test_L002.vcf.gz
+CLL,patient2,test_sample1,test_L003.vcf.gz
 ```
 
 ### Subclonal Deconvolution
@@ -238,34 +273,45 @@ patient1,test_sample,lane_3,test_L003_1.fastq.gz,test_L003_2.fastq.gz
 
 ### Signature Deconvolution
 
-This step can be started either from XXX files or XXXX. The CSV must contain at least the columns XXX.
+This step can be started from `rds` multisample CNAqc object. The CSV must contain at least the columns:
+
+```bash
+dataset,joint_table
+```
 
 The following parameters can be tuned for this step:
 
-- XXX
-- XXX
-  
-The available tools for this step are XXX.
+Main SparseSignatures arguments:
+`K` - the candidate numbers of signatures (min.value = 2) to be fit to the dataset
+`lambda_values_beta` - the range of values of the signature sparsity parameter
+`cross_validation_repetitions` - the number of repetitions of the cross-validation procedure
 
-**NB: When running this step, XXXX***
+Main SigProfiler arguments:
+`project` - project name for instance of counts matrix generation
+`reference_genome` - reference genome to use for the counts matrix generation, e.g. "GRCh37"
+`path_to_input_file` - full path of the saved input files in the desired output folder
+`minimum_signatures` - the minimum number of signatures to be extracted (default = 1) 
+`maximum_signatures` - the maximum number of signatures to be extracted (default = 25) 
+  
+The available tools for this step are:
+- SparseSignatures (Bioconductor R package)
+- SigProfilerMatrixGenerator (Python framework)
+- SigProfilerExtractor (Python framework)
+- SigProfilerPlotting
+- CNAqc (R package)
+
+**NB: When running this step, the mutation's information of the dataset of interest is extracted from multisample mCNAqc object and converted to `txt` format in order to import the constructed data file in R or Python. Mutation frequency count data is generated from point mutation data-frames. The optimal signature number and sparsity is determined by cross-validation (SparseSignatures), followed by discovering the signatures within the dataset. SparseSignatures requires sizable datasets (i.e., at least hundreds of samples, depending on the complexity/number of mut. signatures present in the dataset) to converge to meaningful results. Further, it requires a grid search to choose the best values of K and lambda-beta.**
+
 
 #### Examples
 
 Minimal input file:
 
 ```bash
-patient,sample,lane,fastq_1,fastq_2
-patient1,test_sample,lane_1,test_1.fastq.gz,test_2.fastq.gz
+dataset,joint_table
+CLL,mcnaqc_miltisample.rds
 ```
 
-In this example, the sample comes from multiple patients:
-
-```bash
-patient,sample,lane,fastq_1,fastq_2
-patient1,test_sample,lane_1,test_L001_1.fastq.gz,test_L001_2.fastq.gz
-patient1,test_sample,lane_2,test_L002_1.fastq.gz,test_L002_2.fastq.gz
-patient1,test_sample,lane_3,test_L003_1.fastq.gz,test_L003_2.fastq.gz
-```
 
 ### Updating the pipeline
 
