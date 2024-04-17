@@ -145,30 +145,35 @@ patient1,test_sample,lane_3,test_L003_1.fastq.gz,test_L003_2.fastq.gz
 
 ### Variant Annotation
 
+#### VEP
+
+VEP (Variant Effect Predictor) is a Ensembl tool that determines the effect of your variants (SNPs, insertions, deletions, CNVs or structural variants) on genes, transcripts, and protein sequence.
+
 This step can be started either from `vcf`or `txt` files. Can use compressed input files (gzipped).
-The CSV must contain at least the columns:
+The CSV samplesheet must contain at least the columns:
 
 ```bash
-dataset,patient,sample,vcf
+patient,sample,vcf
 ```
 
-The following parameters can be tuned for this step:
+VEP requires cache files to read genomic data (need to be available for proper tool functioning).
+To use these, specify `--cache`. Params `--dir_cache` specify the cache directory to use, `--cache_version` specify to use a different cache version than the assumed default (the VEP version).
+By default all params are specified in `params.config` file.
 
-Main VEP annotation arguments
-Basic options: 
-`--species [species]` - Can be a latin name e.g. "homo_sapience" or "mouse";
-`--assembly [name]` - Select the assembly version to use if more than one available;
-`--fork [num_forks]` - Can improve runtime.
+Example of the values used for these parameters:
 
-Cache options:
-`--cache`  - Enables use of the cache;
-`--dir_cache [directory]`  - Specify the cache directory to use. Default = "$HOME/.vep/";  
-`--cache_version`  - Use a different cache version than the assumed default (the VEP version);
-`--fasta [file|dir]`.
+```bash
+ref_genome_vep =  "$HOME/ref_genomes/Homo_sapiens/GATK/GRCh38/Sequence/WholeGenomeFasta/Homo_sapiens_assembly38.fasta"
+vep_dir_cache  =  "$HOME/ref_genomes/VEP/"
+vep_cache_version = "110"
+vep_species = "homo_sapience" 
+assembly = "GRCh38"
+```
 
-Other annotation options:
-`--plugin` - plugin modules should be installed in the Plugin subdirectory of the VEP cache directory (defaults to "$HOME/.vep/");
-`--use_given_ref` - Use the provided reference allele from the input.
+Using VEP plugins:
+`--plugin` - plugin modules should be installed in the Plugin subdirectory of the VEP cache directory (defaults to "$HOME/.vep/").
+To enable specify `--plugin SingleLetterAA`.
+
 
 Output format options:
 `--vcf`
@@ -176,21 +181,32 @@ Output format options:
 `--json`
 `--compress_output [gzip|bgzip]`
 
+
+#### vcf2maf
+
+Convert a VCF file into a MAF (Mutation annotation Format), where each variant must be mapped to only one of all possible gene transcripts/isoforms that it might affect.
+vcf2maf is designed to work with VEP. 
+
 Main "vcf2maf" arguments:
+
 `--inhibit-vep` - if you want to skip running VEP;
 `--tumor-id` - to fill columns 16 and 17 of the output MAF with tumor/normal sample IDs, and to parse out genotypes and allele counts from matched genotype columns in the VCF;
 `--ref-fasta [file|dir]`;
 `--ncbi-build` - assembly version;
-`--vep-data` - VEP cache version.
+`--vep-data` - VEP cache version;
+`--species`
 
-The available tools for this step are:
-- Ensembl Variant Effect Predictor (VEP) 
-- vcf2maf
-- maftools (summarize, analyze and visualize MAF files)
 
-**NB: Running VEP requires a VEP cache to be present. To convert a VCF into a MAF, each variant must be mapped to only one of all possible gene transcripts/isoforms that it might affect. While VEP is tolerant of chromosome format mismatches (when the input .vcf file uses the UCSC format chrN and the reference fasta uses Ensembl/NCBI format N), vcf2maf is not. Make sure the reference fasta chromosome format matches that of your input.**
+**NB: While VEP is tolerant of chromosome format mismatches (when the input .vcf file uses the UCSC format chrN and the reference fasta uses Ensembl/NCBI format N), vcf2maf is not. Make sure the reference fasta chromosome format matches that of your input.**
 
-#### Examples
+#### Maftools
+
+This tool attempts to summarize, analyze, annotate and visualize MAF files. A MAF file can be gz compressed. 
+
+`read.maf` function reads MAF files, summarizes it in various ways and stores it as an MAF object.
+MAF files are read for the single patient following merging multiple MAFs to create a multisample MAF object for proper genomic data summary and visualization.
+
+#### Examples of samplesheet 
 
 Minimal input file:
 
@@ -278,19 +294,28 @@ This step can be started from `rds` multisample CNAqc object. The CSV must conta
 dataset,joint_table
 ```
 
-The following parameters can be tuned for this step.
+#### SparseSignatures
 
-Main SparseSignatures arguments:
-`K` - the candidate numbers of signatures (min.value = 2) to be fit to the dataset;
-`lambda_values_beta` - the range of values of the signature sparsity parameter;
-`cross_validation_repetitions` - the number of repetitions of the cross-validation procedure.
+This tool provides a set of functions to extract and visualize the mutational signatures that best explain the mutation counts of a large number of patients. In particular:
+- reliably extracts mutational signatures and quantifies their activity;
+- incorporates an explicit background model to improve the inference;
+- exploits LASSO regularization to reduce the impact of overfitting;
+- implements bi-cross-validation to select the best number of signatures
 
-Main SigProfiler arguments:
-`project` - project name for instance of counts matrix generation;
-`reference_genome` - reference genome to use for the counts matrix generation, e.g. "GRCh37";
-`path_to_input_file` - full path of the saved input files in the desired output folder;
-`minimum_signatures` - the minimum number of signatures to be extracted (default = 1); 
-`maximum_signatures` - the maximum number of signatures to be extracted (default = 25). 
+The following parameters can be tuned for this step:
+
+- `K` - the candidate numbers of signatures (min.value = 2) to be fit to the dataset;
+- `lambda_values_beta` - the range of values of the signature sparsity parameter;
+- `cross_validation_repetitions` - the number of repetitions of the cross-validation procedure.
+
+#### SigProfiler
+
+`SigProfilerExtractor` is a python framework that allows de novo extraction of mutational signatures from data generated in a matrix format. The tool identifies the number of operative mutational signatures, their activities in each sample, and the probability for each signature to cause a specific mutation type in a cancer sample. The tool makes use of `SigProfilerMatrixGenerator` and `SigProfilerPlotting`, seamlessly integrating with other `SigProfiler` tools.
+
+The following parameters can be tuned for this step:
+
+- `minimum_signatures` - the minimum number of signatures to be extracted (default = 1); 
+- `maximum_signatures` - the maximum number of signatures to be extracted (default = 25). 
   
 The available tools for this step are:
 - SparseSignatures (Bioconductor R package)
