@@ -178,7 +178,6 @@ To enable specify `--plugin SingleLetterAA`.
 Output format options:
 `--vcf`
 `--tab`
-`--json`
 `--compress_output [gzip|bgzip]`
 
 
