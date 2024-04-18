@@ -152,6 +152,7 @@ The following parameters can be tuned for this step:
 **Output directory: `{outdir}/results/SigProfiler/<dataset>/results/`**
 
 
+
 ## Subclonal deconvolution
 
 In the context of tumor evolution, subclonal reconstruction consists in the identification of cancer clones by leveraging  variant read counts and the associated variant allele frequency (VAF) of somatic mutations, adjusted for copy-number status and tumor purity. 
