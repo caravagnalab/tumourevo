@@ -169,6 +169,7 @@ To enable specify `--plugin SingleLetterAA`.
 
 `read.maf` function reads multiple MAF files (e.g. multisample/multipatient cohort), summarizes it in various ways and stores it as an MAF object.
 MAF object contains main maf file, summarized data and any associated sample annotations.
+For visualization it uses `plotmafSummary` function to plot the summary of the maf file, which displays number of variants in each sample and variant types summarized by Variant_Classification. Better representation of maf file can be shown as oncoplots using `oncoplot` function.
 
 
 ### Subclonal Deconvolution
