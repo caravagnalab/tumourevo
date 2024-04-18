@@ -165,7 +165,7 @@ Using VEP plugins:
 To enable specify `--plugin SingleLetterAA`.
 
 
-#### Starting from Maftools
+### Starting with Maftools
 
 `read.maf` function reads multiple MAF files (e.g. multisample/multipatient cohort), summarizes it in various ways and stores it as an MAF object.
 MAF object contains main maf file, summarized data and any associated sample annotations.
@@ -233,7 +233,7 @@ patient1,test_sample,lane_2,test_L002_1.fastq.gz,test_L002_2.fastq.gz
 patient1,test_sample,lane_3,test_L003_1.fastq.gz,test_L003_2.fastq.gz
 ```
 
-### Starting from Signature Deconvolution
+### Starting with Signature Deconvolution
 
 This step can be started from `rds` multisample CNAqc object. The CSV must contain at least the columns:
 
