@@ -68,7 +68,7 @@ This step should be started from `vcf` files.
 [maftools]( https://bioconductor.org/packages/release/bioc/html/maftools.html) Bioconductor tool that provides a comprehensive set of functions for processing MAF files and to perform most commonly used analyses in cancer genomics. In particular, maftools summarize, analyze and visualize MAF (Mutation Annotation Format) files. 
 It requires somatic variants in a MAF file which must be gz compressed.
 
-Most of the analysis in maftools uses following fields:
+MAF fields requirements:
 
 - Mandatory fields: `Hugo_Symbol`, `Chromosome`, `Start_Position`, `End_Position`, `Reference_Allele`, `Tumor_Seq_Allele2`, `Variant_Classification`, `Variant_Type` and `Tumor_Sample_Barcode`.
 
@@ -80,10 +80,14 @@ Most of the analysis in maftools uses following fields:
 **Output directory: `{outdir}/results/maftools/{dataset}/`**
 - `<dataset>.maftools.rds`
   - summarized MAF object
+- `<dataset>.maftools.pdf`
+  - summary plots
   </details>
 
 
 ## Signature Deconvolution
+
+Mutational signatures are characteristic patterns of somatic mutations in cancer genomes, reflecting the underlying mutational processes. This step performs de novo extraction, inference, deciphering or deconvolution of mutational counts.
 
 The available tools for this step are:
 - SparseSignatures (Bioconductor R package)
@@ -94,7 +98,7 @@ The available tools for this step are:
 
 ### SparseSignatures
 
-[SparseSignatures](https://www.bioconductor.org/packages/release/bioc/html/SparseSignatures.html) a tool that provides a set of functions to extract and visualize the mutational signatures that best explain the mutation counts of a large number of patients. In particular:
+[SparseSignatures](https://www.bioconductor.org/packages/release/bioc/html/SparseSignatures.html) R-based computational framework that provides a set of functions to extract and visualize the mutational signatures that best explain the mutation counts of a large number of patients. In particular:
 - reliably extracts mutational signatures and quantifies their activity;
 - incorporates an explicit background model to improve the inference;
 - exploits LASSO regularization to reduce the impact of overfitting;
