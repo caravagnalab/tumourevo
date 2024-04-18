@@ -132,7 +132,7 @@ The following parameters can be tuned for this step:
 <details markdown="1">
 <summary>Output files for all samples</summary>
 
-**Output directory: `{outdir}/results/SigProfiler/results/{dataset}/`**
+**Output directory: `{outdir}/results/SigProfiler/{dataset}/results`**
 
 
 ## MultiQC
