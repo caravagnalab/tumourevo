@@ -65,7 +65,7 @@ This step should be started from `vcf` files.
 
 ### maftools
 
-[maftools]( https://bioconductor.org/packages/release/bioc/html/maftools.html) Bioconductor tool that provides a comprehensive set of functions for processing MAF files and to perform most commonly used analyses in cancer genomics. In particular, maftools summarize, analyze and visualize MAF (Mutation Annotation Format) files. 
+[maftools]( https://bioconductor.org/packages/release/bioc/html/maftools.html) R.based tool that provides a comprehensive set of functions for processing MAF files and to perform most commonly used analyses in cancer genomics. In particular, maftools summarize, analyze and visualize MAF (Mutation Annotation Format) files. 
 It requires somatic variants in a MAF file which must be gz compressed.
 
 MAF fields requirements:
