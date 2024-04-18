@@ -36,6 +36,9 @@ This step perform annotation of variants and mutations using genomic data.
 
 This step should be started from `vcf` files.
 
+<details markdown="1">
+<summary>Output files for all samples</summary>
+
 **Output directory: `{outdir}/results/VEP/{dataset,patient,sample}/`**
 
 - `<sample>.VEP.summary.html`
@@ -50,6 +53,9 @@ This step should be started from `vcf` files.
 [vcf2maf](https://github.com/mskcc/vcf2maf) convert a VCF file into a MAF (Mutation annotation Format), where each variant must be mapped to only one of all possible gene transcripts/isoforms that it might affect. vcf2maf is designed to work with VEP. 
 
 **NB: While VEP is tolerant of chromosome format mismatches (when the input .vcf file uses the UCSC format chrN and the reference fasta uses Ensembl/NCBI format N), vcf2maf is not. Make sure the reference fasta chromosome format matches that of your input.**
+
+<details markdown="1">
+<summary>Output files for all samples</summary>
 
 **Output directory: `{outdir}/results/vcf2maf/{dataset,patient,sample}/`**
 - `<sample>.vcf2maf.maf`
@@ -68,6 +74,8 @@ Most of the analysis in maftools uses following fields:
 
 - Optional fields: `VAF` (Variant Allele Frequency), `amino acid change` information.
 
+<details markdown="1">
+<summary>Output files for all samples</summary>
 
 **Output directory: `{outdir}/results/maftools/{dataset}/`**
 - `<dataset>.maftools.rds`
@@ -98,6 +106,9 @@ The following parameters can be tuned for this step:
 - `lambda_values_beta` - the range of values of the signature sparsity parameter;
 - `cross_validation_repetitions` - the number of repetitions of the cross-validation procedure.
 
+<details markdown="1">
+<summary>Output files for all samples</summary>
+
 **Output directory: `{outdir}/results/SparseSignatures/{dataset}/`**
 - `<dataset>.SparseSig.rds`
   - signatures best configiration object
@@ -113,6 +124,9 @@ The following parameters can be tuned for this step:
 
 - `minimum_signatures` - the minimum number of signatures to be extracted (default = 1); 
 - `maximum_signatures` - the maximum number of signatures to be extracted (default = 25). 
+
+<details markdown="1">
+<summary>Output files for all samples</summary>
 
 **Output directory: `{outdir}/results/SigProfiler/results/{dataset}/`**
 
