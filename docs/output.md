@@ -152,7 +152,6 @@ The following parameters can be tuned for this step:
 **Output directory: `{outdir}/results/SigProfiler/<dataset>/results/`**
 
 
-
 ## Subclonal deconvolution
 
 In the context of tumor evolution, subclonal reconstruction consists in the identification of cancer clones by leveraging  variant read counts and the associated variant allele frequency (VAF) of somatic mutations, adjusted for copy-number status and tumor purity. 
@@ -177,7 +176,6 @@ For single sample mode, clones clustering and neutral tail mutations are detecte
 - `<sample>_fit.rds`
   - `.rds` object contains the fit of subclonal deconvolution
 - `<sample>.pdf`
-
 </details>
 
 #### PyClone-VI
@@ -194,7 +192,6 @@ For single sample mode, clones clustering and neutral tail mutations are detecte
   - HDF5 file for all fit
 - `<sample>_best_fit.txt`
   - tsv file for the best fit
-
 </details>
 
 #### VIBER
@@ -229,7 +226,6 @@ When multiple samples for the same patient are available (e.g. multi-regional or
   - HDF5 file for all fit
 - `<patient>_best_fit.txt`
   - tsv file for the best fit
-
 </details>
 
 ##### With MOBSTER
@@ -270,7 +266,6 @@ When multiple samples for the same patient are available (e.g. multi-regional or
 
 - `<patient>_with_mobster_best_fit.rds`
   - rds file for best fit
-
 </details>
 
 <!-- ## Clone Tree Inference
