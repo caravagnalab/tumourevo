@@ -143,36 +143,34 @@ patient1,test_sample,lane_2,test_L002_1.fastq.gz,test_L002_2.fastq.gz
 patient1,test_sample,lane_3,test_L003_1.fastq.gz,test_L003_2.fastq.gz
 ```
 
-### Variant Annotation
+### Start with annotation
 
-This step can be started either from XXX files or XXXX. The CSV must contain at least the columns XXX.
+This step expects the input VCF files to be sorted and compressed (gzipped).
+VEP requires cache files to read genomic data (need to be available for proper tool functioning).
+To use these, specify `--cache`. Params `--dir_cache` specify the cache directory to use, `--cache_version` specify to use a different cache version than the assumed default (the VEP version).
+By default all params are specified in `params.config` file.
 
-The following parameters can be tuned for this step:
-
-- XXX
-- XXX
-  
-The available tools for this step are XXX.
-
-**NB: When running this step, XXXX***
-
-#### Examples
-
-Minimal input file:
+Example of the values used for these parameters:
 
 ```bash
-patient,sample,lane,fastq_1,fastq_2
-patient1,test_sample,lane_1,test_1.fastq.gz,test_2.fastq.gz
+ref_genome_vep =  "$HOME/ref_genomes/Homo_sapiens/GATK/GRCh38/Sequence/WholeGenomeFasta/Homo_sapiens_assembly38.fasta"
+vep_dir_cache  =  "$HOME/ref_genomes/VEP/"
+vep_cache_version = "110"
+vep_species = "homo_sapience" 
+assembly = "GRCh38"
 ```
 
-In this example, the sample comes from multiple patients:
+Using VEP plugins:
+`--plugin` - plugin modules should be installed in the Plugin subdirectory of the VEP cache directory (defaults to "$HOME/.vep/").
+To enable specify `--plugin SingleLetterAA`.
 
-```bash
-patient,sample,lane,fastq_1,fastq_2
-patient1,test_sample,lane_1,test_L001_1.fastq.gz,test_L001_2.fastq.gz
-patient1,test_sample,lane_2,test_L002_1.fastq.gz,test_L002_2.fastq.gz
-patient1,test_sample,lane_3,test_L003_1.fastq.gz,test_L003_2.fastq.gz
-```
+
+### Start with Maftools
+
+`read.maf` function reads multiple MAF files (e.g. multisample/multipatient cohort), summarizes it in various ways and stores it as an MAF object.
+MAF object contains main maf file, summarized data and any associated sample annotations.
+For visualization it uses `plotmafSummary` function to plot the summary of the maf file, which displays number of variants in each sample and variant types summarized by Variant_Classification. Better representation of maf file can be shown as oncoplots using `oncoplot` function.
+
 
 ### Subclonal Deconvolution
 
@@ -236,35 +234,23 @@ patient1,test_sample,lane_2,test_L002_1.fastq.gz,test_L002_2.fastq.gz
 patient1,test_sample,lane_3,test_L003_1.fastq.gz,test_L003_2.fastq.gz
 ```
 
-### Signature Deconvolution
+### Starting with Signature Deconvolution
 
-This step can be started either from XXX files or XXXX. The CSV must contain at least the columns XXX.
+This step can be started from `rds` multisample CNAqc object. The CSV must contain at least the columns:
 
-The following parameters can be tuned for this step:
+```bash
+dataset,joint_table
 
-- XXX
-- XXX
-  
-The available tools for this step are XXX.
-
-**NB: When running this step, XXXX***
+```
+When running this step, the mutation's information of the dataset of interest is extracted from multisample `mCNAqc` object and converted to `txt` format in order to import the constructed data file in R or Python. Mutation frequency count data is generated from point mutation data-frames. The optimal signature number and sparsity is determined by cross-validation (SparseSignatures), followed by discovering the signatures within the dataset.
 
 #### Examples
 
 Minimal input file:
 
 ```bash
-patient,sample,lane,fastq_1,fastq_2
-patient1,test_sample,lane_1,test_1.fastq.gz,test_2.fastq.gz
-```
-
-In this example, the sample comes from multiple patients:
-
-```bash
-patient,sample,lane,fastq_1,fastq_2
-patient1,test_sample,lane_1,test_L001_1.fastq.gz,test_L001_2.fastq.gz
-patient1,test_sample,lane_2,test_L002_1.fastq.gz,test_L002_2.fastq.gz
-patient1,test_sample,lane_3,test_L003_1.fastq.gz,test_L003_2.fastq.gz
+dataset,joint_table
+CLL,mcnaqc_miltisample.rds
 ```
 
 ### Updating the pipeline
