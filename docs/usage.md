@@ -143,19 +143,9 @@ patient1,test_sample,lane_2,test_L002_1.fastq.gz,test_L002_2.fastq.gz
 patient1,test_sample,lane_3,test_L003_1.fastq.gz,test_L003_2.fastq.gz
 ```
 
-### Variant Annotation
+### Start with annotation
 
-#### VEP
-
-VEP (Variant Effect Predictor) is a Ensembl tool that determines the effect of your variants (SNPs, insertions, deletions, CNVs or structural variants) on genes, transcripts, and protein sequence.
-
-This step can be started either from `vcf`or `txt` files. Can use compressed input files (gzipped).
-The CSV samplesheet must contain at least the columns:
-
-```bash
-patient,sample,vcf
-```
-
+This step expects the input VCF files to be sorted and compressed (gzipped).
 VEP requires cache files to read genomic data (need to be available for proper tool functioning).
 To use these, specify `--cache`. Params `--dir_cache` specify the cache directory to use, `--cache_version` specify to use a different cache version than the assumed default (the VEP version).
 By default all params are specified in `params.config` file.
@@ -175,53 +165,11 @@ Using VEP plugins:
 To enable specify `--plugin SingleLetterAA`.
 
 
-Output format options:
-`--vcf`
-`--tab`
-`--compress_output [gzip|bgzip]`
+#### Starting from Maftools
 
+`read.maf` function reads multiple MAF files (e.g. multisample/multipatient cohort), summarizes it in various ways and stores it as an MAF object.
+MAF object contains main maf file, summarized data and any associated sample annotations.
 
-#### vcf2maf
-
-Convert a VCF file into a MAF (Mutation annotation Format), where each variant must be mapped to only one of all possible gene transcripts/isoforms that it might affect.
-vcf2maf is designed to work with VEP. 
-
-Main "vcf2maf" arguments:
-
-`--inhibit-vep` - if you want to skip running VEP;
-`--tumor-id` - to fill columns 16 and 17 of the output MAF with tumor/normal sample IDs, and to parse out genotypes and allele counts from matched genotype columns in the VCF;
-`--ref-fasta [file|dir]`;
-`--ncbi-build` - assembly version;
-`--vep-data` - VEP cache version;
-`--species`
-
-
-**NB: While VEP is tolerant of chromosome format mismatches (when the input .vcf file uses the UCSC format chrN and the reference fasta uses Ensembl/NCBI format N), vcf2maf is not. Make sure the reference fasta chromosome format matches that of your input.**
-
-#### Maftools
-
-This tool attempts to summarize, analyze, annotate and visualize MAF files. A MAF file can be gz compressed. 
-
-`read.maf` function reads MAF files, summarizes it in various ways and stores it as an MAF object.
-MAF files are read for the single patient following merging multiple MAFs to create a multisample MAF object for proper genomic data summary and visualization.
-
-#### Examples of samplesheet 
-
-Minimal input file:
-
-```bash
-dataset,patient,sample,vcf
-CLL,patient1,sample1,file_name.vcf.gz
-```
-
-In this example, the sample comes from multiple patients:
-
-```bash
-dataset,patient,sample,vcf
-CLL,patient1,test_sample1,test_L001.vcf.gz
-CLL,patient1,test_sample2,test_L002.vcf.gz
-CLL,patient2,test_sample1,test_L003.vcf.gz
-```
 
 ### Subclonal Deconvolution
 
@@ -285,45 +233,15 @@ patient1,test_sample,lane_2,test_L002_1.fastq.gz,test_L002_2.fastq.gz
 patient1,test_sample,lane_3,test_L003_1.fastq.gz,test_L003_2.fastq.gz
 ```
 
-### Signature Deconvolution
+### Starting from Signature Deconvolution
 
 This step can be started from `rds` multisample CNAqc object. The CSV must contain at least the columns:
 
 ```bash
 dataset,joint_table
+
 ```
-
-#### SparseSignatures
-
-This tool provides a set of functions to extract and visualize the mutational signatures that best explain the mutation counts of a large number of patients. In particular:
-- reliably extracts mutational signatures and quantifies their activity;
-- incorporates an explicit background model to improve the inference;
-- exploits LASSO regularization to reduce the impact of overfitting;
-- implements bi-cross-validation to select the best number of signatures
-
-The following parameters can be tuned for this step:
-
-- `K` - the candidate numbers of signatures (min.value = 2) to be fit to the dataset;
-- `lambda_values_beta` - the range of values of the signature sparsity parameter;
-- `cross_validation_repetitions` - the number of repetitions of the cross-validation procedure.
-
-#### SigProfiler
-
-`SigProfilerExtractor` is a python framework that allows de novo extraction of mutational signatures from data generated in a matrix format. The tool identifies the number of operative mutational signatures, their activities in each sample, and the probability for each signature to cause a specific mutation type in a cancer sample. The tool makes use of `SigProfilerMatrixGenerator` and `SigProfilerPlotting`, seamlessly integrating with other `SigProfiler` tools.
-
-The following parameters can be tuned for this step:
-
-- `minimum_signatures` - the minimum number of signatures to be extracted (default = 1); 
-- `maximum_signatures` - the maximum number of signatures to be extracted (default = 25). 
-  
-The available tools for this step are:
-- SparseSignatures (Bioconductor R package)
-- SigProfilerMatrixGenerator (Python framework)
-- SigProfilerExtractor (Python framework)
-- SigProfilerPlotting
-- CNAqc (R package)
-
-**NB: When running this step, the mutation's information of the dataset of interest is extracted from multisample mCNAqc object and converted to `txt` format in order to import the constructed data file in R or Python. Mutation frequency count data is generated from point mutation data-frames. The optimal signature number and sparsity is determined by cross-validation (SparseSignatures), followed by discovering the signatures within the dataset. SparseSignatures requires sizable datasets (i.e., at least hundreds of samples, depending on the complexity/number of mut. signatures present in the dataset) to converge to meaningful results. Further, it requires a grid search to choose the best values of K and lambda-beta.**
+When running this step, the mutation's information of the dataset of interest is extracted from multisample mCNAqc object and converted to `txt` format in order to import the constructed data file in R or Python. Mutation frequency count data is generated from point mutation data-frames. The optimal signature number and sparsity is determined by cross-validation (SparseSignatures), followed by discovering the signatures within the dataset.
 
 
 #### Examples
