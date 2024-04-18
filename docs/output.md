@@ -60,7 +60,8 @@ This step should be started from `vcf` files.
   - Summary of the VEP run to be visualised with a web browser
 - `<sample>.vep.vcf.gz`
   - annotated vcf file
-  </details>
+
+</details>
 
 
 ### vcf2maf
@@ -75,7 +76,8 @@ This step should be started from `vcf` files.
 **Output directory: `{outdir}/vcf2maf/<dataset>/<patient>/<sample>/`**
 - `<sample>.vcf2maf.maf`
   - annotated maf file
-  </details>
+
+</details>
 
 
 ### maftools
@@ -97,7 +99,8 @@ MAF fields requirements:
   - summarized MAF object
 - `<dataset>.maftools.pdf`
   - summary plots
-  </details>
+
+</details>
 
 
 ## Signature Deconvolution
@@ -134,7 +137,8 @@ The following parameters can be tuned for this step:
   - signatures best configiration object
 - `<dataset>.SparseSig.pdf`
   - signatures plot
-  </details>
+
+</details>
   
 
 ### SigProfiler
@@ -150,6 +154,8 @@ The following parameters can be tuned for this step:
 <summary>Output files for all samples</summary>
 
 **Output directory: `{outdir}/results/SigProfiler/<dataset>/results/`**
+
+</details>
 
 
 ## Subclonal deconvolution
@@ -176,6 +182,7 @@ For single sample mode, clones clustering and neutral tail mutations are detecte
 - `<sample>_fit.rds`
   - `.rds` object contains the fit of subclonal deconvolution
 - `<sample>.pdf`
+
 </details>
 
 #### PyClone-VI
@@ -192,6 +199,7 @@ For single sample mode, clones clustering and neutral tail mutations are detecte
   - HDF5 file for all fit
 - `<sample>_best_fit.txt`
   - tsv file for the best fit
+  
 </details>
 
 #### VIBER
@@ -226,6 +234,7 @@ When multiple samples for the same patient are available (e.g. multi-regional or
   - HDF5 file for all fit
 - `<patient>_best_fit.txt`
   - tsv file for the best fit
+  
 </details>
 
 ##### With MOBSTER
@@ -266,6 +275,7 @@ When multiple samples for the same patient are available (e.g. multi-regional or
 
 - `<patient>_with_mobster_best_fit.rds`
   - rds file for best fit
+  
 </details>
 
 <!-- ## Clone Tree Inference
