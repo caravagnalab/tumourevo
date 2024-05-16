@@ -109,9 +109,7 @@ Mutational signatures are characteristic patterns of somatic mutations in cancer
 
 The available tools for this step are:
 - SparseSignatures (Bioconductor R package)
-- SigProfilerMatrixGenerator (Python framework)
-- SigProfilerExtractor (Python framework)
-- SigProfilerPlotting
+- SigProfiler (Python framework)
 - CNAqc (R package)
 
 
@@ -123,11 +121,7 @@ The available tools for this step are:
 - exploits LASSO regularization to reduce the impact of overfitting;
 - implements bi-cross-validation to select the best number of signatures
 
-The following parameters can be tuned for this step:
-
-- `K` - the candidate numbers of signatures (min.value = 2) to be fit to the dataset;
-- `lambda_values_beta` - the range of values of the signature sparsity parameter;
-- `cross_validation_repetitions` - the number of repetitions of the cross-validation procedure.
+`mCNAqc` object is used as input for this step.
 
 <details markdown="1">
 <summary>Output files for all samples</summary>
@@ -145,10 +139,7 @@ The following parameters can be tuned for this step:
 
 [SigProfiler](https://osf.io/t6j7u/wiki/home/) is a python framework that allows de novo extraction of mutational signatures from data generated in a matrix format. The tool identifies the number of operative mutational signatures, their activities in each sample, and the probability for each signature to cause a specific mutation type in a cancer sample. The tool makes use of `SigProfilerMatrixGenerator` and `SigProfilerPlotting`, seamlessly integrating with other `SigProfiler` tools.
 
-The following parameters can be tuned for this step:
-
-- `minimum_signatures` - the minimum number of signatures to be extracted (default = 1); 
-- `maximum_signatures` - the maximum number of signatures to be extracted (default = 25). 
+`mCNAqc` object is used as input for this step.
 
 <details markdown="1">
 <summary>Output files for all samples</summary>
