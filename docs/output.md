@@ -9,8 +9,15 @@ This document describes the output produced by the pipeline. Most of the plots a
 The pipeline is built using [Nextflow](https://www.nextflow.io/)
 and processes data using the following steps:
 
-* [FastQC](#fastqc) - read quality control
-* [MultiQC](#multiqc) - aggregate report, describing results of the whole pipeline
+* [Variant Annotation](#variant-annotation) -
+* [Formatter](#formatter) - coversion of files to different formats
+* [Lifter](#lifter) - pileup of private mutations of the other samples in multi-sample setting
+* [QC](#qc) - quality control of copy-number and somatic mutation calling and creation of multi-CNAqc object
+* [Subclonal Deconvolution](#subclonal-deconvolution) - 
+* [Signature Deconvolution](#signature-deconvolution) - 
+
+<!-- * [FastQC](#fastqc) - read quality control
+* [MultiQC](#multiqc) - aggregate report, describing results of the whole pipeline -->
 
 <!-- ## FastQC
 
@@ -43,7 +50,7 @@ The pipeline has special steps which allow the software versions used to be repo
 For more information about how to use MultiQC reports, see [http://multiqc.info](http://multiqc.info) -->
 
 
-## Variant annotation
+## Variant Annotation
 This step perform annotation of variants and mutations using genomic data.
 
 ### VEP
@@ -102,6 +109,107 @@ MAF fields requirements:
 
 </details>
 
+## Formatter
+The Formatter sub-workflow is used to convert file to other formats.
+
+### cnaparse
+
+<details markdown="1">
+<summary>Output files for all samples</summary>
+
+**Output directory: `{outdir}/<dataset>/<patient>/<sample>/cna2CNAqc`**
+* `CNA.rds`
+  * `rds` file containing parsed cna output in table format 
+</details>
+
+### vcfparse
+<details markdown="1">
+<summary>Output files for all samples</summary>
+
+**Output directory: `{outdir}/<dataset>/<patient>/<sample>/vcf2CNAqc`**
+* `VCF.rds`
+  * `rds` file containing parsed vcf in table format
+</details>
+
+## Lifter
+The Lifter sub-workflow is optional in multi-sample mode, when for a patient more samples are provided. The sub-workflow collect all mutations from the samples and perform pile-up of sample's private mutations in all the other samples.
+
+### get_positions
+Retrieve private and shared mutations of the samples.
+
+**Output directory: `results/datasetID/patientID/sampleID/mpileup`**
+
+* `positions_missing.bed`
+  * bed file that contains mutations that have to be retrieved for a given sample
+
+**Output directory: `results/datasetID/patientID/mpileup`**
+* `all_positions.bed`
+  * mutation of all the samples
+
+### mpileup
+[bcftools](https://samtools.github.io/bcftools/bcftools.html) is used for performing the pileup, so to retrive frequency information of private mutations in all the samples.
+
+<details markdown="1">
+<summary>Output files for all samples</summary>
+
+**Output directory: `{outdir}/<dataset>/<patient>/<sample>/mpileup`**
+- `pileup.vcf`
+  - vcf file with called mutations
+</details>
+
+### join_positions
+Once all mutations are retrieved, they are joined with original vcf mutations and an rds ready for QC step is returned.
+
+<details markdown="1">
+<summary>Output files for all samples</summary>
+
+**Output directory: `{outdir}/<dataset>/<patient>/<sample>/mpileup`**
+- `pileup_VCF.rds`
+  - rds containing all mutations
+
+</details>
+
+## QC
+The QC sub-workflows perfom quality control of CNV and somatic mutations of single sample data and then create a joinQC for the patient.
+
+### CNAqc
+[CNAqc](https://caravagnalab.github.io/CNAqc/) is a package to quality control (QC) bulk cancer sequencing data for validating copy number segmentations against variant allele frequencies of somatic mutations.
+ 
+<!-- **Output directory: `results/datasetID/patientID/sampleID/CNAqc`**
+* `data.pdf`
+  * CNAqc report
+* `qc.pdf`
+  * QC step report
+* `qc.rds`
+  * CNAqc object -->
+
+<details markdown="1">
+<summary>Output files for all samples</summary>
+
+<!-- **Output directory: `{outdir}/subclonal_deconvolution/mobster/<dataset>/<patient>/<sample>/`** -->
+**Output directory: `{outdir}/<dataset>/<patient>/<sample>/CNAqc`**
+- `data.pdf`
+  - CNAqc report
+- `qc.pdf`
+  - QC step report
+- `qc.rds`
+  -  CNAqc object
+</details>
+
+### join_CNAqc
+The module create a multi-CNAqc object for patient that summarize the QC performed in the single samples.
+
+<!-- **Output directory: `results/datasetID/patientID/join_CNAqc`**
+* `multi_cnaqc.rds`
+  * multi-CNAqc object  -->
+
+<details markdown="1">
+<summary>Output files for all patients</summary>
+
+**Output directory: `{outdir}/<dataset>/<patient>/join_CNAqc`**
+- `multi_cnaqc.rds`
+  - multi-CNAqc object
+</details>
 
 ## Signature Deconvolution
 
@@ -149,7 +257,7 @@ The available tools for this step are:
 </details>
 
 
-## Subclonal deconvolution
+## Subclonal Deconvolution
 
 In the context of tumor evolution, subclonal reconstruction consists in the identification of cancer clones by leveraging  variant read counts and the associated variant allele frequency (VAF) of somatic mutations, adjusted for copy-number status and tumor purity. 
 
