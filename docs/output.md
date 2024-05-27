@@ -10,7 +10,7 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/)
 and processes data using the following steps:
 
 * [Variant Annotation](#variant-annotation) -
-* [Formatter](#formatter) - coversion of files to different formats
+<!-- * [Formatter](#formatter) - coversion of files to different formats -->
 * [Lifter](#lifter) - pileup of private mutations of the other samples in multi-sample setting
 * [QC](#qc) - quality control of copy-number and somatic mutation calling and creation of multi-CNAqc object
 * [Subclonal Deconvolution](#subclonal-deconvolution) - 
@@ -109,7 +109,7 @@ MAF fields requirements:
 
 </details>
 
-## Formatter
+<!-- ## Formatter
 The Formatter sub-workflow is used to convert file to other formats.
 
 ### cnaparse
@@ -129,12 +129,12 @@ The Formatter sub-workflow is used to convert file to other formats.
 **Output directory: `{outdir}/<dataset>/<patient>/<sample>/vcf2CNAqc`**
 * `VCF.rds`
   * `rds` file containing parsed vcf in table format
-</details>
+</details> -->
 
 ## Lifter
 The Lifter sub-workflow is optional in multi-sample mode, when for a patient more samples are provided. The sub-workflow collect all mutations from the samples and perform pile-up of sample's private mutations in all the other samples.
 
-### get_positions
+<!-- ### get_positions
 Retrieve private and shared mutations of the samples.
 
 **Output directory: `results/datasetID/patientID/sampleID/mpileup`**
@@ -158,7 +158,7 @@ Retrieve private and shared mutations of the samples.
 </details>
 
 ### join_positions
-Once all mutations are retrieved, they are joined with original vcf mutations and an rds ready for QC step is returned.
+Once all mutations are retrieved, they are joined with original vcf mutations and an rds ready for QC step is returned. -->
 
 <details markdown="1">
 <summary>Output files for all samples</summary>
