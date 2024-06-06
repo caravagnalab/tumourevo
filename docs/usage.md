@@ -15,21 +15,8 @@
     - [2. Multi sample mode](#2-multi-sample-mode)
       - [Example](#example)
     - [Joint variant calling](#joint-variant-calling)
-  - [Tumor type specific analysis](#tumor-type-specific-analysis)
+  - [Driver annotation](#driver-annotation)
   - [Avaiable tools](#avaiable-tools)
-    - [Gene annotation](#gene-annotation)
-      - [EnsemblVEP](#ensemblvep)
-    - [Driver annotation](#driver-annotation)
-    - [Quality control](#quality-control)
-      - [CNAqc](#cnaqc)
-    - [Subclonal deconvolution](#subclonal-deconvolution)
-      - [Mobster](#mobster)
-      - [Pyclone-vi](#pyclone-vi)
-      - [VIBER](#viber)
-      - [Ctree](#ctree)
-    - [Signature deconvolution](#signature-deconvolution)
-      - [SparseSignature](#sparsesignature)
-      - [SigProfiler](#sigprofiler)
     - [Updating the pipeline](#updating-the-pipeline)
     - [Reproducibility](#reproducibility)
   - [Main arguments](#main-arguments)
@@ -129,25 +116,25 @@ Output from different workflows, subworkflows and modules will be in a specific 
 | `sample`  | **Sample ID** for each sample; more than one sample for each subject is possible. <br /> _Required_                                              |
 | `vcf`  | Full path to the vcf file. <br /> _Required_                                                                                                        |
 | `vcf_tbi`  | Full path to the vcf `tabix` index file. <br /> _Required_                                                                                      |
-| `cna_dir`  | Full path to the directory containing text files from copy-number calling. <br /> _Required_                                                    |
 |`cna_caller`| Name of the copy number caller used to generate your data. <br /> _Required_ |
+| `cna_dir`  | Full path to the directory containing text files from copy-number calling. <br /> _Required_ |
 | `tumour_bam`  | Full path to the tumour bam file. <br /> _Required for `--mode subclonal_multisample`_                                                       |
 | `tumour_bai`  | Full path to the tumour bam index file. <br /> _Required for `--mode subclonal_multisample `_                                              |
-| `tumour_type` | *Optional for the `driver_annotation` step* |
+| `tumour_type` | Tumour type (either `PANCANCER` or one of the tumor type present in the driver table) <br /> *Required* |
 
 An [example samplesheet](https://github.com/caravagnalab/nf-core-evoverse/blob/dev/test_input.csv) has been provided with the pipeline.
 
 ## Pipeline modalities - `single_sample` vs `multi_sample`
 
 The evoverse pipeline supports variant annotation, driver annotation, quality control processes, subclonal deconvolution and signature deconvolution analysis through various tools. It can be used to analyse both single sample experiments and longitudinal/multi-region assays, in which multiple samples of the same patient are avaiable. 
-The pipeline can be run in two different modalities: `single_sample` or `multi_sample`. In the first mode, each sample is condisered as independent, while in the latter samples are analysed in a multivariate framework (which affects in particular the subclonal deconvolution and the signature deconvolution steps) to retrieve information useful in the reconstruction of the evolutionary process. 
+The pipeline can be run in two different modalities: `single_sample` or `multi_sample`. In the first mode, each sample is condisered as independent, while in the latter samples are analysed in a multivariate framework (which affects in particular the subclonal deconvolution deconvolution steps) to retrieve information useful in the reconstruction of the evolutionary process. 
 <!-- aggiungi un riassunto di cosa voglia dire single e multi sample (analisi multivariata, soprattutto per subclonal deconv)
 E' possibile usarla sia nel caso di vc multi sample che indipendente -->
 As input, you must provide at least the VCF file from one of the supported callers and the output of a copy number caller. 
 
 ### 1. Single sample mode
 
-If you run the pipeline in `single_sample` mode, all the samples, even if belonging to the same patient, are assumed to be independent. In this framework, the subclonal deconvolution and signature deconvolution are affected, identifying clonal and subclonal composition of the sample starting from allele frequency of detected somatic variants and identifying mutagenic processes for each independent element. 
+If you run the pipeline in `single_sample` mode, all the samples, even if belonging to the same patient, are assumed to be independent. In this framework, the subclonal deconvolution is affected, identifying clonal and subclonal composition of the sample starting from allele frequency of detected somatic variants and identifying mutagenic processes for each independent element. 
 
 <!-- rephrase better -->
 <!-- Si assume che i campioni siano indipendenti e che quindi la subclonal deconv viene svolta cercando popolazioni sottoclonali a lv di singolo campione. Sign deconv si cercano i processi mutagenici comuni in un dataset fatto di elementi indipenti -->
@@ -163,7 +150,7 @@ nextflow run nf-core/evoverse \
  --samples <INPUT CSV> \
  --publish_dir ./results \
  --mode sigle_sample \
- --tools pyclone,mobster,viber,ctree,sparsesignature,sigprofiler
+ --tools pyclone,mobster,viber,sparsesignature,sigprofiler
 ```
 
 Minimal input file:
@@ -176,7 +163,7 @@ dataset1,patient1,S1,patient1_S1.vcf.gz,patient1_S1.vcf.gz.tbi,/CNA/patient1/S1,
 In this example, two samples come from the same patient: 
 
 ```bash
-dataset,patient,sample,vcf,vcf_tbi,cna_dircna_caller
+dataset,patient,sample,vcf,vcf_tbi,cna_dir,cna_caller
 dataset1,patient1,S1,patient1_S1.vcf.gz,patient1_S1.vcf.gz.tbi,/CNA/patient1/S1,caller
 dataset1,patient1,S2,patient1_S2.vcf.gz,patient1_S2.vcf.gz.tbi,/CNA/patient1/S2,caller
 ```
@@ -244,8 +231,12 @@ dataset1,patient1,S2,patient1_S2.vcf.gz,patient1_S2.vcf.gz.tbi,/CNA/patient1/S2,
 dataset1,patient1,S1,patient1_S1.vcf.gz,patient1_S1.vcf.gz.tbi,/CNA/patient2/S1,caller,patient1/BAM/S1,patient1/BAM/S1.bam.bai 
 dataset1,patient2,S2,patient2_S2.vcf.gz,patient2_S2.vcf.gz.tbi,/CNA/patient2/S2,caller,patient2/BAM/S2,patient2/BAM/S2.bam.bai 
 ```
-## Tumor type specific analysis
-You can retrieve tumor-specific drivers in the driver annotation step by specifying the tumor type in the input csv. Otherwise, the driver identification step will be run on pan-cancer mode. We currently refer to IntOGen latest release [link alla relase], but you can also provide a custom driver table that will be used in the analysis. Avaiable tumor codes are avaiable on []. 
+## Driver annotation
+You can retrieve tumor-specific drivers in the driver annotation step by specifying the tumor type in the input csv. Pan-cancer drivers will be retrieved by specifying `PANCANCER` as tumour type in the input csv file. 
+For this step, we currently refer to [IntOGen latest release](https://www.nature.com/articles/s41568-020-0290-x), but you can also provide a custom driver table that will be used in the analysis. 
+Please note that the tumor types reported in the input file must correspond to those present in the table used for the annotation (default driver table used can be found [here](https://github.com/caravagnalab/nextflow_modules/blob/main/2023-05-31_IntOGen-Drivers/Unfiltered_drivers.tsv))
+
+<!-- add a snapshot of the driver table -->
 
 Input file: 
 
@@ -260,46 +251,25 @@ dataset1,patient2,S2,patient2_S2.vcf.gz,patient2_S2.vcf.gz.tbi,/CNA/patient2/S2,
 ## Avaiable tools
 
 We report the different tools included in the pipeline. 
-### Gene annotation
-#### EnsemblVEP
-In order to run annotation via EnsemblVEP, input VCF files must be sorted and compressed in gzip form. VEP requires cache files to read genomic data (need to be available for proper tool functioning).
-To use these, specify `--cache`. Params `--dir_cache` specify the cache directory to use, `--cache_version` specify to use a different cache version than the assumed default (the VEP version).
-By default all params are specified in `params.config` file.
-
-
-### Driver annotation 
-
-### Quality control 
-
-#### CNAqc 
-
-[CNAqc](https://caravagnalab.github.io/CNAqc/)
+1. **Gene annotation**
+- [EnsemblVEP]()
+2. **Driver annotation**
+3. **Quality control** 
+- [CNAqc](https://caravagnalab.github.io/CNAqc/)
 
 <!-- #### TINC
 
 #### INCOMMON -->
 
-### Subclonal deconvolution
+4. **Subclonal deconvolution**
+- [MOBSTER](https://caravagnalab.github.io/mobster/)
+- [PyClone-VI](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-020-03919-2)
+- [VIBER](https://caravagnalab.github.io/VIBER/index.html)
+- [Ctree](https://caravagnalab.github.io/ctree/)
 
-#### Mobster
-
-[MOBSTER](https://caravagnalab.github.io/mobster/)
-
-#### Pyclone-vi
-
-[PyClone-VI](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-020-03919-2)
-
-#### VIBER
-
-[VIBER](https://caravagnalab.github.io/VIBER/index.html)
-#### Ctree
-[Ctree](https://caravagnalab.github.io/ctree/)
-
-### Signature deconvolution
-
-#### SparseSignature 
-
-#### SigProfiler
+5. **Signature deconvolution**
+- [SparseSignature]()
+- [SigProfiler]()
 <!-- ### Start with annotation
 
 
