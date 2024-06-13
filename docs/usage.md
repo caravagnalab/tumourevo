@@ -107,7 +107,7 @@ Output from different workflows, subworkflows and modules will be in a specific 
 | `vcf`  | Full path to the vcf file. <br /> _Required_                                                                                                        |
 | `vcf_tbi`  | Full path to the vcf `tabix` index file. <br /> _Required_                                                                                      |
 |`cnv_caller`| Name of the copy number caller used to generate your data. <br /> _Required_ |
-| `cnv_dir`  | Full path to the directory containing text files from copy-number calling. <br /> _Required_ |
+| `cnv_res`  | Full path to the directory containing text files from copy-number calling. <br /> _Required_ |
 | `cancer_type`  | Type of cancer of the sample, if not know put PANCANCER. <br /> _Required_ |
 | `tumour_bam`  | Full path to the tumour bam file. <br /> _Required for `--mode multisample`_                                                       |
 | `tumour_bai`  | Full path to the tumour bam index file. <br /> _Required for `--mode multisample `_                                              |
