@@ -21,11 +21,13 @@ The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool
 
 ## Pipeline Summary
 
-- Quality Control (`CNAqc`)
+- Quality Control (`CNAqc`, `TINC`)
 - Variant Annotation (`VEP`, `maftools`)
+- Driver Annotation
 - Subclonal Deconvolution (`PyClone`, `MOBSTER`, `VIBER`)
 - Clone Tree Inference (`ctree`)
 - Signature Deconvolution (`SparseSignatures`, `SigProfiler`)
+- Report
 
 ## Quick Start
 
