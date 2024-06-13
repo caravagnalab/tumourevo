@@ -9,7 +9,7 @@
   - [Quickstart](#quickstart)
   - [Input: Sample sheet configurations](#input-sample-sheet-configurations)
     - [Overview: Samplesheet Columns](#overview-samplesheet-columns)
-  - [Pipeline modalities - `single_sample` vs `multi_sample`](#pipeline-modalities---single_sample-vs-multi_sample)
+  - [Pipeline modalities - `singlesample` vs `multisample`](#pipeline-modalities---singlesample-vs-multisample)
     - [1. Single sample mode](#1-single-sample-mode)
       - [Examples](#examples)
     - [2. Multi sample mode](#2-multi-sample-mode)
@@ -21,19 +21,9 @@
     - [Reproducibility](#reproducibility)
   - [Main arguments](#main-arguments)
     - [`-profile`](#-profile)
-    - [`--reads`](#--reads)
-    - [`--single_end`](#--single_end)
-  - [Reference genomes](#reference-genomes)
-    - [`--genome` (using iGenomes)](#--genome-using-igenomes)
-    - [`--fasta`](#--fasta)
-    - [`--igenomes_ignore`](#--igenomes_ignore)
   - [Job resources](#job-resources)
     - [Automatic resubmission](#automatic-resubmission)
     - [Custom resource requests](#custom-resource-requests)
-  - [AWS Batch specific parameters](#aws-batch-specific-parameters)
-    - [`--awsqueue`](#--awsqueue)
-    - [`--awsregion`](#--awsregion)
-    - [`--awscli`](#--awscli)
   - [Other command line parameters](#other-command-line-parameters)
     - [`--outdir`](#--outdir)
     - [`--email`](#--email)
@@ -118,23 +108,23 @@ Output from different workflows, subworkflows and modules will be in a specific 
 | `vcf_tbi`  | Full path to the vcf `tabix` index file. <br /> _Required_                                                                                      |
 |`cna_caller`| Name of the copy number caller used to generate your data. <br /> _Required_ |
 | `cna_dir`  | Full path to the directory containing text files from copy-number calling. <br /> _Required_ |
-| `tumour_bam`  | Full path to the tumour bam file. <br /> _Required for `--mode subclonal_multisample`_                                                       |
-| `tumour_bai`  | Full path to the tumour bam index file. <br /> _Required for `--mode subclonal_multisample `_                                              |
+| `tumour_bam`  | Full path to the tumour bam file. <br /> _Required for `--mode multisample`_                                                       |
+| `tumour_bai`  | Full path to the tumour bam index file. <br /> _Required for `--mode multisample `_                                              |
 | `tumour_type` | Tumour type (either `PANCANCER` or one of the tumor type present in the driver table) <br /> *Required* |
 
 An [example samplesheet](https://github.com/caravagnalab/nf-core-evoverse/blob/dev/test_input.csv) has been provided with the pipeline.
 
-## Pipeline modalities - `single_sample` vs `multi_sample`
+## Pipeline modalities - `singlesample` vs `multisample`
 
 The evoverse pipeline supports variant annotation, driver annotation, quality control processes, subclonal deconvolution and signature deconvolution analysis through various tools. It can be used to analyse both single sample experiments and longitudinal/multi-region assays, in which multiple samples of the same patient are avaiable. 
-The pipeline can be run in two different modalities: `single_sample` or `multi_sample`. In the first mode, each sample is condisered as independent, while in the latter samples are analysed in a multivariate framework (which affects in particular the subclonal deconvolution deconvolution steps) to retrieve information useful in the reconstruction of the evolutionary process. 
+The pipeline can be run in two different modalities: `singlesample` or `multisample`. In the first mode, each sample is condisered as independent, while in the latter samples are analysed in a multivariate framework (which affects in particular the subclonal deconvolution deconvolution steps) to retrieve information useful in the reconstruction of the evolutionary process. 
 <!-- aggiungi un riassunto di cosa voglia dire single e multi sample (analisi multivariata, soprattutto per subclonal deconv)
 E' possibile usarla sia nel caso di vc multi sample che indipendente -->
 As input, you must provide at least the VCF file from one of the supported callers and the output of a copy number caller. 
 
 ### 1. Single sample mode
 
-If you run the pipeline in `single_sample` mode, all the samples, even if belonging to the same patient, are assumed to be independent. In this framework, the subclonal deconvolution is affected, identifying clonal and subclonal composition of the sample starting from allele frequency of detected somatic variants and identifying mutagenic processes for each independent element. 
+If you run the pipeline in `singlesample` mode, all the samples, even if belonging to the same patient, are assumed to be independent. In this framework, the subclonal deconvolution is affected, identifying clonal and subclonal composition of the sample starting from allele frequency of detected somatic variants and identifying mutagenic processes for each independent element. 
 
 <!-- rephrase better -->
 <!-- Si assume che i campioni siano indipendenti e che quindi la subclonal deconv viene svolta cercando popolazioni sottoclonali a lv di singolo campione. Sign deconv si cercano i processi mutagenici comuni in un dataset fatto di elementi indipenti -->
@@ -150,7 +140,7 @@ nextflow run nf-core/evoverse \
  --samples <INPUT CSV> \
  --publish_dir ./results \
  --mode sigle_sample \
- --tools pyclone,mobster,viber,sparsesignature,sigprofiler
+ --tools pyclonevi,mobster,viber,sparsesignature,sigprofiler
 ```
 
 Minimal input file:
@@ -170,8 +160,8 @@ dataset1,patient1,S2,patient1_S2.vcf.gz,patient1_S2.vcf.gz.tbi,/CNA/patient1/S2,
 
 ### 2. Multi sample mode
 
-You can use the `multi_sample` mode of evoverse to analyse samples from multi-region and longitudinal assays. This allows you to track in space and time the existing tumor populations, and better understand its heterogeneity. This modality integrates data across multiple samples, thus improving the resolution of subclonal structures and providing insights into the evolutionary dynamics and progression of the tumor.
-Two of the avaiable tools for subclonal deconvolution, `PyClone-VI` and `VIBER` can by-design be run in multi-sample mode, inferring the subclonal structure of samples. If you add `MOBSTER` to the `--tool` parameter when running the pipeline in this modality, it will be run at first on each individual sample (since the tool does not support at the moment multi-sample analysis) in order to recognize neutral tail mutations and remove them. The mutations data manipulated in this way will then be processed by either `PyClone-VI`, `VIBER` or both using the multivariate subclonal deconvolution as described before. 
+You can use the `multisample` mode of evoverse to analyse samples from multi-region and longitudinal assays. This allows you to track in space and time the existing tumor populations, and better understand its heterogeneity. This modality integrates data across multiple samples, thus improving the resolution of subclonal structures and providing insights into the evolutionary dynamics and progression of the tumor.
+Two of the avaiable tools for subclonal deconvolution, `pyclonevi` and `viber` can by-design be run in multi-sample mode, inferring the subclonal structure of samples. If you add `mobster` to the `--tool` parameter when running the pipeline in this modality, it will be run at first on each individual sample (since the tool does not support at the moment multi-sample analysis) in order to recognize neutral tail mutations and remove them. The mutations data manipulated in this way will then be processed by either `pyclone`, `viber` or both using the multivariate subclonal deconvolution as described before. 
 
 #### Example
 
@@ -183,7 +173,7 @@ nextflow run nf-core/evoverse \
  -profile <PROFILE> \
  --samples <INPUT CSV> \
  --publish_dir ./results \
- --mode multi_sample \
+ --mode multisample \
  --tools pyclone,viber,ctree,sparsesignature,sigprofiler
 ```
 Running the pipeline with mobster
@@ -196,7 +186,7 @@ nextflow run nf-core/evoverse \
  -profile <PROFILE> \
  --samples <INPUT CSV> \
  --publish_dir ./results \
- --mode multi_sample \
+ --mode multisample \
  --tools mobster,pyclone,viber,ctree,sparsesignature,sigprofiler
 ```
 
@@ -217,7 +207,7 @@ Input file for two patients without joint variant calling:
 
 <!-- minimal csv senza bam -->
 
-<!-- aggiungi esempio di run con flag multi_sample e scelta dei tool -->
+<!-- aggiungi esempio di run con flag multisample e scelta dei tool -->
 
 
  <!-- If you had performed it in the multisample mode, no additional 
@@ -426,7 +416,7 @@ If `-profile` is not specified, the pipeline will run locally and expect all sof
 
 <!-- TODO nf-core: Document required command line parameters -->
 
-### `--reads`
+<!-- ### `--reads`
 
 Use this to specify the location of your input FastQ files. For example:
 
@@ -450,9 +440,9 @@ By default, the pipeline expects paired-end data. If you have single-end data, y
 --single_end --reads '*.fastq'
 ```
 
-It is not possible to run a mixture of single-end and paired-end files in one run.
+It is not possible to run a mixture of single-end and paired-end files in one run. -->
 
-## Reference genomes
+<!-- ## Reference genomes
 
 The pipeline config files come bundled with paths to the illumina iGenomes reference index files. If running with docker or AWS, the configuration is set up to use the [AWS-iGenomes](https://ewels.github.io/AWS-iGenomes/) resource.
 
@@ -479,7 +469,7 @@ The syntax for this reference configuration is as follows:
 
 <!-- TODO nf-core: Update reference genome example according to what is needed -->
 
-```nextflow
+<!-- ```nextflow
 params {
   genomes {
     'GRCh37' {
@@ -488,11 +478,11 @@ params {
     // Any number of additional genomes, key is used with --genome
   }
 }
-```
+``` -->
 
 <!-- TODO nf-core: Describe reference path flags -->
 
-### `--fasta`
+<!-- ### `--fasta`
 
 If you prefer, you can specify the full path to your reference genome when you run the pipeline:
 
@@ -502,7 +492,7 @@ If you prefer, you can specify the full path to your reference genome when you r
 
 ### `--igenomes_ignore`
 
-Do not load `igenomes.config` when running the pipeline. You may choose this option if you observe clashes between custom parameters and those supplied in `igenomes.config`.
+Do not load `igenomes.config` when running the pipeline. You may choose this option if you observe clashes between custom parameters and those supplied in `igenomes.config`. --> 
 
 ## Job resources
 
@@ -518,7 +508,7 @@ If you are likely to be running `nf-core` pipelines regularly it may be a good i
 
 If you have any questions or issues please send us a message on [Slack](https://nf-co.re/join/slack).
 
-## AWS Batch specific parameters
+<!-- ## AWS Batch specific parameters
 
 Running the pipeline on AWS Batch requires a couple of specific parameters to be set according to your AWS Batch configuration. Please use [`-profile awsbatch`](https://github.com/nf-core/configs/blob/master/conf/awsbatch.config) and then specify all of the following parameters.
 
@@ -534,7 +524,7 @@ The AWS region in which to run your job. Default is set to `eu-west-1` but can b
 
 The [AWS CLI](https://www.nextflow.io/docs/latest/awscloud.html#aws-cli-installation) path in your custom AMI. Default: `/home/ec2-user/miniconda/bin/aws`.
 
-Please make sure to also set the `-w/--work-dir` and `--outdir` parameters to a S3 storage bucket of your choice - you'll get an error message notifying you if you didn't.
+Please make sure to also set the `-w/--work-dir` and `--outdir` parameters to a S3 storage bucket of your choice - you'll get an error message notifying you if you didn't. -->
 
 ## Other command line parameters
 
