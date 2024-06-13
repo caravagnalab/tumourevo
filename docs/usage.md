@@ -108,10 +108,9 @@ Output from different workflows, subworkflows and modules will be in a specific 
 | `vcf_tbi`  | Full path to the vcf `tabix` index file. <br /> _Required_                                                                                      |
 |`cnv_caller`| Name of the copy number caller used to generate your data. <br /> _Required_ |
 | `cnv_res`  | Full path to the directory containing text files from copy-number calling. <br /> _Required_ |
-| `cancer_type`  | Type of cancer of the sample, if not know put PANCANCER. <br /> _Required_ |
+| `cancer_type` | Tumour type (either `PANCANCER` or one of the tumor type present in the driver table) <br /> *Required* |
 | `tumour_bam`  | Full path to the tumour bam file. <br /> _Required for `--mode multisample`_                                                       |
 | `tumour_bai`  | Full path to the tumour bam index file. <br /> _Required for `--mode multisample `_                                              |
-| `tumour_type` | Tumour type (either `PANCANCER` or one of the tumor type present in the driver table) <br /> *Required* |
 
 An [example samplesheet](https://github.com/caravagnalab/nf-core-evoverse/blob/dev/test_input.csv) has been provided with the pipeline.
 
