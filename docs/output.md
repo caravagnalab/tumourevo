@@ -457,7 +457,7 @@ At this stage, [bcftools](https://samtools.github.io/bcftools/bcftools.html) is 
   - VCF file with called mutations
 </details>
 
-### join_positions
+#### join_positions
 In this step, all retrieved mutations are joined with original mutations present in input VCF, which is in turn converted into an RDS object using [vcfR](https://cran.r-project.org/web/packages/vcfR/vignettes/intro_to_vcfR.html).
 
 <details markdown="1">
