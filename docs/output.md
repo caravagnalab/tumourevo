@@ -26,7 +26,6 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and consists in
 
 * [Variant Annotation](#variant-annotation)
 * [QC](#qc)
-* [Lifter](#lifter)
 * [Signature Deconvolution](#signature-deconvolution)
 * [Subclonal Deconvolution](#subclonal-deconvolution)
 
@@ -97,7 +96,7 @@ MAF fields requirements:
 
 </details>
 
-## Lifter
+<!-- ## Lifter
 
 The Lifter subworkflow is an optional step and it is run when `--mode multisample` is used. When multiple samples from the same patient are provided, the user can specify either a single joint VCF file, containing variant calls from all tumor samples of the patient, or individual sample specific VCF files. In the latter case, path to tumor BAM files must be provided in order to collect all mutations from the samples and perform pile-up of sample's private mutations in all the other samples. Two intermediate steps, [get_positions](#get_positions) and [mpileup](#mpileup), are performed to identify private mutations in all the samples and retrieve their variant allele frequency. Once private mutations are properly defined, they are merged back into the original VCF file during the [join_positions](#join_positions) step. The updated VCF file is then converted into a `vcfR` RDS object.
 
@@ -113,7 +112,7 @@ In this step, all retrieved mutations are joined with original mutations present
 - `pileup_VCF.rds`
   - RDS containing shared and private mutations
 
-</details>
+</details> -->
 
 ## QC
 The QC subworkflows requires in input a segmentation file from allele-specific copy number callers (either [Sequenza](https://sequenzatools.bitbucket.io/#/home), [ASCAT](https://github.com/VanLoo-lab/ascat)) and the joint VCF file from [join_positions](#join_positions) subworkflow. The QC sub-workflows first conduct quality control on CNV and somatic mutation data for individual samples in [CNAqc](#cnaqc) step, and subsequently summarize validated information at patient level in [join_CNAqc](#join_cnaqc) step.
@@ -173,9 +172,9 @@ The results of this step are collected in `{pubslish_dir}/signature_deconvolutio
 - `best_params_config.rds`
   - signatures best configiration object
 - `cv_means_mse.rds`
-  - descr
+  - cross validation output RDS
 - `nmf_Lasso_out.rds`
-  - descr
+  - NMF Lasso output RDS
 - `plot_signatures.pdf`
   - exposure PDF plot
 - `plot_signatures.rds`
@@ -422,7 +421,9 @@ This parser aims at converting mutations data of joint CNAqc analysis from CNAqc
 </details>
 
 ### Lifter
-The Lifter subworkflow is optional in multi-sample mode, when for a patient more samples are provided. The sub-workflow collect all mutations from the samples and perform pile-up of sample's private mutations in all the other samples.
+<!-- The Lifter subworkflow is optional in multi-sample mode, when for a patient more samples are provided. The sub-workflow collect all mutations from the samples and perform pile-up of sample's private mutations in all the other samples. -->
+
+The Lifter subworkflow is an optional step and it is run when `--mode multisample` is used. When multiple samples from the same patient are provided, the user can specify either a single joint VCF file, containing variant calls from all tumor samples of the patient, or individual sample specific VCF files. In the latter case, path to tumor BAM files must be provided in order to collect all mutations from the samples and perform pile-up of sample's private mutations in all the other samples. Two intermediate steps, [get_positions](#get_positions) and [mpileup](#mpileup), are performed to identify private mutations in all the samples and retrieve their variant allele frequency. Once private mutations are properly defined, they are merged back into the original VCF file during the [join_positions](#join_positions) step. The updated VCF file is then converted into a `vcfR` RDS object.
 
 #### get_positions
 This intermediate step allows to retrieve private and shared mutations across samples originated from the same patient. 
@@ -456,10 +457,22 @@ At this stage, [bcftools](https://samtools.github.io/bcftools/bcftools.html) is 
   - VCF file with called mutations
 </details>
 
+### join_positions
+In this step, all retrieved mutations are joined with original mutations present in input VCF, which is in turn converted into an RDS object using [vcfR](https://cran.r-project.org/web/packages/vcfR/vignettes/intro_to_vcfR.html).
+
+<details markdown="1">
+<summary>Output files for all samples</summary>
+
+**Output directory: `{publish_dir}/lifter/mpileup/<dataset>/<patient>/<sample>/`**
+- `pileup_VCF.rds`
+  - RDS containing shared and private mutations
+
+</details>
+
 
 ### Driver Annotation
 
-_Add small description of this step_
+Variants are annotated according to [IntOGen latest release](https://www.nature.com/articles/s41568-020-0290-x).
 
 <details markdown="1">
 <summary>Output files for all samples</summary>
