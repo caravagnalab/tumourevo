@@ -12,6 +12,13 @@ include { PLOT_REPORT_MULTI_SAMPLE } from "${baseDir}/modules/plot_report/plot_r
 
 workflow EVOVERSE {
 
+  take:
+  input_vcf
+  input_cna
+  cancer_type
+  
+  main:
+ 
   VARIANT_ANNOTATION(input_vcf)
   FORMATTER_VCF(VARIANT_ANNOTATION.out.vep, "vcf")
   FORMATTER_CNA(input_cna, "cna")
@@ -33,5 +40,8 @@ workflow EVOVERSE {
   QC(FORMATTER_CNA.out, annotation)
   SUBCLONAL_DECONVOLUTION(QC.out.rds_join)
   SIGNATURE_DECONVOLUTION(QC.out.rds_join)
+  
+  emit:
 
+  null
 }
