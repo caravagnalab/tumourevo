@@ -8,12 +8,19 @@ include { DRIVER_ANNOTATION } from "${baseDir}/subworkflows/annotate_driver/main
 include { FORMATTER as FORMATTER_RDS} from "${baseDir}/subworkflows/formatter/main"
 include { QC } from "${baseDir}/subworkflows/QC/main"
 include { SUBCLONAL_DECONVOLUTION } from "${baseDir}/subworkflows/subclonal_deconvolution/main"
-include { SIGNATURES_DECONVOLUTION } from "${baseDir}/subworkflows/signature_deconvolution/main"
+include { SIGNATURE_DECONVOLUTION } from "${baseDir}/subworkflows/signature_deconvolution/main"
 include { PLOT_REPORT_SINGLE_SAMPLE } from "${baseDir}/modules/plot_report/main"
 include { PLOT_REPORT_MULTI_SAMPLE } from "${baseDir}/modules/plot_report/plot_report_multi"
 
-workflow {
+workflow EVOVERSE {
 
+  take:
+  input_vcf
+  input_cna
+  cancer_type
+  
+  main:
+ 
   VARIANT_ANNOTATION(input_vcf)
   FORMATTER_VCF(VARIANT_ANNOTATION.out.vep, "vcf")
   FORMATTER_CNA(input_cna, "cna")
@@ -34,6 +41,9 @@ workflow {
 
   QC(FORMATTER_CNA.out, annotation)
   SUBCLONAL_DECONVOLUTION(QC.out.rds_join)
-  MUTATIONAL_SIGNATURES(QC.out.rds_join)
+  SIGNATURE_DECONVOLUTION(QC.out.rds_join)
+  
+  emit:
 
+  null
 }
