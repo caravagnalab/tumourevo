@@ -3,7 +3,8 @@
 //
 
 include { GET_POSITIONS } from "../../modules/mpileup/main_vcf"
-include { BCFTOOLS_MPILEUP } from "../../modules/mpileup/main"
+// include { BCFTOOLS_MPILEUP } from "../../modules/mpileup/main"
+include { BCFTOOLS_MPILEUP } from '../modules/nf-core/bcftools/mpileup/main'
 include { JOIN_POSITIONS } from "../../modules/mpileup/main_join"
 
 

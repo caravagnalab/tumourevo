@@ -1,4 +1,6 @@
 include { VARIANT_ANNOTATION } from "${baseDir}/subworkflows/variant_annotation/main"
+include { ENSEMBLVEP_VEP } from '../modules/nf-core/ensemblvep/vep/main'
+
 include { FORMATTER as FORMATTER_CNA } from "${baseDir}/subworkflows/formatter/main"
 include { FORMATTER as FORMATTER_VCF} from "${baseDir}/subworkflows/formatter/main"
 include { LIFTER } from "${baseDir}/subworkflows/lifter/main"
