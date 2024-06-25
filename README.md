@@ -23,11 +23,11 @@ The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool
 
 - Quality Control (`CNAqc`, `TINC`)
 - Variant Annotation (`VEP`, `maftools`)
-- Driver Annotation
+- Driver Annotation (`SOPRANO`, `dndsCV`)
 - Subclonal Deconvolution (`PyClone`, `MOBSTER`, `VIBER`)
 - Clone Tree Inference (`ctree`)
 - Signature Deconvolution (`SparseSignatures`, `SigProfiler`)
-- Report
+- Genome Interpreter
 
 ## Quick Start
 
