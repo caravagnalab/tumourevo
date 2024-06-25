@@ -2,9 +2,9 @@
 // FORMATTING SUB-WORKFLOW
 //
 
-include { RDS_PROCESSING } from '../../modules/CNAqc2tsv/main'
-include { CNA_PROCESSING } from '../../modules/cna2CNAqc/main'
-include { VCF_PROCESSING } from '../../modules/vcf2CNAqc/main'
+include { RDS_PROCESSING } from '../../modules/local/CNAqc2tsv/main'
+include { CNA_PROCESSING } from '../../modules/local/cna2CNAqc/main'
+include { VCF_PROCESSING } from '../../modules/local/vcf2CNAqc/main'
 
 
 workflow FORMATTER {

@@ -1,14 +1,14 @@
 //include { VARIANT_ANNOTATION } from "${baseDir}/subworkflows/variant_annotation/main"
 include { VCF_ANNOTATE_ENSEMBLVEP } from '../subworkflows/nf-core/vcf_annotate_ensemblvep/main'
 
-include { FORMATTER as FORMATTER_CNA } from "${baseDir}/subworkflows/formatter/main"
-include { FORMATTER as FORMATTER_VCF} from "${baseDir}/subworkflows/formatter/main"
-include { LIFTER } from "${baseDir}/subworkflows/lifter/main"
-include { DRIVER_ANNOTATION } from "${baseDir}/subworkflows/annotate_driver/main"
-include { FORMATTER as FORMATTER_RDS} from "${baseDir}/subworkflows/formatter/main"
-include { QC } from "${baseDir}/subworkflows/QC/main"
-include { SUBCLONAL_DECONVOLUTION } from "${baseDir}/subworkflows/subclonal_deconvolution/main"
-include { SIGNATURE_DECONVOLUTION } from "${baseDir}/subworkflows/signature_deconvolution/main"
+include { FORMATTER as FORMATTER_CNA } from "${baseDir}/subworkflows/local/formatter/main"
+include { FORMATTER as FORMATTER_VCF} from "${baseDir}/subworkflows/local/formatter/main"
+include { LIFTER } from "${baseDir}/subworkflows/local/lifter/main"
+include { DRIVER_ANNOTATION } from "${baseDir}/subworkflows/local/annotate_driver/main"
+include { FORMATTER as FORMATTER_RDS} from "${baseDir}/subworkflows/local/formatter/main"
+include { QC } from "${baseDir}/subworkflows/local/QC/main"
+include { SUBCLONAL_DECONVOLUTION } from "${baseDir}/subworkflows/local/subclonal_deconvolution/main"
+include { SIGNATURE_DECONVOLUTION } from "${baseDir}/subworkflows/local/signature_deconvolution/main"
 include { PLOT_REPORT_SINGLE_SAMPLE } from "${baseDir}/modules/plot_report/main"
 include { PLOT_REPORT_MULTI_SAMPLE } from "${baseDir}/modules/plot_report/plot_report_multi"
 
