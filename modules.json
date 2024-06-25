@@ -1,0 +1,20 @@
+{
+  "name": "nf-core/evoverse",
+  "homePage": "https://github.com/nf-core/evoverse",
+  "repos": {
+    "https://github.com/nf-core/modules.git": {
+      "modules": {
+        "nf-core": {
+          "ensemblvep/vep": {
+            "branch": "master",
+            "git_sha": "b42fec6f7c6e5d0716685cabb825ef6bf6e386b5",
+            "installed_by": ["modules"]
+          }
+        }
+      },
+      "subworkflows": {
+        "nf-core": {}
+      }
+    }
+  }
+}
