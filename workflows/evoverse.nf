@@ -1,5 +1,5 @@
-include { VARIANT_ANNOTATION } from "${baseDir}/subworkflows/variant_annotation/main"
-include { ENSEMBLVEP_VEP } from '../modules/nf-core/ensemblvep/vep/main'
+//include { VARIANT_ANNOTATION } from "${baseDir}/subworkflows/variant_annotation/main"
+include { VCF_ANNOTATE_ENSEMBLVEP } from '../subworkflows/nf-core/vcf_annotate_ensemblvep/main'
 
 include { FORMATTER as FORMATTER_CNA } from "${baseDir}/subworkflows/formatter/main"
 include { FORMATTER as FORMATTER_VCF} from "${baseDir}/subworkflows/formatter/main"

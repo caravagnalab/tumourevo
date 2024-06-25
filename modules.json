@@ -13,12 +13,28 @@
           "ensemblvep/vep": {
             "branch": "master",
             "git_sha": "b42fec6f7c6e5d0716685cabb825ef6bf6e386b5",
+            "installed_by": ["modules", "vcf_annotate_ensemblvep"]
+          },
+          "tabix/tabix": {
+            "branch": "master",
+            "git_sha": "9502adb23c0b97ed8e616bbbdfa73b4585aec9a1",
+            "installed_by": ["vcf_annotate_ensemblvep"]
+          },
+          "vcf2maf": {
+            "branch": "master",
+            "git_sha": "3f5420aa22e00bd030a2556dfdffc9e164ec0ec5",
             "installed_by": ["modules"]
           }
         }
       },
       "subworkflows": {
-        "nf-core": {}
+        "nf-core": {
+          "vcf_annotate_ensemblvep": {
+            "branch": "master",
+            "git_sha": "cfd937a668919d948f6fcbf4218e79de50c2f36f",
+            "installed_by": ["subworkflows"]
+          }
+        }
       }
     }
   }
