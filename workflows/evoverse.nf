@@ -21,7 +21,8 @@ workflow EVOVERSE {
   
   main:
  
-  VARIANT_ANNOTATION(input_vcf)
+  //VARIANT_ANNOTATION(input_vcf)
+  VCF_ANNOTATE_ENSEMBLVEP(input_vcf)
   FORMATTER_VCF(VARIANT_ANNOTATION.out.vep, "vcf")
   FORMATTER_CNA(input_cna, "cna")
 
