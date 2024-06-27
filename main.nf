@@ -31,28 +31,14 @@ input_vcf = Channel.fromPath(params.input).
     splitCsv(header: true).
     map {
       row ->
-      meta = [dataset:row.dataset, patient:row.patient, sample:row.sample, cancer_type: row.cancer_type, row.]
+      meta = [dataset:row.dataset, patient:row.patient, tumour_sample:row.tumour_sample, normal_sample:row.normal_sample, cancer_type: row.cancer_type, cnv_caller: row.cnv_caller]
       [meta, [
           file(row.vcf),
           file(row.vcf_tbi),
-          
+          file(row.tumour_bam)
+          file(tumour_bai) 
       ]]
-      tuple(row.dataset.toString(), row.patient.toString(), row.sample.toString(), file(row.vcf), file(row.vcf_tbi))
     }
-
-cancer_type = Channel.fromPath(params.input).
-    splitCsv(header: true).
-    map {
-      row ->
-      row.cancer_type.toString()
-    }
-
-input_cna = Channel.fromPath(params.input).
-  splitCsv(header: true).
-  map {
-    row ->
-   tuple(row.dataset.toString(), row.patient.toString(), row.sample.toString(), file(row.cnv_res), row.cnv_caller.toString())
-  }
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
