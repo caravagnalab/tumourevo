@@ -31,6 +31,12 @@ input_vcf = Channel.fromPath(params.input).
     splitCsv(header: true).
     map {
       row ->
+      meta = [dataset:row.dataset, patient:row.patient, sample:row.sample, cancer_type: row.cancer_type, row.]
+      [meta, [
+          file(row.vcf),
+          file(row.vcf_tbi),
+          
+      ]]
       tuple(row.dataset.toString(), row.patient.toString(), row.sample.toString(), file(row.vcf), file(row.vcf_tbi))
     }
 
