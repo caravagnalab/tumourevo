@@ -155,7 +155,7 @@ parse_Mutect = function(vcf, sample_id, filter_mutations = FALSE){
     if (filter_mutations){ 
       filter = c('PASS')
     } else {
-      filter = fix$FILTER %>% unique()
+      filter = fix_field$FILTER %>% unique()
     }
     
     # For each sample create the table of mutations 
