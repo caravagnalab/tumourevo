@@ -19,6 +19,7 @@ workflow EVOVERSE {
   input_cna
   cancer_type
   lifter
+  fasta
   
   main:
  
@@ -33,7 +34,7 @@ workflow EVOVERSE {
   //     map{row ->
   //     tuple(row.dataset.toString(), row.patient.toString(), row.sample.toString(), file(row.tumour_bam), file(row.tumour_bai))}
 
-    LIFTER(FORMATTER_VCF.out, tumor_bam)
+    LIFTER(FORMATTER_VCF.out, tumor_bam, fasta)
     annotation = DRIVER_ANNOTATION(LIFTER.out, cancer_type)
 
   } else {
