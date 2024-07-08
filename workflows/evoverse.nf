@@ -18,6 +18,7 @@ workflow EVOVERSE {
   input_vcf
   input_cna
   cancer_type
+  lifter
   
   main:
  
@@ -26,12 +27,11 @@ workflow EVOVERSE {
   FORMATTER_VCF(VARIANT_ANNOTATION.out.vep, "vcf")
   FORMATTER_CNA(input_cna, "cna")
 
-  exist_bam_val = false //placeholder
-  if (params.mode == 'multisample' && exist_bam_val){
-    tumor_bam = Channel.fromPath(params.samples).
-      splitCsv(header: true).
-       map{row ->
-       tuple(row.dataset.toString(), row.patient.toString(), row.sample.toString(), file(row.tumour_bam), file(row.tumour_bai))}
+  if (params.mode == 'multisample' && lifter){
+  //  tumor_bam = Channel.fromPath(params.samples).
+  //    splitCsv(header: true).
+  //     map{row ->
+  //     tuple(row.dataset.toString(), row.patient.toString(), row.sample.toString(), file(row.tumour_bam), file(row.tumour_bai))}
 
     LIFTER(FORMATTER_VCF.out, tumor_bam)
     annotation = DRIVER_ANNOTATION(LIFTER.out, cancer_type)
