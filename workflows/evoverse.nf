@@ -17,6 +17,7 @@ workflow EVOVERSE {
   take:
   input_vcf
   input_cna
+  tumor_bam
   cancer_type
   lifter
   fasta
