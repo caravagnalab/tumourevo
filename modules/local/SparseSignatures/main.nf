@@ -8,6 +8,7 @@ process SPARSE_SIGNATURES {
 
   input:
     tuple val(datasetID), val(patientID), val(sampleID), path(joint_table,  stageAs: '*.tsv')
+    //tuple val(meta), path(joint_table,  stageAs: '*.tsv')
 
   output:
   tuple val(datasetID), val(patientID), val(sampleID), path("signature_deconvolution/SparseSig/$datasetID/cv_means_mse.rds"), emit: signatures_cv_rds
@@ -15,8 +16,13 @@ process SPARSE_SIGNATURES {
   tuple val(datasetID), val(patientID), val(sampleID), path("signature_deconvolution/SparseSig/$datasetID/nmf_Lasso_out.rds"), emit: signatures_nmfOut_rds
   tuple val(datasetID), val(patientID), val(sampleID), path("signature_deconvolution/SparseSig/$datasetID/plot_all.rds"), emit: signatures_plot_rds
   tuple val(datasetID), val(patientID), val(sampleID), path("signature_deconvolution/SparseSig/$datasetID/plot_all.pdf"), emit: signatures_plot_pdf
-                            
 
+  //tuple val(meta), path("signature_deconvolution/SparseSig/$datasetID/cv_means_mse.rds"), emit: signatures_cv_rds
+  //tuple val(meta), path("signature_deconvolution/SparseSig/$datasetID/best_params_config.rds"), emit: signatures_bestConf_rds
+  //tuple val(meta), path("signature_deconvolution/SparseSig/$datasetID/nmf_Lasso_out.rds"), emit: signatures_nmfOut_rds
+  //tuple val(meta), path("signature_deconvolution/SparseSig/$datasetID/plot_all.rds"), emit: signatures_plot_rds
+  //tuple val(meta), path("signature_deconvolution/SparseSig/$datasetID/plot_all.pdf"), emit: signatures_plot_pdf
+                            
   script:
 
     def args = task.ext.args ?: ""
