@@ -16,7 +16,7 @@ include { JOINT_FIT } from "../../modules/local/joint_fit/main"
 
 workflow SUBCLONAL_DECONVOLUTION {
     take: 
-    joint_table // grouped by patient
+    joint_table // grouped by patient [meta, mCNAqc]
 
     main:
     pyclone_fits = null 
@@ -73,6 +73,7 @@ workflow SUBCLONAL_DECONVOLUTION {
 
         if (params.tools && params.tools.split(",").contains("mobster")) {
             // run MOBSTER on all samples independently
+            // * Adjust meta and group *
             joint_table_singlesample = joint_table.transpose(by: [2])
             // tuple val(datasetID), val(patientID), val(sampleID), path("${outDir}/*/mobsterh_st_best_fit.rds"), emit: mobster_best_rds
             MOBSTERh_MULTI(joint_table_singlesample)
