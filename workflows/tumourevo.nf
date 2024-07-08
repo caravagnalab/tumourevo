@@ -12,7 +12,7 @@ include { SIGNATURE_DECONVOLUTION } from "${baseDir}/subworkflows/local/signatur
 include { PLOT_REPORT_SINGLE_SAMPLE } from "${baseDir}/modules/plot_report/main"
 include { PLOT_REPORT_MULTI_SAMPLE } from "${baseDir}/modules/plot_report/plot_report_multi"
 
-workflow EVOVERSE {
+workflow TUMOUREVO {
 
   take:
   input_vcf
