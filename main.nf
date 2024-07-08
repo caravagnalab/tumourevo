@@ -36,7 +36,7 @@ input_vcf = Channel.fromPath(params.input).
           file(row.vcf),
           file(row.vcf_tbi),
           file(row.tumour_bam)
-          file(tumour_bai) 
+          file(row.tumour_bai) 
       ]]
     }
 
