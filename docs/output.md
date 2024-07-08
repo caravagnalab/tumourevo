@@ -1,4 +1,4 @@
-# nf-core/evoverse: Output
+# nf-core/tumourevo: Output
 ## Introduction
 
 This document describes the output produced by the pipeline. All plots generated in each step are summarised into the final report.
