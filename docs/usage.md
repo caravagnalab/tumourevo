@@ -1,8 +1,8 @@
-# nf-core/evoverse: Usage
+# nf-core/tumourevo: Usage
 
 ## Table of contents
 
-- [nf-core/evoverse: Usage](#nf-coreevoverse-usage)
+- [nf-core/tumourevo: Usage](#nf-coretumourevo-usage)
   - [Table of contents](#table-of-contents)
 - [Introduction](#introduction)
 - [Running the pipeline](#running-the-pipeline)
@@ -43,7 +43,7 @@
 
 # Introduction
 
-**evoverse** is a workflow to infer a tumour evolution model from whole-genome sequencing (WGS) data. 
+**tumourevo** is a workflow to infer a tumour evolution model from whole-genome sequencing (WGS) data. 
 
 Through the analysis of variant and copy-number calls, it reconstructs the evolutionary process leading to the observed tumour genome. Most of the analyses can be done at mutliple levels: single sample, multiple samples from the same patient (multi-region/longitudinal assays), and multiple patients from distinct cohorts.
 
@@ -54,7 +54,7 @@ Through the analysis of variant and copy-number calls, it reconstructs the evolu
 The typical command for running the pipeline is as follows:
 
 ```bash
-nextflow run nf-core/evoverse \
+nextflow run nf-core/tumourevo \
  -r <VERSION> \
  -profile <PROFILE> \
  --samples <INPUT CSV> \
@@ -66,11 +66,11 @@ nextflow run nf-core/evoverse \
 
 `-profile <PROFILE>` is mandatory and should reflect either your own institutional profile or any pipeline profile specified in the [profile section](##-profile).
 
-This documentation imply that any `nextflow run nf-core/evoverse` command is run with the appropriate `-r` and `-profile` commands.
+This documentation imply that any `nextflow run nf-core/tumourevo` command is run with the appropriate `-r` and `-profile` commands.
 
-This will launch the pipeline and perform variant calling with the tools specified in `--tools`, see the [parameter section]([https://github.com/caravagnalab/nf-core-evoverse/tree/dev]) for details on the available tools.
+This will launch the pipeline and perform variant calling with the tools specified in `--tools`, see the [parameter section]([https://github.com/caravagnalab/nf-core-tumourevo/tree/dev]) for details on the available tools.
 
-Unless running with the `test` profile, the paths of input files must be provided within the `<INPUT CSV>` file specified in `--samples`, see the [input section]([https://github.com/caravagnalab/nf-core-evoverse/tree/dev]) for input requirements. 
+Unless running with the `test` profile, the paths of input files must be provided within the `<INPUT CSV>` file specified in `--samples`, see the [input section]([https://github.com/caravagnalab/nf-core-tumourevo/tree/dev]) for input requirements. 
 
 Note that the pipeline will create the following files in your working directory:
 
@@ -93,7 +93,7 @@ Multiple samples from the same patient must be specified with the same `dataset`
 
 Multiple patients from the same dataset must be specified with the same `dataset` ID, and a different `patient` ID.
 
-**evoverse** will output sample-specific results in a different directory for _each sample_, patient-specific results in a common directory for _each patient_, and dataset-specific results in a common directory for _each dataset_.
+**tumourevo** will output sample-specific results in a different directory for _each sample_, patient-specific results in a common directory for _each patient_, and dataset-specific results in a common directory for _each dataset_.
 
 Output from different workflows, subworkflows and modules will be in a specific directory for each dataset, patient, sample and tool configuration.
 
@@ -112,11 +112,11 @@ Output from different workflows, subworkflows and modules will be in a specific 
 | `tumour_bam`  | Full path to the tumour bam file. <br /> _Required for `--mode multisample`_                                                       |
 | `tumour_bai`  | Full path to the tumour bam index file. <br /> _Required for `--mode multisample `_                                              |
 
-An [example samplesheet](https://github.com/caravagnalab/nf-core-evoverse/blob/dev/test_input.csv) has been provided with the pipeline.
+An [example samplesheet](https://github.com/caravagnalab/nf-core-tumourevo/blob/dev/test_input.csv) has been provided with the pipeline.
 
 ## Pipeline modalities - `singlesample` vs `multisample`
 
-The evoverse pipeline supports variant annotation, driver annotation, quality control processes, subclonal deconvolution and signature deconvolution analysis through various tools. It can be used to analyse both single sample experiments and longitudinal/multi-region assays, in which multiple samples of the same patient are avaiable. 
+The tumourevo pipeline supports variant annotation, driver annotation, quality control processes, subclonal deconvolution and signature deconvolution analysis through various tools. It can be used to analyse both single sample experiments and longitudinal/multi-region assays, in which multiple samples of the same patient are avaiable. 
 The pipeline can be run in two different modalities: `singlesample` or `multisample`. In the first mode, each sample is condisered as independent, while in the latter samples are analysed in a multivariate framework (which affects in particular the subclonal deconvolution deconvolution steps) to retrieve information useful in the reconstruction of the evolutionary process. 
 <!-- aggiungi un riassunto di cosa voglia dire single e multi sample (analisi multivariata, soprattutto per subclonal deconv)
 E' possibile usarla sia nel caso di vc multi sample che indipendente -->
@@ -134,7 +134,7 @@ If you run the pipeline in `singlesample` mode, all the samples, even if belongi
 Running the pipeline
 
 ```bash
-nextflow run nf-core/evoverse \
+nextflow run nf-core/tumourevo \
  -r <VERSION> \
  -profile <PROFILE> \
  --samples <INPUT CSV> \
@@ -160,7 +160,7 @@ dataset1,patient1,S2,patient1_S2.vcf.gz,patient1_S2.vcf.gz.tbi,/CNA/patient1/S2,
 
 ### 2. Multi sample mode
 
-You can use the `multisample` mode of evoverse to analyse samples from multi-region and longitudinal assays. This allows you to track in space and time the existing tumor populations, and better understand its heterogeneity. This modality integrates data across multiple samples, thus improving the resolution of subclonal structures and providing insights into the evolutionary dynamics and progression of the tumor.
+You can use the `multisample` mode of tumourevo to analyse samples from multi-region and longitudinal assays. This allows you to track in space and time the existing tumor populations, and better understand its heterogeneity. This modality integrates data across multiple samples, thus improving the resolution of subclonal structures and providing insights into the evolutionary dynamics and progression of the tumor.
 Two of the avaiable tools for subclonal deconvolution, `pyclonevi` and `viber` can by-design be run in multi-sample mode, inferring the subclonal structure of samples. If you add `mobster` to the `--tool` parameter when running the pipeline in this modality, it will be run at first on each individual sample (since the tool does not support at the moment multi-sample analysis) in order to recognize neutral tail mutations and remove them. The mutations data manipulated in this way will then be processed by either `pyclone`, `viber` or both using the multivariate subclonal deconvolution as described before. 
 
 #### Example
@@ -168,7 +168,7 @@ Two of the avaiable tools for subclonal deconvolution, `pyclonevi` and `viber` c
 Running the pipeline without mobster
 
 ```bash
-nextflow run nf-core/evoverse \
+nextflow run nf-core/tumourevo \
  -r <VERSION> \
  -profile <PROFILE> \
  --samples <INPUT CSV> \
@@ -181,7 +181,7 @@ Running the pipeline with mobster
 <!-- mobster lavora single sample, mentre pyclone e viber anche multisample -->
 
 ```bash
-nextflow run nf-core/evoverse \
+nextflow run nf-core/tumourevo \
  -r <VERSION> \
  -profile <PROFILE> \
  --samples <INPUT CSV> \
@@ -372,14 +372,14 @@ CLL,mcnaqc_miltisample.rds
 When you run the above command, Nextflow automatically pulls the pipeline code from GitHub and stores it as a cached version. When running the pipeline after this, it will always use the cached version if available - even if the pipeline has been updated since. To make sure that you're running the latest version of the pipeline, make sure that you regularly update the cached version of the pipeline:
 
 ```bash
-nextflow pull nf-core/evoverse
+nextflow pull nf-core/tumourevo
 ```
 
 ### Reproducibility
 
 It's a good idea to specify a pipeline version when running the pipeline on your data. This ensures that a specific version of the pipeline code and software are used when you run your pipeline. If you keep using the same tag, you'll be running the same version of the pipeline, even if there have been changes to the code since.
 
-First, go to the [nf-core/evoverse releases page](https://github.com/nf-core/evoverse/releases) and find the latest version number - numeric only (eg. `1.3.1`). Then specify this when running the pipeline with `-r` (one hyphen) - eg. `-r 1.3.1`.
+First, go to the [nf-core/tumourevo releases page](https://github.com/nf-core/tumourevo/releases) and find the latest version number - numeric only (eg. `1.3.1`). Then specify this when running the pipeline with `-r` (one hyphen) - eg. `-r 1.3.1`.
 
 This version number will be logged in reports when you run the pipeline, so that you'll know what you used when you look back in the future.
 
@@ -402,10 +402,10 @@ If `-profile` is not specified, the pipeline will run locally and expect all sof
 
 * `docker`
   * A generic configuration profile to be used with [Docker](http://docker.com/)
-  * Pulls software from dockerhub: [`nfcore/evoverse`](http://hub.docker.com/r/nfcore/evoverse/)
+  * Pulls software from dockerhub: [`nfcore/tumourevo`](http://hub.docker.com/r/nfcore/tumourevo/)
 * `singularity`
   * A generic configuration profile to be used with [Singularity](http://singularity.lbl.gov/)
-  * Pulls software from DockerHub: [`nfcore/evoverse`](http://hub.docker.com/r/nfcore/evoverse/)
+  * Pulls software from DockerHub: [`nfcore/tumourevo`](http://hub.docker.com/r/nfcore/tumourevo/)
 * `conda`
   * Please only use Conda as a last resort i.e. when it's not possible to run the pipeline with Docker or Singularity.
   * A generic configuration profile to be used with [Conda](https://conda.io/docs/)
