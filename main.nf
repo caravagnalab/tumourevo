@@ -27,6 +27,9 @@ include { EVOVERSE } from '${baseDir}/workflows/evoverse'
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
+// Initialize fasta file with meta map:
+fasta = params.fasta ? Channel.fromPath(params.fasta).map{ it -> [ [id:it.baseName], it ] }.collect() : Channel.empty()
+
 input_vcf = Channel.fromPath(params.input).
     splitCsv(header: true).
     map {
@@ -55,6 +58,7 @@ input_vcf = Channel.fromPath(params.input).
     input_vcf
     input_cna
     cancer_type
+    fasta
 
     main:
 
@@ -62,6 +66,7 @@ input_vcf = Channel.fromPath(params.input).
         input_vcf,
         input_cna
         cancer_type
+        fasta
     )
 
     emit:
@@ -78,6 +83,7 @@ workflow {
         input_vcf,
         input_cna
         cancer_type
+        fasta
     )
 
 }
