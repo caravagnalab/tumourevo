@@ -1,11 +1,11 @@
 #!/usr/bin/env nextflow
 /*
 ========================================================================================
-                         nf-core/evoverse
+                         nf-core/tumourevo
 ========================================================================================
- nf-core/evoverse Analysis Pipeline.
+ nf-core/tumourevo Analysis Pipeline.
  #### Homepage / Documentation
- https://github.com/nf-core/evoverse
+ https://github.com/nf-core/tumourevo
 ----------------------------------------------------------------------------------------
 */
 
@@ -19,7 +19,7 @@ nextflow.enable.dsl = 2
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { EVOVERSE } from '${baseDir}/workflows/evoverse'
+include { TUMOUREVO } from '${baseDir}/workflows/tumourevo'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -52,7 +52,7 @@ input_vcf = Channel.fromPath(params.input).
  //
  // WORKFLOW: Run main analysis pipeline depending on type of input
  //
- workflow NFCORE_EVOVERSE {
+ workflow NFCORE_TUMOUREVO {
 
     take:
     input_vcf
@@ -62,7 +62,7 @@ input_vcf = Channel.fromPath(params.input).
 
     main:
 
-    EVOVERSE (
+    TUMOUREVO (
         input_vcf,
         input_cna
         cancer_type
@@ -79,7 +79,7 @@ workflow {
     //
     // WORKFLOW: Run main workflow
     //
-    NFCORE_EVOVERSE(
+    NFCORE_TUMOUREVO(
         input_vcf,
         input_cna
         cancer_type
