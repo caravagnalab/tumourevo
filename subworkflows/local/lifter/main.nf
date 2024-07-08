@@ -12,12 +12,13 @@ workflow LIFTER {
     take:
         rds
         tumor_bam
+        fasta
 
 
     main:
 
         GET_POSITIONS(rds.groupTuple(by: [0,1]))
-        BCFTOOLS_MPILEUP(GET_POSITIONS.out.bed.transpose(by: [2,3]), tumor_bam)
+        BCFTOOLS_MPILEUP([meta, tumor_bam, GET_POSITIONS.out.bed.transpose(by: [2,3])], fasta, false)
         pileup = rds.join(BCFTOOLS_MPILEUP.out.vcf, by: [0,1,2])
         JOIN_POSITIONS(pileup, GET_POSITIONS.out.pos.transpose(by: 2))
 
