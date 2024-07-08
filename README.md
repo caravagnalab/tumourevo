@@ -1,4 +1,4 @@
-# ![nf-core/tumourevo](docs/images/nf-core-evoverse_logo.png)
+# ![nf-core/tumourevo](docs/images/nf-core-tumourevo_logo.png)
 
 **Tumour evolution from WGS data**
 
