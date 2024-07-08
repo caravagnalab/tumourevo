@@ -7,6 +7,7 @@ process SIG_PROFILER {
 
     input:
        tuple val(datasetID), val(patientID), val(sampleID), path(joint_table) //from formatter output
+       //tuple val(meta), path(joint_table)
 
     output:
        tuple val(datasetID), path("signature_deconvolution/Sigprofiler/$datasetID/results/SBS96/SBS96_selection_plot.pdf"),
