@@ -31,7 +31,7 @@ input_vcf = Channel.fromPath(params.input).
     splitCsv(header: true).
     map {
       row ->
-      meta = [dataset:row.dataset, patient:row.patient, tumour_sample:row.tumour_sample, normal_sample:row.normal_sample, cancer_type: row.cancer_type, cnv_caller: row.cnv_caller]
+      meta = row.subMap('dataset', 'patient', 'tumour_sample', 'normal_sample', 'cancer_type', 'cnv_caller')
       [meta, [
           file(row.vcf),
           file(row.vcf_tbi),
