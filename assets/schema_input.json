@@ -1,5 +1,5 @@
 {
-    "$schema": "http://json-schema.org/draft-07/schema",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "https://raw.githubusercontent.com/nf-core/tumourevo/dev/assets/schema_input.json",
     "title": "nf-core/tumourevo pipeline - params.input schema",
     "description": "Schema for the file provided with params.input",
@@ -53,7 +53,7 @@
                 "anyOf": [
                     {
                         "type": "string",
-                        "pattern": "^Sequenza$"
+                        "pattern": "^sequenza$"
                     },
                     {
                         "type": "string",

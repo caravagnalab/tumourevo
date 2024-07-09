@@ -15,20 +15,17 @@ include { PLOT_REPORT_MULTI_SAMPLE } from "${baseDir}/modules/plot_report/plot_r
 workflow TUMOUREVO {
 
   take:
-  input_vcf
-  input_cna
-  tumor_bam
-  cancer_type
-  lifter
+  input
   fasta
   
   main:
  
-  //VARIANT_ANNOTATION(input_vcf)
-  VCF_ANNOTATE_ENSEMBLVEP(input_vcf)
+  //VARIANT_ANNOTATION(input)
+  VCF_ANNOTATE_ENSEMBLVEP(input)
   FORMATTER_VCF(VARIANT_ANNOTATION.out.vep, "vcf")
-  FORMATTER_CNA(input_cna, "cna")
-
+  FORMATTER_CNA(input, "cna")
+  
+  lifter=false
   if (params.mode == 'multisample' && lifter){
   //  tumor_bam = Channel.fromPath(params.samples).
   //    splitCsv(header: true).
@@ -45,8 +42,4 @@ workflow TUMOUREVO {
   QC(FORMATTER_CNA.out, annotation)
   SUBCLONAL_DECONVOLUTION(QC.out.rds_join)
   SIGNATURE_DECONVOLUTION(QC.out.rds_join)
-  
-  emit:
-
-  null
 }
