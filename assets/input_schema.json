@@ -1,0 +1,132 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "https://raw.githubusercontent.com/nf-core/tumourevo/dev/assets/schema_input.json",
+    "title": "nf-core/tumourevo pipeline - params.input schema",
+    "description": "Schema for the file provided with params.input",
+    "type": "array",
+    "items": {
+        "type": "object",
+        "properties": {
+
+            "dataset": {
+                "type": "string",
+                "pattern": "^\\S+$",
+                "errorMessage": "Dataset ID must be provided and cannot contain spaces",
+                "meta": ["dataset"]
+            },
+            "patient": {
+                "type": "string",
+                "pattern": "^\\S+$",
+                "errorMessage": "Patient ID must be provided and cannot contain spaces",
+                "meta": ["patient"]
+            },
+            "tumour_sample": {
+                "type": "string",
+                "pattern": "^\\S+$",
+                "errorMessage": "Tumour sample ID must be provided and cannot contain spaces",
+                "meta": ["tumour_sample"]
+            },
+            "normal_sample": {
+                "type": "string",
+                "pattern": "^\\S+$",
+                "errorMessage": "Normal sample ID must be provided and cannot contain spaces",
+                "meta": ["normal_sample"]
+            },
+            "cancer_type": {
+                "errorMessage": "Cancer type cannot contain spaces",
+                "meta": ["cancer_type"],
+                "default": "PANCANCER",
+                "anyOf": [
+                    {
+                        "type": "string",
+                        "pattern": "^\\S+$"
+                    },
+                    {
+                        "type": "string",
+                        "maxLength": 0
+                    }
+                ]
+            },
+            "cna_caller": {
+                "errorMessage": "CNA caller not supported",
+                "meta": ["cna_caller"],
+                "anyOf": [
+                    {
+                        "type": "string",
+                        "pattern": "^Sequenza$"
+                    },
+                    {
+                        "type": "string",
+                        "pattern": "^ASCAT$"
+                    }
+                ]
+            },
+	    "vcf": {
+                "errorMessage": "VCF file cannot contain spaces and must have extension '.vcf' or '.vcf.gz'",
+                "anyOf": [
+                    {
+                        "type": "string",
+                        "pattern": "^\\S+\\.vcf(\\.gz)?$"
+                    },
+                    {
+                        "type": "string",
+                        "maxLength": 0
+                    }
+                ],
+                "format": "file-path",
+                "exists": true
+            },
+            "tbi": {
+                "errorMessage": "VCF index file cannot contain spaces and must have extension '.tbi'",
+                "anyOf": [
+                    {
+                        "type": "string",
+                        "pattern": "^\\S+\\.tbi$"
+                    },
+                    {
+                        "type": "string",
+                        "maxLength": 0
+                    }
+                ],
+                "format": "file-path",
+                "exists": true
+            },
+            "tumour_bam": {
+                "errorMessage": "Tumour BAM file cannot contain spaces and must have extension '.bam'",
+                "anyOf": [
+                    {
+                        "type": "string",
+                        "pattern": "^\\S+\\.bam$"
+                    },
+                    {
+                        "type": "string",
+                        "maxLength": 0
+                    }
+                ],
+                "format": "file-path",
+                "exists": true
+            },
+            "tumour_bai": {
+                "errorMessage": "Tumour BAM index file cannot contain spaces and must have extension '.bai'",
+                "anyOf": [
+                    {
+                        "type": "string",
+                        "pattern": "^\\S+\\.bai$"
+                    },
+                    {
+                        "type": "string",
+                        "maxLength": 0
+                    }
+                ],
+                "format": "file-path",
+                "exists": true
+            },
+            "cna_dir": {
+                "errorMessage": "Directory for CNA calls files cannot contain spaces",
+		"type": "string",
+                "pattern": "^\\S+$"
+            }
+        },
+        "required": ["dataset", "patient", "tumour_sample", "normal_sample", "vcf", "tbi", "cna_dir", "cna_caller"]
+    }
+}
