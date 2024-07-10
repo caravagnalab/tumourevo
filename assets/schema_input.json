@@ -151,8 +151,8 @@
             },
             "cna_dir": {
                 "errorMessage": "Directory for CNA calls files cannot contain spaces",
-		"type": "string",
-                "pattern": "^\\S+$"
+                "type": "string",
+                        "pattern": "^\\S+$"
             }
         },
         "required": ["dataset", "patient", "tumour_sample", "normal_sample", "vcf", "tbi", "cna_dir", "cna_caller"]

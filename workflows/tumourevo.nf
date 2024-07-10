@@ -15,31 +15,50 @@ include { SIGNATURE_DECONVOLUTION } from "${baseDir}/subworkflows/local/signatur
 workflow TUMOUREVO {
 
   take:
-  input
+  input_samplesheet
   fasta
   
   main:
- 
-  //VARIANT_ANNOTATION(input)
-  VCF_ANNOTATE_ENSEMBLVEP(input)
-  FORMATTER_VCF(VARIANT_ANNOTATION.out.vep, "vcf")
-  FORMATTER_CNA(input, "cna")
-  
-  lifter=false
-  if (params.mode == 'multisample' && lifter){
-  //  tumor_bam = Channel.fromPath(params.samples).
-  //    splitCsv(header: true).
-  //     map{row ->
-  //     tuple(row.dataset.toString(), row.patient.toString(), row.sample.toString(), file(row.tumour_bam), file(row.tumour_bai))}
+  //input_samplesheet.view()
+  //fasta.view()
 
-    LIFTER(FORMATTER_VCF.out, tumor_bam, fasta)
-    annotation = DRIVER_ANNOTATION(LIFTER.out, cancer_type)
-
-  } else {
-   annotation = DRIVER_ANNOTATION(FORMATTER_VCF.out, cancer_type)
+  input = input_samplesheet.map{ meta, vcf, tbi, bam, bai, cna_dir -> 
+        meta = meta + [id: "${meta.dataset}_${meta.patient}_${meta.tumour_sample}"]
+        [ meta, vcf, tbi, bam, bai, cna_dir ]
+    }
+  input.view()
+  input_vcf = input.map{ meta, vcf, tbi, bam, bai, cna_dir  -> 
+        [meta, vcf, tbi]
   }
 
-  QC(FORMATTER_CNA.out, annotation)
-  SUBCLONAL_DECONVOLUTION(QC.out.rds_join)
-  SIGNATURE_DECONVOLUTION(QC.out.rds_join)
+
+
+  //VARIANT_ANNOTATION(input) //old stuff
+  VCF_ANNOTATE_ENSEMBLVEP(input_vcf, 
+                          fasta,
+                          params.genome,
+                          params.species,
+                          params.vep_cache_version,
+                          ['', params.vep_dir_cache],
+                          [])
+  // FORMATTER_VCF(VARIANT_ANNOTATION.out.vep, "vcf")
+  // FORMATTER_CNA(input, "cna")
+  
+  // lifter=false
+  // if (params.mode == 'multisample' && lifter){
+  // //  tumor_bam = Channel.fromPath(params.samples).
+  // //    splitCsv(header: true).
+  // //     map{row ->
+  // //     tuple(row.dataset.toString(), row.patient.toString(), row.sample.toString(), file(row.tumour_bam), file(row.tumour_bai))}
+
+  //   LIFTER(FORMATTER_VCF.out, tumor_bam, fasta)
+  //   annotation = DRIVER_ANNOTATION(LIFTER.out, cancer_type)
+
+  // } else {
+  //  annotation = DRIVER_ANNOTATION(FORMATTER_VCF.out, cancer_type)
+  // }
+
+  // QC(FORMATTER_CNA.out, annotation)
+  // SUBCLONAL_DECONVOLUTION(QC.out.rds_join)
+  // SIGNATURE_DECONVOLUTION(QC.out.rds_join)
 }

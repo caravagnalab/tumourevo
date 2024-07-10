@@ -28,8 +28,8 @@ include { samplesheetToList } from 'plugin/nf-schema'
 // Initialize fasta file with meta map:
 fasta = params.fasta ? Channel.fromPath(params.fasta).map{ it -> [ [id:it.baseName], it ] }.collect() : Channel.empty()
 input = params.input ? Channel.fromList(samplesheetToList(params.input, "assets/schema_input.json")) : Channel.empty()
-input.view()
-fasta.view()
+
+
 
 //input_vcf = Channel.fromPath(params.input).
 //    splitCsv(header: true).
@@ -60,7 +60,7 @@ fasta.view()
     fasta
 
     main:
-
+    
     TUMOUREVO (
         input,
         fasta
