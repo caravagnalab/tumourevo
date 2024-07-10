@@ -29,6 +29,7 @@ include { samplesheetToList } from 'plugin/nf-schema'
 fasta = params.fasta ? Channel.fromPath(params.fasta).map{ it -> [ [id:it.baseName], it ] }.collect() : Channel.empty()
 input = params.input ? Channel.fromList(samplesheetToList(params.input, "assets/schema_input.json")) : Channel.empty()
 input.view()
+fasta.view()
 
 //input_vcf = Channel.fromPath(params.input).
 //    splitCsv(header: true).
@@ -52,35 +53,35 @@ input.view()
  //
  // WORKFLOW: Run main analysis pipeline depending on type of input
  //
- workflow NFCORE_TUMOUREVO {
+//  workflow NFCORE_TUMOUREVO {
 
-    take:
-    input
-    fasta
+//     take:
+//     input
+//     fasta
 
-    main:
+//     main:
 
-    TUMOUREVO (
-        input,
-        fasta
-    )
+//     TUMOUREVO (
+//         input,
+//         fasta
+//     )
 
-    emit:
-    null
-}
+//     emit:
+//     null
+// }
 
-workflow {
+// workflow {
 
-    main:
-    //
-    // WORKFLOW: Run main workflow
-    //
-    NFCORE_TUMOUREVO(
-        input,
-        fasta
-    )
+//     main:
+//     //
+//     // WORKFLOW: Run main workflow
+//     //
+//     NFCORE_TUMOUREVO(
+//         input,
+//         fasta
+//     )
 
-}
+// }
 
 
 /*
