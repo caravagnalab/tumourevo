@@ -9,28 +9,56 @@
         "properties": {
 
             "dataset": {
-                "type": "string",
-                "pattern": "^\\S+$",
                 "errorMessage": "Dataset ID must be provided and cannot contain spaces",
-                "meta": ["dataset"]
+                "meta": ["dataset"],
+                "anyOf": [
+                    {
+                        "type": "string",
+                        "pattern": "^\\S+$"
+                    },
+                    {
+                        "type": "integer"
+                    }
+                ]
             },
             "patient": {
-                "type": "string",
-                "pattern": "^\\S+$",
                 "errorMessage": "Patient ID must be provided and cannot contain spaces",
-                "meta": ["patient"]
+                "meta": ["patient"],
+                "anyOf": [
+                    {
+                        "type": "string",
+                        "pattern": "^\\S+$"
+                    },
+                    {
+                        "type": "integer"
+                    }
+                ]
             },
             "tumour_sample": {
-                "type": "string",
-                "pattern": "^\\S+$",
                 "errorMessage": "Tumour sample ID must be provided and cannot contain spaces",
-                "meta": ["tumour_sample"]
+                "meta": ["tumour_sample"],
+                "anyOf": [
+                    {
+                        "type": "string",
+                        "pattern": "^\\S+$"
+                    },
+                    {
+                        "type": "integer"
+                    }
+                ]
             },
             "normal_sample": {
-                "type": "string",
-                "pattern": "^\\S+$",
                 "errorMessage": "Normal sample ID must be provided and cannot contain spaces",
-                "meta": ["normal_sample"]
+                "meta": ["normal_sample"],
+                "anyOf": [
+                    {
+                        "type": "string",
+                        "pattern": "^\\S+$"
+                    },
+                    {
+                        "type": "integer"
+                    }
+                ]
             },
             "cancer_type": {
                 "errorMessage": "Cancer type cannot contain spaces",

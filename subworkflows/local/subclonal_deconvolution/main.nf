@@ -1,18 +1,18 @@
 //
 // SUBCLONAL DECONVOLUTION WORKFLOW
 //
-include { VIBER as VIBER_SINGLE } from "../../modules/local/viber/main"
-include { VIBER as VIBER_MULTI } from "../../modules/local/viber/main"
-include { PYCLONEVI as PYCLONEVI_MULTI} from "../../modules/local/pyclonevi/main"
-include { PYCLONEVI as PYCLONEVI_SINGLE} from "../../modules/local/pyclonevi/main"
-include { CTREE as CTREE_PYCLONEVI } from "../../modules/local/ctree/main"
-include { CTREE as CTREE_VIBER } from "../../modules/local/ctree/main"
-include { CTREE as CTREE_MOBSTERh } from "../../modules/local/ctree/main"
-include { MOBSTERh as MOBSTERh_SINGLE } from "../../modules/local/mobsterh/main"
-include { MOBSTERh as MOBSTERh_MULTI } from "../../modules/local/mobsterh/main"
-include { FORMATTER as FORMATTER_RDS_SINGLE} from "../../subworkflows/local/formatter/main"
-include { FORMATTER as FORMATTER_RDS_MULTI} from "../../subworkflows/local/formatter/main"
-include { JOINT_FIT } from "../../modules/local/joint_fit/main"
+include { VIBER as VIBER_SINGLE } from "../../../modules/local/viber/main"
+include { VIBER as VIBER_MULTI } from "../../../modules/local/viber/main"
+include { PYCLONEVI as PYCLONEVI_MULTI} from "../../../modules/local/pyclonevi/main"
+include { PYCLONEVI as PYCLONEVI_SINGLE} from "../../../modules/local/pyclonevi/main"
+include { CTREE as CTREE_PYCLONEVI } from "../../../modules/local/ctree/main"
+include { CTREE as CTREE_VIBER } from "../../../modules/local/ctree/main"
+include { CTREE as CTREE_MOBSTERh } from "../../../modules/local/ctree/main"
+include { MOBSTERh as MOBSTERh_SINGLE } from "../../../modules/local/mobsterh/main"
+include { MOBSTERh as MOBSTERh_MULTI } from "../../../modules/local/mobsterh/main"
+include { FORMATTER as FORMATTER_RDS_SINGLE} from "../../../subworkflows/local/formatter/main"
+include { FORMATTER as FORMATTER_RDS_MULTI} from "../../../subworkflows/local/formatter/main"
+include { JOINT_FIT } from "../../../modules/local/joint_fit/main"
 
 workflow SUBCLONAL_DECONVOLUTION {
     take: 

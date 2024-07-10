@@ -2,10 +2,10 @@
 // LIFTER SUB-WORKFLOW
 //
 
-include { GET_POSITIONS } from "../../modules/local/get_positions/main"
+include { GET_POSITIONS } from "../../../modules/local/get_positions/main"
 // include { BCFTOOLS_MPILEUP } from "../../modules/local/mpileup/main"
-include { BCFTOOLS_MPILEUP } from '../modules/nf-core/bcftools/mpileup/main'
-include { JOIN_POSITIONS } from "../../modules/local/join_positions/main"
+include { BCFTOOLS_MPILEUP } from '../../../modules/nf-core/bcftools/mpileup/main'
+include { JOIN_POSITIONS } from "../../../modules/local/join_positions/main"
 
 
 workflow LIFTER {

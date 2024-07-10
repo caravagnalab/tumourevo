@@ -17,7 +17,7 @@ nextflow.enable.dsl = 2
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-//include { TUMOUREVO } from './workflows/tumourevo'
+include { TUMOUREVO } from './workflows/tumourevo'
 include { samplesheetToList } from 'plugin/nf-schema'
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -53,35 +53,35 @@ fasta.view()
  //
  // WORKFLOW: Run main analysis pipeline depending on type of input
  //
-//  workflow NFCORE_TUMOUREVO {
+ workflow NFCORE_TUMOUREVO {
 
-//     take:
-//     input
-//     fasta
+    take:
+    input
+    fasta
 
-//     main:
+    main:
 
-//     TUMOUREVO (
-//         input,
-//         fasta
-//     )
+    TUMOUREVO (
+        input,
+        fasta
+    )
 
-//     emit:
-//     null
-// }
+    emit:
+    null
+}
 
-// workflow {
+workflow {
 
-//     main:
-//     //
-//     // WORKFLOW: Run main workflow
-//     //
-//     NFCORE_TUMOUREVO(
-//         input,
-//         fasta
-//     )
+    main:
+    //
+    // WORKFLOW: Run main workflow
+    //
+    NFCORE_TUMOUREVO(
+        input,
+        fasta
+    )
 
-// }
+}
 
 
 /*
