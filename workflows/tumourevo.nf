@@ -19,29 +19,35 @@ workflow TUMOUREVO {
   fasta
   
   main:
-  //input_samplesheet.view()
-  //fasta.view()
 
   input = input_samplesheet.map{ meta, vcf, tbi, bam, bai, cna_dir -> 
         meta = meta + [id: "${meta.dataset}_${meta.patient}_${meta.tumour_sample}"]
         [ meta, vcf, tbi, bam, bai, cna_dir ]
     }
-  input.view()
+
   input_vcf = input.map{ meta, vcf, tbi, bam, bai, cna_dir  -> 
-        [meta, vcf, tbi]
+        [ meta, vcf, tbi ]
+  }
+
+  input_cna = input.map{ meta, vcf, tbi, bam, bai, cna_dir  -> 
+        [ meta, cna_dir ]
+  }
+
+  input_bam = input.map{ meta, vcf, tbi, bam, bai, cna_dir  -> 
+        [ meta, bam, bai ]
   }
 
 
-
   //VARIANT_ANNOTATION(input) //old stuff
+  ch_extra_files = []
   VCF_ANNOTATE_ENSEMBLVEP(input_vcf, 
                           fasta,
                           params.genome,
                           params.species,
                           params.vep_cache_version,
-                          ['', params.vep_dir_cache],
-                          [])
-  // FORMATTER_VCF(VARIANT_ANNOTATION.out.vep, "vcf")
+                          params.vep_dir_cache,
+                          ch_extra_files)
+  // FORMATTER_VCF(VCF_ANNOTATE_ENSEMBLVEP.out.vcf_tbi, "vcf")
   // FORMATTER_CNA(input, "cna")
   
   // lifter=false

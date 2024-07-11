@@ -17,7 +17,6 @@ workflow VCF_ANNOTATE_ENSEMBLVEP {
 
     main:
     ch_versions = Channel.empty()
-    ch_cache.view()
 
     ENSEMBLVEP_VEP(
         ch_vcf,

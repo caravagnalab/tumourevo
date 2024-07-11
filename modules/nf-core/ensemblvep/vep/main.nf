@@ -6,6 +6,14 @@ process ENSEMBLVEP_VEP {
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/ensembl-vep:111.0--pl5321h2a3209d_0' :
         'biocontainers/ensembl-vep:111.0--pl5321h2a3209d_0' }"
+    
+    publishDir = [
+        [
+            mode: params.publish_dir_mode,
+            path: { "${params.outdir}/variant_annotation/vep/${meta.dataset}/${meta.patient}/${meta.tumour_sample}/" },
+            pattern: "*{vcf.gz, tab.gz, json.gz, html, yml}"
+        ]
+    ]
 
     input:
     tuple val(meta), path(vcf), path(custom_extra_files)
