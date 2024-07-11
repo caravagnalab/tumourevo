@@ -7,14 +7,6 @@ process ENSEMBLVEP_VEP {
         'https://depot.galaxyproject.org/singularity/ensembl-vep:111.0--pl5321h2a3209d_0' :
         'biocontainers/ensembl-vep:111.0--pl5321h2a3209d_0' }"
     
-    publishDir = [
-        [
-            mode: params.publish_dir_mode,
-            path: { "${params.outdir}/variant_annotation/vep/${meta.dataset}/${meta.patient}/${meta.tumour_sample}/" },
-            pattern: "*{vcf.gz, tab.gz, json.gz, html, yml}"
-        ]
-    ]
-
     input:
     tuple val(meta), path(vcf), path(custom_extra_files)
     val   genome
@@ -41,6 +33,8 @@ process ENSEMBLVEP_VEP {
     def prefix = task.ext.prefix ?: "${meta.id}"
     def dir_cache = cache ? "\${PWD}/${cache}" : "/.vep"
     def reference = fasta ? "--fasta $fasta" : ""
+
+    
     """
     vep \\
         -i $vcf \\
