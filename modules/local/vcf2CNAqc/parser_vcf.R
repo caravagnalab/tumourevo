@@ -1,6 +1,8 @@
 library(tidyverse)
 library(vcfR)
 
+
+# adjust tumour and normal sample id!!!!!
 # to add VEP
 parse_FreeBayes = function(vcf, sample_id, filter_mutations = FALSE){
   tb = vcfR::vcfR2tidy(vcf)

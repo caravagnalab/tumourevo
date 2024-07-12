@@ -89,7 +89,7 @@
                     }
                 ]
             },
-	    "vcf": {
+	        "vcf": {
                 "errorMessage": "VCF file cannot contain spaces and must have extension '.vcf' or '.vcf.gz'",
                 "anyOf": [
                     {
@@ -152,7 +152,9 @@
             "cna_dir": {
                 "errorMessage": "Directory for CNA calls files cannot contain spaces",
                 "type": "string",
-                        "pattern": "^\\S+$"
+                "pattern": "^\\S+$",
+                "format": "file-path",
+                "exists": true
             }
         },
         "required": ["dataset", "patient", "tumour_sample", "normal_sample", "vcf", "tbi", "cna_dir", "cna_caller"]

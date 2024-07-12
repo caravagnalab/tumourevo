@@ -1,4 +1,3 @@
-//include { VARIANT_ANNOTATION } from "${baseDir}/subworkflows/variant_annotation/main"
 include { VCF_ANNOTATE_ENSEMBLVEP } from '../subworkflows/nf-core/vcf_annotate_ensemblvep/main'
 
 include { FORMATTER as FORMATTER_CNA } from "${baseDir}/subworkflows/local/formatter/main"
@@ -38,7 +37,6 @@ workflow TUMOUREVO {
   }
 
 
-  //VARIANT_ANNOTATION(input) //old stuff
   ch_extra_files = []
   VCF_ANNOTATE_ENSEMBLVEP(input_vcf, 
                           fasta,
@@ -47,8 +45,8 @@ workflow TUMOUREVO {
                           params.vep_cache_version,
                           params.vep_dir_cache,
                           ch_extra_files)
-  // FORMATTER_VCF(VCF_ANNOTATE_ENSEMBLVEP.out.vcf_tbi, "vcf")
-  // FORMATTER_CNA(input, "cna")
+  FORMATTER_VCF(VCF_ANNOTATE_ENSEMBLVEP.out.vcf_tbi, "vcf")
+  //FORMATTER_CNA(input_cna, "cna") // does not work due to nature of path in test_input.csv
   
   // lifter=false
   // if (params.mode == 'multisample' && lifter){
