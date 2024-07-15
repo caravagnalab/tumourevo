@@ -1,7 +1,7 @@
 include { VCF_ANNOTATE_ENSEMBLVEP } from '../subworkflows/nf-core/vcf_annotate_ensemblvep/main'
-
 include { FORMATTER as FORMATTER_CNA } from "${baseDir}/subworkflows/local/formatter/main"
 include { FORMATTER as FORMATTER_VCF} from "${baseDir}/subworkflows/local/formatter/main"
+
 include { LIFTER } from "${baseDir}/subworkflows/local/lifter/main"
 include { DRIVER_ANNOTATION } from "${baseDir}/subworkflows/local/annotate_driver/main"
 include { FORMATTER as FORMATTER_RDS} from "${baseDir}/subworkflows/local/formatter/main"
@@ -19,20 +19,21 @@ workflow TUMOUREVO {
   
   main:
 
-  input = input_samplesheet.map{ meta, vcf, tbi, bam, bai, cna_dir -> 
+  input = input_samplesheet.map{ meta, vcf, tbi, bam, bai, cna_segs, cna_extra -> 
         meta = meta + [id: "${meta.dataset}_${meta.patient}_${meta.tumour_sample}"]
-        [ meta, vcf, tbi, bam, bai, cna_dir ]
-    }
+        [ meta, vcf, tbi, bam, bai, cna_segs, cna_extra ]
+      }
 
-  input_vcf = input.map{ meta, vcf, tbi, bam, bai, cna_dir  -> 
+
+  input_vcf = input.map{ meta, vcf, tbi, bam, bai, cna_segs, cna_extra  -> 
         [ meta, vcf, tbi ]
   }
 
-  input_cna = input.map{ meta, vcf, tbi, bam, bai, cna_dir  -> 
-        [ meta, cna_dir ]
+  input_cna = input.map{ meta, vcf, tbi, bam, bai, cna_segs, cna_extra  -> 
+        [ meta, [cna_segs, cna_extra] ]
   }
 
-  input_bam = input.map{ meta, vcf, tbi, bam, bai, cna_dir  -> 
+  input_bam = input.map{ meta, vcf, tbi, bam, bai, cna_segs, cna_extra  -> 
         [ meta, bam, bai ]
   }
 
@@ -45,11 +46,11 @@ workflow TUMOUREVO {
                           params.vep_cache_version,
                           params.vep_dir_cache,
                           ch_extra_files)
-  FORMATTER_VCF(VCF_ANNOTATE_ENSEMBLVEP.out.vcf_tbi, "vcf")
-  //FORMATTER_CNA(input_cna, "cna") // does not work due to nature of path in test_input.csv
+  FORMATTER_VCF(VCF_ANNOTATE_ENSEMBLVEP.out.vcf_tbi, "vcf") // return check multi-sample
+  FORMATTER_CNA(input_cna, "cna")
   
   // lifter=false
-  // if (params.mode == 'multisample' && lifter){
+  // if (params.mode == 'multisample' && lifter){ // + check vcf multi-sample
   // //  tumor_bam = Channel.fromPath(params.samples).
   // //    splitCsv(header: true).
   // //     map{row ->

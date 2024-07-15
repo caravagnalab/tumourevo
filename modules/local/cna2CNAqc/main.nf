@@ -4,7 +4,7 @@ process CNA_PROCESSING {
     container "docker://lvaleriani/cnaqc:dev1"
 
     input:
-      tuple val(meta), path(cnaPath)
+      tuple val(meta), path(cna_segs), path(cna_extra)
 
     output:
       tuple val(meta), path("*.rds"), emit: rds
@@ -21,15 +21,15 @@ process CNA_PROCESSING {
       source(paste0("$moduleDir", '/parser_CNA.R'))
 
       if ("$meta.cna_caller" == 'sequenza'){
-        CNA = parse_Sequenza("$meta.tumour_sample", "$cnaPath")
+        CNA = parse_Sequenza(segments = "$cna_segs", extra = "$cna_extra")
 
       } else if ("$meta.cna_caller" == 'ASCAT'){
-        CNA = parse_ASCAT("$meta.tumour_sample", "$cnaPath")
+        CNA = parse_ASCAT(segments = "$cna_segs", extra = "$cna_extra")
         
       } else {
         stop('Copy Number Caller not supported.')
       }
 
-      saveRDS(object = CNA, file = paste0(${prefix}, ".rds"))
+      saveRDS(object = CNA, file = paste0("${prefix}", ".rds"))
       """
 }
