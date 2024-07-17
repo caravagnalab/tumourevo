@@ -16,7 +16,7 @@ workflow QC {
 
         //TINC(cna, vcf)
         CNAQC(cna, vcf)
-        JOIN_CNAQC(CNAQC.out.qc_rds.groupTuple(by: [0,1]))
+        //JOIN_CNAQC(CNAQC.out.qc_rds.groupTuple(by: [0,1]))
     
     emit:
         rds_cnaqc = CNAQC.out.qc_rds
@@ -28,5 +28,5 @@ workflow QC {
         //rds_tinc = TINC.out.fit_rds
         //pdf_tinc = TINC.out.plot_pdf
 
-        rds_join = JOIN_CNAQC.out.rds
+        //rds_join = JOIN_CNAQC.out.rds
 }

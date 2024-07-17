@@ -1,5 +1,5 @@
 process JOIN_CNAQC {
-  publishDir params.publish_dir, mode: 'copy'
+  container = 'docker://lvaleriani/cnaqc:dev1'
 
   input:
     

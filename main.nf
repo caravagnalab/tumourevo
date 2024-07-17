@@ -30,20 +30,6 @@ fasta = params.fasta ? Channel.fromPath(params.fasta).map{ it -> [ [id:it.baseNa
 input = params.input ? Channel.fromList(samplesheetToList(params.input, "assets/schema_input.json")) : Channel.empty()
 
 
-
-//input_vcf = Channel.fromPath(params.input).
-//    splitCsv(header: true).
-//    map {
-//      row ->
-//      meta = row.subMap('dataset', 'patient', 'tumour_sample', 'normal_sample', 'cancer_type', 'cnv_caller')
-//      [meta, [
-//          file(row.vcf),
-//          file(row.vcf_tbi),
-//          file(row.tumour_bam)
-//          file(row.tumour_bai) 
-//      ]]
-//    }
-
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     NAMED WORKFLOWS FOR PIPELINE

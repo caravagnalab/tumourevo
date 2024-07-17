@@ -1,6 +1,6 @@
 process GET_POSITIONS {
-    publishDir params.publish_dir
-    //mode: 'copy'
+    tag "$meta.id"
+    container = 'docker://lvaleriani/cnaqc:dev1'
 
     input:
 
@@ -8,10 +8,12 @@ process GET_POSITIONS {
 
     output:
 
-    tuple val(datasetID), val(patientID), val(sampleID), path("Lifter/mpileup/$datasetID/$patientID/*/*.bed"), emit: bed
-    tuple val(datasetID), val(patientID), val(sampleID), path("Lifter/mpileup/$datasetID/$patientID/*.bed"), emit: pos
+    tuple val(meta), path("*.bed"), emit: bed
+    tuple val(meta), path("*.bed"), emit: pos
 
     script:
+    def args = task.ext.args ?: ''
+    def prefix = task.ext.prefix ?: "${meta.id}"
 
     """
     #!/usr/bin/env Rscript
