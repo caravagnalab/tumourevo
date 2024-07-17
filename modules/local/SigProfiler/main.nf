@@ -1,9 +1,6 @@
-//
-// Mutational signature extraction with SigProfilerExtractor
-//
-
 process SIG_PROFILER {
-    publishDir params.publish_dir, mode: 'copy'
+    tag "$meta.id"
+    //container =
 
     input:
        tuple val(datasetID), val(patientID), val(sampleID), path(joint_table) //from formatter output
