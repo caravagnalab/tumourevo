@@ -1,4 +1,5 @@
 process ANNOTATE_DRIVER {
+    tag "$meta.id"
     container = 'docker://lvaleriani/cnaqc:dev1'
 
     input:
@@ -9,10 +10,15 @@ process ANNOTATE_DRIVER {
 
     tuple val(meta), path("*.rds"), emit: rds
 
-    script:
-    def args                                = task.ext.args    
-    def prefix                              = task.ext.prefix                                       ?: "${meta.id}"  
+    when:
+    
+    task.ext.when == null || task.ext.when
 
+    script:
+
+    def args = task.ext.args ?: ''    
+    def prefix = task.ext.prefix ?: "${meta.id}"
+    
     """
     #!/usr/bin/env Rscript
 
@@ -53,6 +59,6 @@ process ANNOTATE_DRIVER {
     new_data = list()
     new_data[["$meta.tumour_sample"]]\$mutations = x
     new_data[["$meta.tumour_sample"]]\$sample = data[["$meta.tumour_sample"]]\$sample
-    saveRDS(object = new_data, file = paste0("$prefix", ".rds"))
+    saveRDS(object = new_data, file = paste0("$prefix", "_driver.rds"))
     """
 }

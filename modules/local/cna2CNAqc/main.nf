@@ -30,6 +30,6 @@ process CNA_PROCESSING {
         stop('Copy Number Caller not supported.')
       }
 
-      saveRDS(object = CNA, file = paste0("$prefix", ".rds"))
+      saveRDS(object = CNA, file = paste0("$prefix", "_cna.rds"))
       """
 }

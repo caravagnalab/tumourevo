@@ -13,7 +13,7 @@ process VCF_PROCESSING {
         task.ext.when == null || task.ext.when
 
     script:
-        def args = task.ext.args ?: ''
+        def args = task.ext.args ?: ''    
         def prefix = task.ext.prefix ?: "${meta.id}"
         def filter_mutations  = args!='' && args.filter_mutations     ?  "$args.filter_mutations" : ""
 
@@ -46,6 +46,6 @@ process VCF_PROCESSING {
         stop('Variant Caller not supported.')
     }
 
-    saveRDS(object = calls, file = paste0("$prefix", ".rds"))
+    saveRDS(object = calls, file = paste0("$prefix", "_snv.rds"))
     """
 }
