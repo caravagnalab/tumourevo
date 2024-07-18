@@ -65,16 +65,13 @@ workflow TUMOUREVO {
                 multisample: meta.lifter == false
             }
 
-    if (params.mode == 'multisample'){
-        out_lifter = LIFTER(join_input.to_lift, fasta)
-        annotation = DRIVER_ANNOTATION(LIFTER.out)
+    out_lifter = LIFTER(join_input.to_lift, fasta)
+    rds_input = join_input.multisample.map{ meta, rds, bam, bai -> 
+            [meta, rds]
+            }
 
-    } else{
-        rds_input = join_input.multisample.map{ meta, rds, bam, bai -> 
-                [meta, rds]}
-        annotation = DRIVER_ANNOTATION(rds_input)
-    }
-
+    vcf_rds = rds_input.concat(out_lifter)
+    annotation = DRIVER_ANNOTATION(vcf_rds)
     QC(FORMATTER_CNA.out, annotation)
     // SUBCLONAL_DECONVOLUTION(QC.out.rds_join)
     // SIGNATURE_DECONVOLUTION(QC.out.rds_join)

@@ -9,10 +9,10 @@ process CNAQC {
   
   output:
 
-    tuple val(meta), path("*.rds"), emit: qc_rds
-    tuple val(meta), path("*.rds"), path("*.rds"), emit: plot_rds
-    tuple val(meta), path("*.pdf"), emit: plot_pdf_data
-    tuple val(meta), path("*.pdf"), emit: plot_pdf_qc
+    tuple val(meta), path("*_qc.rds"), emit: qc_rds
+    tuple val(meta), path("*_data_plot.rds"), path("*_qc_plot.rds"), emit: plot_rds
+    tuple val(meta), path("*_data.pdf"), emit: plot_pdf_data
+    tuple val(meta), path("*_qc.pdf"), emit: plot_pdf_qc
 
   script:
 
@@ -111,8 +111,8 @@ process CNAQC {
       patchwork::plot_annotation("$meta.tumour_sample")
 
     saveRDS(object = x, file = paste0("$prefix", "_qc.rds"))
-    saveRDS(object = pl_exp, file = paste0("$prefix", "_plot_data.rds"))
-    saveRDS(object = pl_qc, file = paste0("$prefix", "_plot_qc.rds"))
+    saveRDS(object = pl_exp, file = paste0("$prefix", "_data_plot.rds"))
+    saveRDS(object = pl_qc, file = paste0("$prefix", "_qc_plot.rds"))
 
     ggplot2::ggsave(plot = pl_exp, filename = paste0("$prefix", "_data.pdf"), width = 210, height = 297, units="mm", dpi = 200)
     ggplot2::ggsave(plot = pl_qc, filename = paste0("$prefix", "_qc.pdf"), width = 210, height = 297, units="mm", dpi = 200)

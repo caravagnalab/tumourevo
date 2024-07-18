@@ -4,7 +4,7 @@ process GET_POSITIONS {
 
     input:
 
-    tuple val(datasetID), val(patientID), val(sampleID), path(rds_list, stageAs: '*.rds') 
+    tuple val(meta) path(rds_list, stageAs: '*.rds') 
 
     output:
 
@@ -25,7 +25,6 @@ process GET_POSITIONS {
     
     samples = substr("$sampleID", 2, nchar("$sampleID")-1)
     samples = strsplit(samples, ", ")[[1]]
-    #samples = strsplit(x = "$sampleID", " ")%>% unlist()
 
     positions = lapply(strsplit("$rds_list", " ")[[1]], FUN = function(rds){
         df = readRDS(rds)
@@ -48,7 +47,6 @@ process GET_POSITIONS {
                 tidyr::separate(id,into = c('chr', 'from', 'to'), sep = ':') %>% 
                 dplyr::filter(chr %in% c(paste0('chr', seq(1,22)), 'chrX', 'chrY'))
 
-	dir.create(paste0("lifter/mpileup/", res_dir, sample), recursive = T, showWarnings = F)                
         write.table(file = paste0("lifter/mpileup/", res_dir, sample, "/positions_missing.bed"), df, quote = F, sep = "\t", row.names = F, col.names = F)
     }
     """

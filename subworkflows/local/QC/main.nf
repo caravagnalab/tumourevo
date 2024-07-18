@@ -16,7 +16,12 @@ workflow QC {
 
         //TINC(cna, vcf)
         CNAQC(cna, vcf)
-        //JOIN_CNAQC(CNAQC.out.qc_rds.groupTuple(by: [0,1]))
+        in_join = CNAQC.out.qc_rds.map{ meta, rds -> 
+            meta = meta + [id: "${meta.dataset}_${meta.patient}"]
+            sample = meta.tumour_sample
+            [meta.subMap('dataset', 'patient', 'id'), rds, sample]}
+            | groupTuple
+        JOIN_CNAQC(in_join)
     
     emit:
         rds_cnaqc = CNAQC.out.qc_rds
@@ -27,6 +32,6 @@ workflow QC {
         //plot_rds_tinc = TINC.out.plot_rds
         //rds_tinc = TINC.out.fit_rds
         //pdf_tinc = TINC.out.plot_pdf
-
-        //rds_join = JOIN_CNAQC.out.rds
+        
+        rds_join = JOIN_CNAQC.out.rds
 }
