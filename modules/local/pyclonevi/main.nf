@@ -1,17 +1,24 @@
 process PYCLONEVI {
-    publishDir (
-      params.publish_dir,
-      mode: "copy"
-    )
+    tag "$meta.id"
+    container = 'https://depot.galaxyproject.org/singularity/pyclone-vi%3A0.1.3--pyhca03a8a_0'
+    // publishDir (
+    //   params.publish_dir,
+    //   mode: "copy"
+    // )
                
     input:
 
-      tuple val(datasetID), val(patientID), val(sampleID), path(joint_table) // from the formatter output
+      tuple val(meta), path(joint_table)
+      // tuple val(datasetID), val(patientID), val(sampleID), path(joint_table) // from the formatter output
 
     output:
-      tuple val(datasetID), val(patientID), val(sampleID), path("${outDir_ctree}/ctree_input_pyclonevi.csv"), emit: ctree_input
-      tuple val(datasetID), val(patientID), val(sampleID), path("${outDir}/all_fits.h5"), emit: pyclone_all_fits
-      tuple val(datasetID), val(patientID), val(sampleID), path("${outDir}/best_fit.txt"), emit: pyclone_best_fit
+      tuple val(meta), path("${outDir_ctree}/ctree_input_pyclonevi.csv"), emit: ctree_input
+      tuple val(meta), path("${outDir}/all_fits.h5"), emit: pyclone_all_fits
+      tuple val(meta), val(patientID), val(sampleID), path("${outDir}/best_fit.txt"), emit: pyclone_best_fit
+
+      // tuple val(datasetID), val(patientID), val(sampleID), path("${outDir_ctree}/ctree_input_pyclonevi.csv"), emit: ctree_input
+      // tuple val(datasetID), val(patientID), val(sampleID), path("${outDir}/all_fits.h5"), emit: pyclone_all_fits
+      // tuple val(datasetID), val(patientID), val(sampleID), path("${outDir}/best_fit.txt"), emit: pyclone_best_fit
     
     script:
       def args = task.ext.args ?: ''
