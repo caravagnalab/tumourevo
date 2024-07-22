@@ -4,7 +4,7 @@ process GET_POSITIONS {
 
     input:
 
-    tuple val(meta) path(rds_list, stageAs: '*.rds') 
+    tuple val(meta), path(rds_list, stageAs: '*.rds') 
 
     output:
 
