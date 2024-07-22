@@ -8,10 +8,9 @@ include { ANNOTATE_DRIVER } from '../../../modules/local/annotate_driver/main'
 workflow DRIVER_ANNOTATION {
     take:
         rds
-        cancer_type
     
     main:
-        ANNOTATE_DRIVER(rds, cancer_type)
+        ANNOTATE_DRIVER(rds)
 
 
     emit:

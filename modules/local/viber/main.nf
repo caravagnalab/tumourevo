@@ -1,22 +1,29 @@
 process VIBER {
-  publishDir (
-    params.publish_dir,
-    mode: "copy"
-  )
+  tag "$meta.id"
+  container='file:///fast/cdslab/ebusca00/singularity/cdslab.sif'
+
 
   input:
     
-    tuple val(datasetID), val(patientID), val(sampleID), path(joint_table)
+    tuple val(meta), path(joint_table)
+    // tuple val(datasetID), val(patientID), val(sampleID), path(joint_table)
 
   output:
-    
-    tuple val(datasetID), val(patientID), val(sampleID), path("${outDir}/viber_best_st_fit.rds"), emit: viber_rds
-    tuple val(datasetID), val(patientID), val(sampleID), path("${outDir}/viber_best_st_heuristic_fit.rds"), emit: viber_heuristic_rds
-    tuple val(datasetID), val(patientID), val(sampleID), path("${outDir}/${plot1}"), emit: viber_plots_rds
-    tuple val(datasetID), val(patientID), val(sampleID), path("${outDir}/${plot2}"), emit: viber_heuristic_plots_rds
-    tuple val(datasetID), val(patientID), val(sampleID), path("${outDir}/REPORT_plots_viber.rds"), emit: viber_report_rds
-    tuple val(datasetID), val(patientID), val(sampleID), path("${outDir}/REPORT_plots_viber.pdf"), emit: viber_report_pdf
-    tuple val(datasetID), val(patientID), val(sampleID), path("${outDir}/REPORT_plots_viber.png"), emit: viber_report_png
+    tuple val(meta), path("${outDir}/viber_best_st_fit.rds"), emit: viber_rds
+    tuple val(meta), path("${outDir}/viber_best_st_heuristic_fit.rds"), emit: viber_heuristic_rds
+    tuple val(meta), path("${outDir}/${plot1}"), emit: viber_plots_rds
+    tuple val(meta), path("${outDir}/${plot2}"), emit: viber_heuristic_plots_rds
+    tuple val(meta), path("${outDir}/REPORT_plots_viber.rds"), emit: viber_report_rds
+    tuple val(meta), path("${outDir}/REPORT_plots_viber.pdf"), emit: viber_report_pdf
+    tuple val(meta), path("${outDir}/REPORT_plots_viber.png"), emit: viber_report_png
+
+    // tuple val(datasetID), val(patientID), val(sampleID), path("${outDir}/viber_best_st_fit.rds"), emit: viber_rds
+    // tuple val(datasetID), val(patientID), val(sampleID), path("${outDir}/viber_best_st_heuristic_fit.rds"), emit: viber_heuristic_rds
+    // tuple val(datasetID), val(patientID), val(sampleID), path("${outDir}/${plot1}"), emit: viber_plots_rds
+    // tuple val(datasetID), val(patientID), val(sampleID), path("${outDir}/${plot2}"), emit: viber_heuristic_plots_rds
+    // tuple val(datasetID), val(patientID), val(sampleID), path("${outDir}/REPORT_plots_viber.rds"), emit: viber_report_rds
+    // tuple val(datasetID), val(patientID), val(sampleID), path("${outDir}/REPORT_plots_viber.pdf"), emit: viber_report_pdf
+    // tuple val(datasetID), val(patientID), val(sampleID), path("${outDir}/REPORT_plots_viber.png"), emit: viber_report_png
 
   script:
     // viber fit params

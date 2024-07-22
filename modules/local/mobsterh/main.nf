@@ -1,8 +1,7 @@
 process MOBSTERh {
-  publishDir (
-    params.publish_dir,
-    mode: "copy"
-  )
+  tag "$meta.id"
+  container='file:///fast/cdslab/ebusca00/singularity/cdslab.sif'
+
 
   input:
     tuple val(datasetID), val(patientID), val(sampleID), path(joint_table)
