@@ -15,19 +15,24 @@ process TINC {
     // tuple val(datasetID), val(patientID), val(sampleID), path(snv_RDS)
   
   output:
-    tuple val(meta), path("*.rds"), emit: rds 
-    // tuple val(meta), path("*.rds"), emit: plot_rds
-    tuple val(meta), path("*.pdf"), emit: pdf
+    tuple val(meta), path("*_fit.rds"), emit: rds 
+    tuple val(meta), path("*_plot.rds"), emit: plot_rds
+    tuple val(meta), path("*.pdf"), emit: plot_pdf
     // tuple val(datasetID), val(patientID), val(sampleID), path("QC/TINC/$datasetID/$patientID/$sampleID/TINC/*tinc_plot.rds"), emit: plot_rds
     // tuple val(datasetID), val(patientID), val(sampleID), path("QC/TINC/$datasetID/$patientID/$sampleID/TINC/*tinc_fit.rds"), emit: fit_rds
     // tuple val(datasetID), val(patientID), val(sampleID), path("QC/TINC/$datasetID/$patientID/$sampleID/TINC/*plot.pdf"), emit: plot_pdf
 
   script:
 
-    def args = task.ext.args ?: ''
+    def args                                = task.ext.args 
+    def prefix                              = task.ext.prefix                                       ?: "${meta.id}"
     def matching_strategy                   = args!='' && args.matching_strategy                    ?  "$args.matching_strategy" : ""
-    def VAF_range_tumour                    = args!='' && args.VAF_range_tumour
-    def prefix = task.ext.prefix ?: "${meta.id}"
+    def vaf_range_tumour                    = args!='' && args.vaf_range_tumour                     ?  "$args.vaf_range_tumour"  : ""
+    def cutoff_miscalled_clonal             = args!='' && args.cutoff_miscalled_clonal              ?  "$args.cutoff_miscalled_clonal" : ""
+    def cutoff_lv_assignment                = args!='' && args.cutoff_lv_assignment                 ?  "$args.cutoff_lv_assignment"  : ""
+    def N                                   = args!='' && args.N                                    ?  "$args.N"  : ""
+    def fast                                = args!='' && args.fast                                 ?  "$args.fast" : ""
+    
 
     """
     #!/usr/bin/env Rscript
