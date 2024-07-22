@@ -1,10 +1,10 @@
 process SIG_PROFILER {
     tag "$meta.id"
-    //container =
+    container = 'docker://katiad/sigprofiler:latest'
 
     input:
-       tuple val(datasetID), val(patientID), val(sampleID), path(joint_table) //from formatter output
-       //tuple val(meta), path(joint_table)
+       //tuple val(datasetID), val(patientID), val(sampleID), path(joint_table) //from formatter output
+       tuple val(meta), path(joint_table)
 
     output:
        tuple val(datasetID), path("signature_deconvolution/Sigprofiler/$datasetID/results/SBS96/SBS96_selection_plot.pdf"),
@@ -62,6 +62,7 @@ process SIG_PROFILER {
       import pandas as pd
       from SigProfilerExtractor import sigpro as sig
       from SigProfilerMatrixGenerator.scripts import SigProfilerMatrixGeneratorFunc as matGen
+      from SigProfilerMatrixGenerator import install as genInstall
   
     
       #if os.path.exists(output_path):
@@ -91,6 +92,9 @@ process SIG_PROFILER {
 
       #saving input matrix to txt
       input_data.to_csv("input_path/input_data.txt", sep="\t", index=False, header=True)
+
+      #download desired reference genome
+      genInstall.install('$reference_genome', rsync=False, bash=True)
 
       #mutation's counts matrix generation
       input_matrix = matGen.SigProfilerMatrixGeneratorFunc(
