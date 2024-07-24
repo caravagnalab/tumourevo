@@ -4,8 +4,8 @@ process MOBSTERh {
 
 
   input:
-    tuple val(datasetID), val(patientID), val(sampleID), path(joint_table)
-    //tuple val(meta), path(joint_table)
+    tuple val(datasetID), val(patientID), val(sampleID), path(joint_table) // to delete
+    //tuple val(meta), path(rds_join) // rds from JOIN_CNAQC 
 
   output:
     tuple val(datasetID), val(patientID), val(sampleID), path("${outDir}/*/mobsterh_st_fit.rds"), emit: mobster_rds
@@ -15,15 +15,16 @@ process MOBSTERh {
     tuple val(datasetID), val(patientID), val(sampleID), path("${outDir}/*/REPORT_plots_mobster.pdf"), emit: mobster_report_pdf
     tuple val(datasetID), val(patientID), val(sampleID), path("${outDir}/*/REPORT_plots_mobster.png"), emit: mobster_report_png
 
-    //tuple val(meta), path("${outDir}/*/mobsterh_st_fit.rds"), emit: mobster_rds
-    //tuple val(meta), path("${outDir}/*/mobsterh_st_best_fit.rds"), emit: mobster_best_rds
-    //tuple val(meta), path("${outDir}/*/*plots.rds"), emit: mobster_plots_rds
-    //tuple val(meta), path("${outDir}/*/REPORT_plots_mobster.rds"), emit: mobster_report_rds
-    //tuple val(meta), path("${outDir}/*/REPORT_plots_mobster.pdf"), emit: mobster_report_pdf
-    //tuple val(meta), path("${outDir}/*/REPORT_plots_mobster.png"), emit: mobster_report_png
+    //tuple val(meta), path("*_mobsterh_st_fit.rds"), emit: mobster_rds
+    //tuple val(meta), path("*_mobsterh_st_best_fit.rds"), emit: mobster_best_rds
+    //tuple val(meta), path("*_plots.rds"), emit: mobster_plots_rds
+    //tuple val(meta), path("*_REPORT_plots_mobster.rds"), emit: mobster_report_rds
+    //tuple val(meta), path("*_REPORT_plots_mobster.pdf"), emit: mobster_report_pdf
+    //tuple val(meta), path("*_REPORT_plots_mobster.png"), emit: mobster_report_png
 
   script:
     def args = task.ext.args ?: ""
+    def prefix = task.ext.prefix ?: "${meta.id}"
     def K = args!="" && args.K ? "$args.K" : ""
     def samples = args!="" && args.samples ? "$args.samples" : ""
     def init = args!="" && args.init ? "$args.init" : ""
