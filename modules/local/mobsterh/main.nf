@@ -4,7 +4,6 @@ process MOBSTERh {
 
 
   input:
-    // tuple val(datasetID), val(patientID), val(sampleID), path(joint_table) // to delete
     tuple val(meta), path(rds_join) // rds from JOIN_CNAQC 
 
   output:
@@ -16,11 +15,11 @@ process MOBSTERh {
     // tuple val(datasetID), val(patientID), val(sampleID), path("${outDir}/*/REPORT_plots_mobster.png"), emit: mobster_report_png
 
     tuple val(meta), path("*_mobsterh_st_fit.rds"), emit: mobster_rds
-    //tuple val(meta), path("*_mobsterh_st_best_fit.rds"), emit: mobster_best_rds
-    //tuple val(meta), path("*_plots.rds"), emit: mobster_plots_rds
-    //tuple val(meta), path("*_REPORT_plots_mobster.rds"), emit: mobster_report_rds
-    //tuple val(meta), path("*_REPORT_plots_mobster.pdf"), emit: mobster_report_pdf
-    //tuple val(meta), path("*_REPORT_plots_mobster.png"), emit: mobster_report_png
+    tuple val(meta), path("*_mobsterh_st_best_fit.rds"), emit: mobster_best_rds
+    tuple val(meta), path("*_plots.rds"), emit: mobster_plots_rds
+    tuple val(meta), path("*_REPORT_plots_mobster.rds"), emit: mobster_report_rds
+    tuple val(meta), path("*_REPORT_plots_mobster.pdf"), emit: mobster_report_pdf
+    tuple val(meta), path("*_REPORT_plots_mobster.png"), emit: mobster_report_png
 
   script:
     def args = task.ext.args ?: ""
@@ -120,14 +119,14 @@ process MOBSTERh {
      plot_fit = plot(best_fit)
 
      saveRDS(object=fit, file=paste0("$prefix", "_mobsterh_st_fit.rds"))
-    #  saveRDS(object=best_fit, file=paste0(outDir_sample, "mobsterh_st_best_fit.rds"))
-    #  saveRDS(object=plot_fit, file=paste0(outDir_sample, "mobsterh_st_best_fit_plots.rds"))
+     saveRDS(object=best_fit, file=paste0("$prefix", "_mobsterh_st_best_fit.rds"))
+     saveRDS(object=plot_fit, file=paste0("$prefix", "_mobsterh_st_best_fit_plots.rds"))
 
-    #  # save report plots
-    #  report_fig = mobster::plot_model_selection(fit)
-    #  saveRDS(report_fig, file=paste0(outDir_sample, "REPORT_plots_mobster.rds"))
-    #  ggplot2::ggsave(plot=report_fig, filename=paste0(outDir_sample, "REPORT_plots_mobster.pdf"), height=210, width=210, units="mm", dpi = 200)
-    #  ggplot2::ggsave(plot=report_fig, filename=paste0(outDir_sample, "REPORT_plots_mobster.png"), height=210, width=210, units="mm", dpi = 200)
+     # save report plots
+     report_fig = mobster::plot_model_selection(fit)
+     saveRDS(report_fig, file=paste0("$prefix", "_REPORT_plots_mobster.rds"))
+     ggplot2::ggsave(plot=report_fig, filename=paste0("$prefix", "_REPORT_plots_mobster.pdf"), height=210, width=210, units="mm", dpi = 200)
+     ggplot2::ggsave(plot=report_fig, filename=paste0("$prefix", "_REPORT_plots_mobster.png"), height=210, width=210, units="mm", dpi = 200)
     })
     """
 }
