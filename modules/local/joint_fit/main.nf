@@ -10,12 +10,12 @@ process JOINT_FIT {
 
   output:
     
-    tuple val(meta), path(rds_join) //mCNAqc_filtered.rds
+    tuple val(meta), path("*.rds"), emit: rds //mCNAqc_filtered.rds
     // tuple val(datasetID), val(patientID), val(sampleID), path("$outDir/mCNAqc_filtered.rds")
 
   script:
     def args = task.ext.args ?: ""
-
+    def prefix = task.ext.prefix ?: "${meta.id}"
     //outDir = "subclonal_deconvolution/$datasetID/$patientID"
 
     //if (!(mobster_best_fits instanceof String)) {
@@ -31,8 +31,6 @@ process JOINT_FIT {
 
     patientID = "$meta.patient"
     fits = strsplit(x="$mobster_best_fits", ",") %>% unlist()  # list of mobster fitnames
-    ### add chechk to the remove_tail parameter 
-    ### "$params.remove_tail"
 
     check_mutation_id = function(mutations_table) {
       if (!"mutation_id" %in% colnames(mutations_table))
@@ -40,7 +38,7 @@ process JOINT_FIT {
       return(mutations_table)
     }
 
-    muts_to_discard = lapply(fits, function(fit_name) {
+    tail_muts = lapply(fits, function(fit_name) {
       fit_i = readRDS(fit_name)
 
       data_i = check_mutation_id(fit_i[["data"]])
@@ -51,9 +49,26 @@ process JOINT_FIT {
         dplyr::select(mutation_id, cluster, sample_id)
     }) %>% dplyr::bind_rows() %>% 
       dplyr::group_by(mutation_id) %>% 
-      dplyr::summarise(n_samples=dplyr::n()) %>% 
-      dplyr::filter(n_samples == length(fits)) %>%
-      dplyr::pull(mutation_id)
+      dplyr::summarise(n_samples=dplyr::n()) 
+    # dplyr::filter(n_samples == length(fits)) %>%
+    # dplyr::pull(mutation_id)
+
+    # Apply filtering based on the value of params_remove_tail
+    if ("$params.remove_tail" == "all") {
+      muts_to_discard <- tail_muts %>%
+        dplyr::filter(n_samples == length(fits)) %>%
+        dplyr::pull(mutation_id)
+    } else if ("$params.remove_tail" == "once") {
+      muts_to_discard <- tail_muts %>%
+        dplyr::filter(n_samples >= 1) %>%
+        dplyr::pull(mutation_id)
+    } else if ("$params.remove_tail" == "never") {
+      muts_to_discard <- tail_muts %>%
+        dplyr::filter(n_samples < -1000) %>%
+        dplyr::pull(mutation_id)
+    } else {
+      cli::cli_alert_warning("Invalid value for params_remove_tail")
+    }
 
     # Function to discard mutations from the mCNAqc objects
     discard_mutations_from_mCNAqc = function(obj, mutations_list) {
@@ -78,17 +93,16 @@ process JOINT_FIT {
       return(obj)
     }
 
-    dir.create("$outDir", recursive=TRUE)
 
-    if ( grepl(".rds\$", tolower("$joint_table")) ) {
-      obj = readRDS("$joint_table")
+    if ( grepl(".rds\$", tolower("$rds_join")) ) {
+      obj = readRDS("$rds_join")
       if (class(obj) == "m_cnaqc") {
         obj_filtered = discard_mutations_from_mCNAqc(obj, muts_to_discard)
 
-        saveRDS(obj_filtered, "$outDir/mCNAqc_filtered.rds")
+        saveRDS(obj_filtered, file = paste0("$prefix","_multi_cnaqc_filtered.rds"))
       } else {
-        cli::cli_alert_warning("Object of class {class($joint_table)} not supported. Saving the original object.")
-        saveRDS(obj, "$outDir/mCNAqc_filtered.rds")
+        cli::cli_alert_warning("Object of class {class($rds_join)} not supported. Saving the original object.")
+        saveRDS(obj, file = paste0("$prefix","_multi_cnaqc_filtered.rds"))
       }
     }
 

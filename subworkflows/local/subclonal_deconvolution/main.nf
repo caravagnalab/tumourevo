@@ -133,7 +133,7 @@ include { MOBSTERh } from "../../../modules/local/mobsterh/main"
 // include { MOBSTERh as MOBSTERh_MULTI } from "../../../modules/local/mobsterh/main"
 // include { FORMATTER as FORMATTER_RDS_SINGLE} from "../../../subworkflows/local/formatter/main"
 // include { FORMATTER as FORMATTER_RDS_MULTI} from "../../../subworkflows/local/formatter/main"
-// include { JOINT_FIT } from "../../../modules/local/joint_fit/main"
+include { JOINT_FIT } from "../../../modules/local/joint_fit/main"
 
 workflow SUBCLONAL_DECONVOLUTION {
     take: 
@@ -149,11 +149,6 @@ workflow SUBCLONAL_DECONVOLUTION {
     ctree_mobster_pdf = null
     pyclone_table = null
 
-    // check the number of samples in meta
-    // if n=1 then I do not need to transpose
-    // else (n>1) then I do need to transpose only if mobster in tools
-
-
     if (params.tools && params.tools.split(",").contains("mobster")){
         joinCNAqc = rds_join.transpose().map{ meta, rds, sample -> 
             meta = meta + ['tumour_sample': sample, 'id':"${meta.dataset}_${meta.patient}_${sample}"]
@@ -165,7 +160,8 @@ workflow SUBCLONAL_DECONVOLUTION {
             [meta.subMap('dataset', 'patient', 'id'), rds, sample]}
             | groupTuple
         input_joint_fit = rds_join.map{meta, rds, sample-> [meta, rds]}
-        input_joint_fit.join(in_join).view() // still to check
+        // input_joint_fit.join(in_join).view()
+        JOINT_FIT(input_joint_fit.join(in_join))
     }
 
 
