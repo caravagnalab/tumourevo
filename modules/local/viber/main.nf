@@ -5,7 +5,7 @@ process VIBER {
 
   input:
     
-    tuple val(meta), path(joint_table)
+    tuple val(meta), path(rds_join) //rds from either JOIN_CNAQC or JOIN_FIT, should be always grouped
     // tuple val(datasetID), val(patientID), val(sampleID), path(joint_table)
 
   output:
@@ -69,7 +69,7 @@ process VIBER {
     source("$moduleDir/getters.R")
     dir.create("$outDir", recursive = TRUE)
 
-    patientID = "$patientID"
+    patientID = "$meta.patient"
     samples = strsplit(x = "$sampleID_string", " ")%>% unlist()
 
     print("$sampleID_string")

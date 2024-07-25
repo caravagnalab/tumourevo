@@ -159,6 +159,13 @@ workflow SUBCLONAL_DECONVOLUTION {
             meta = meta + ['tumour_sample': sample, 'id':"${meta.dataset}_${meta.patient}_${sample}"]
             [meta, rds]}
         MOBSTERh(joinCNAqc)
+        in_join = MOBSTERh.out.mobster_best_rds.map{ meta, rds -> 
+            meta = meta + [id: "${meta.dataset}_${meta.patient}"]
+            sample = meta.tumour_sample
+            [meta.subMap('dataset', 'patient', 'id'), rds, sample]}
+            | groupTuple
+        input_joint_fit = rds_join.map{meta, rds, sample-> [meta, rds]}
+        input_joint_fit.join(in_join).view() // still to check
     }
 
 

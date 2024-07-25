@@ -1,23 +1,30 @@
 process JOINT_FIT {
-  publishDir (
-    params.publish_dir,
-    mode: "copy"
-  )
+  tag "$meta.id"
+  container = 'docker://lvaleriani/cnaqc:dev1'
+
+  //publishDir (
+  //  params.publish_dir,
+  //  mode: "copy"
+  //)
 
   input:
-    tuple val(datasetID), val(patientID), val(sampleID), path(joint_table), path(mobster_best_fits, stageAs:"?/best_fit.rds")
+    
+    tuple val(meta), path(rds_join), path(mobster_best_fits, stageAs:"?/best_fit.rds"), val(tumour_samples)
+    // tuple val(datasetID), val(patientID), val(sampleID), path(joint_table), path(mobster_best_fits, stageAs:"?/best_fit.rds")
 
   output:
-    tuple val(datasetID), val(patientID), val(sampleID), path("$outDir/mCNAqc_filtered.rds")
+    
+    tuple val(meta), path(rds_join) //mCNAqc_filtered.rds
+    // tuple val(datasetID), val(patientID), val(sampleID), path("$outDir/mCNAqc_filtered.rds")
 
   script:
     def args = task.ext.args ?: ""
 
-    outDir = "subclonal_deconvolution/$datasetID/$patientID"
+    //outDir = "subclonal_deconvolution/$datasetID/$patientID"
 
-    if (!(mobster_best_fits instanceof String)) {
-      mobster_best_fits = mobster_best_fits.join(",")
-    }
+    //if (!(mobster_best_fits instanceof String)) {
+    //  mobster_best_fits = mobster_best_fits.join(",")
+    //}
 
     """
     #!/usr/bin/env Rscript
@@ -26,8 +33,10 @@ process JOINT_FIT {
 
     library(dplyr)
 
-    patientID = "$patientID"
+    patientID = "$meta.patient"
     fits = strsplit(x="$mobster_best_fits", ",") %>% unlist()  # list of mobster fitnames
+    ### add chechk to the remove_tail parameter 
+    ### "$params.remove_tail"
 
     check_mutation_id = function(mutations_table) {
       if (!"mutation_id" %in% colnames(mutations_table))
