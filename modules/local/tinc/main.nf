@@ -11,7 +11,8 @@ process TINC {
 
     input:
    
-    tuple val(meta), path(cna_RDS), path(snv_RDS)
+    tuple val(meta), path(cna_RDS)
+    tuple val(meta), path(snv_RDS)
     // tuple val(datasetID), val(patientID), val(sampleID), path(snv_RDS)
   
   output:
@@ -26,7 +27,6 @@ process TINC {
 
     def args                                = task.ext.args 
     def prefix                              = task.ext.prefix                                       ?: "${meta.id}"
-    def matching_strategy                   = args!='' && args.matching_strategy                    ?  "$args.matching_strategy" : ""
     def vaf_range_tumour                    = args!='' && args.vaf_range_tumour                     ?  "$args.vaf_range_tumour"  : ""
     def cutoff_miscalled_clonal             = args!='' && args.cutoff_miscalled_clonal              ?  "$args.cutoff_miscalled_clonal" : ""
     def cutoff_lv_assignment                = args!='' && args.cutoff_lv_assignment                 ?  "$args.cutoff_lv_assignment"  : ""
@@ -64,7 +64,15 @@ process TINC {
 
     CNAs = readRDS("$cna_RDS")\$segments
     
-    TINC_fit = TINC::autofit(input_mut, cna = CNAs, FAST = FALSE)
+    TINC_fit = TINC::autofit(input = input_mut, 
+                    cna = CNAs, 
+                    VAF_range_tumour = as.numeric("$vaf_range_tumour"),
+                    cutoff_miscalled_clonal = as.numeric("$cutoff_miscalled_clonal"),
+                    cutoff_lv_assignment = as.numeric("$cutoff_lv_assignment"),
+                    N = as.numeric("$N"),
+                    FAST = "$fast"
+                    )
+                    
     tinc_plot = plot(TINC_fit)
     
     saveRDS(filename = paste0("${prefix}", "_plot.rds"), object = tinc_plot)
