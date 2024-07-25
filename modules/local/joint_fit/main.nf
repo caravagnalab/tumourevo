@@ -1,11 +1,7 @@
 process JOINT_FIT {
   tag "$meta.id"
   container = 'docker://lvaleriani/cnaqc:dev1'
-
-  //publishDir (
-  //  params.publish_dir,
-  //  mode: "copy"
-  //)
+  // container='file:///fast/cdslab/ebusca00/singularity/cdslab.sif'
 
   input:
     
