@@ -9,13 +9,13 @@ process VIBER {
     // tuple val(datasetID), val(patientID), val(sampleID), path(joint_table)
 
   output:
-    tuple val(meta), path("${outDir}/viber_best_st_fit.rds"), emit: viber_rds
-    tuple val(meta), path("${outDir}/viber_best_st_heuristic_fit.rds"), emit: viber_heuristic_rds
-    tuple val(meta), path("${outDir}/${plot1}"), emit: viber_plots_rds
-    tuple val(meta), path("${outDir}/${plot2}"), emit: viber_heuristic_plots_rds
-    tuple val(meta), path("${outDir}/REPORT_plots_viber.rds"), emit: viber_report_rds
-    tuple val(meta), path("${outDir}/REPORT_plots_viber.pdf"), emit: viber_report_pdf
-    tuple val(meta), path("${outDir}/REPORT_plots_viber.png"), emit: viber_report_png
+    tuple val(meta), path("*_viber_best_st_fit.rds"), emit: viber_rds
+    tuple val(meta), path("*_viber_best_st_heuristic_fit.rds"), emit: viber_heuristic_rds
+    tuple val(meta), path("*_${plot1}"), emit: viber_plots_rds
+    tuple val(meta), path("*_${plot2}"), emit: viber_heuristic_plots_rds
+    tuple val(meta), path("*_REPORT_plots_viber.rds"), emit: viber_report_rds
+    tuple val(meta), path("*_REPORT_plots_viber.pdf"), emit: viber_report_pdf
+    tuple val(meta), path("*_REPORT_plots_viber.png"), emit: viber_report_png
 
     // tuple val(datasetID), val(patientID), val(sampleID), path("${outDir}/viber_best_st_fit.rds"), emit: viber_rds
     // tuple val(datasetID), val(patientID), val(sampleID), path("${outDir}/viber_best_st_heuristic_fit.rds"), emit: viber_heuristic_rds
@@ -28,6 +28,7 @@ process VIBER {
   script:
     // viber fit params
     def args = task.ext.args ?: ""
+    def prefix = task.ext.prefix ?: "${meta.id}" 
     def K = args!="" && args.K ? "$args.K" : ""
     def alpha_0 = args!="" && args.alpha_0 ? "$args.alpha_0" : ""
     def a_0 = args!="" && args.a_0 ? "$args.a_0" : ""

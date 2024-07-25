@@ -73,6 +73,6 @@ workflow TUMOUREVO {
     vcf_rds = rds_input.concat(out_lifter)
     annotation = DRIVER_ANNOTATION(vcf_rds)
     QC(FORMATTER_CNA.out, annotation)
-    // SUBCLONAL_DECONVOLUTION(QC.out.rds_join)
+    SUBCLONAL_DECONVOLUTION(QC.out.rds_join)
     // SIGNATURE_DECONVOLUTION(QC.out.rds_join)
 }

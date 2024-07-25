@@ -1,0 +1,32 @@
+nextflow_process {
+    name 'Test process ANNOTATE_DRIVER'
+    script "modules/local/annotate_driver/main.nf"
+    process 'ANNOTATE_DRIVER'
+
+    // FIXME VCF.rds should be readed from raw.github
+    // Test both single and multisample ?
+    // Try with setup from looking the main workflow file to create
+    // the correct setup for the run
+    test("Should run without failures") {
+        when {
+            process {
+                """
+                meta = [
+                    id : "idProva",
+                    tumour_sample: "Set6_42",
+                    cancer_type: "PANCANCER" 
+                ]
+                
+                snv_RDS = file("${projectDir}/results/formatter/vcf2cnaqc/MSeq/Set06/Set6_42/MSeq_Set06_Set6_42_snv.rds", checkIfExists: true)
+                // Create a tuple with metadata and file path
+                input[0] = tuple(meta, snv_RDS)
+
+                """
+            }
+        }
+
+        then {
+            assert process.success
+        }
+    }
+}
