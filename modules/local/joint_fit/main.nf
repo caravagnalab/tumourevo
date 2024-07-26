@@ -10,7 +10,7 @@ process JOINT_FIT {
 
   output:
     
-    tuple val(meta), path("*.rds"), emit: rds //mCNAqc_filtered.rds
+    tuple val(meta), path("*.rds"), val(tumour_samples), emit: rds //mCNAqc_filtered.rds
     // tuple val(datasetID), val(patientID), val(sampleID), path("$outDir/mCNAqc_filtered.rds")
 
   script:
