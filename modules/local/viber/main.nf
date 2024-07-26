@@ -5,8 +5,7 @@ process VIBER {
 
   input:
     
-    tuple val(meta), path(rds_join) //rds from either JOIN_CNAQC or JOIN_FIT, should be always grouped
-    // tuple val(datasetID), val(patientID), val(sampleID), path(joint_table)
+    tuple val(meta), path(rds_join), val(tumour_samples) //rds from either JOIN_CNAQC or JOIN_FIT, should be always grouped
 
   output:
     tuple val(meta), path("*_viber_best_st_fit.rds"), emit: viber_rds
@@ -43,19 +42,28 @@ process VIBER {
     def dimensions_cutoff = args!="" && args.dimensions_cutoff ? "$args.dimensions_cutoff" : ""
     def pi_cutoff = args!="" && args.pi_cutoff ? "$args.pi_cutoff" : ""
     def re_assign = args!="" && args.re_assign ? "$args.re_assign" : ""
-    def mode = args.mode ?  "$args.mode" : ""
+    // def mode = args.mode ?  "$args.mode" : ""
+    def n_samples = tumour_samples.size()
 
-    if (mode == "singlesample") {
-      sampleID_string = sampleID
-      outDir = "subclonal_deconvolution/viber/$datasetID/$patientID/$sampleID/"
+    if (n_samples==1) {
       plot1 = "viber_best_st_mixing_plots.rds"
       plot2 = "viber_best_st_heuristic_mixing_plots.rds"
-    } else if (mode == "multisample"){
-      sampleID_string = sampleID.join(" ")
-      outDir = "subclonal_deconvolution/viber/$datasetID/$patientID/"
+    } else {
       plot1 = "viber_best_st_fit_plots.rds"
       plot2 = "viber_best_st_heuristic_fit_plots.rds"
     }
+
+    // if (mode == "singlesample") {
+      //sampleID_string = sampleID
+      //outDir = "subclonal_deconvolution/viber/$datasetID/$patientID/$sampleID/"
+      // plot1 = "viber_best_st_mixing_plots.rds"
+      // plot2 = "viber_best_st_heuristic_mixing_plots.rds"
+    // } else if (mode == "multisample"){
+      // sampleID_string = sampleID.join(" ")
+      // outDir = "subclonal_deconvolution/viber/$datasetID/$patientID/"
+      // plot1 = "viber_best_st_fit_plots.rds"
+      // plot2 = "viber_best_st_heuristic_fit_plots.rds"
+    // }
 
     """
     #!/usr/bin/env Rscript
@@ -67,17 +75,16 @@ process VIBER {
     library(tidyverse)
     library(ggplot2)
     source("$moduleDir/getters.R")
-    dir.create("$outDir", recursive = TRUE)
 
     patientID = "$meta.patient"
-    samples = strsplit(x = "$sampleID_string", " ")%>% unlist()
-
-    print("$sampleID_string")
-    print("$joint_table")
+    samples = substr("$tumour_samples", 2, nchar("$tumour_samples")-1)
+    samples = strsplit(samples, ", ")[[1]]
+    print("$tumour_samples")
+    print("$rds_join")
     print(samples)
 
-    if ( grepl(".rds\$", tolower("$joint_table")) ) {
-      input_obj = readRDS("$joint_table")
+    if ( grepl(".rds\$", tolower("$rds_join")) ) {
+      input_obj = readRDS("$rds_join")
       if (class(input_obj) == "m_cnaqc") {
         shared = input_obj %>% get_sample(sample=samples, which_obj="shared")
         joint_table = lapply(names(shared), 
@@ -156,23 +163,23 @@ process VIBER {
     } )
 
     # Save fits
-    saveRDS(best_fit, file=paste0("$outDir", "viber_best_st_fit.rds"))
-    saveRDS(best_fit_heuristic, file = paste0("$outDir", "viber_best_st_heuristic_fit.rds"))
+    saveRDS(best_fit, file=paste0("$prefix", "_viber_best_st_fit.rds"))
+    saveRDS(best_fit_heuristic, file = paste0("$prefix", "_viber_best_st_heuristic_fit.rds"))
 
     # Save plots
-    if ("$mode" == "multisample") { #mutlisample mode on
+    if ("$n_samples" >1) { #mutlisample mode on
       print("multisample mode on")
       plot_fit = plot(best_fit)
       plot_fit_heuristic = plot(best_fit_heuristic)
       
-      saveRDS(plot_fit, file=paste0("$outDir", "viber_best_st_fit_plots.rds"))
-      saveRDS(plot_fit_heuristic, file=paste0("$outDir", "viber_best_st_heuristic_fit_plots.rds"))
-    } else if ("$mode" == "singlesample") {
+      saveRDS(plot_fit, file=paste0("$prefix", "_viber_best_st_fit_plots.rds"))
+      saveRDS(plot_fit_heuristic, file=paste0("$prefix", "_viber_best_st_heuristic_fit_plots.rds"))
+    } else {
       plot_fit_mixing = plot_mixing_proportions(best_fit)
       plot_fit_mixing_heuristic = plot_mixing_proportions(best_fit_heuristic)
 
-      saveRDS(plot_fit_mixing, file=paste0("$outDir", "viber_best_st_mixing_plots.rds"))
-      saveRDS(plot_fit_mixing_heuristic, file=paste0("$outDir", "viber_best_st_heuristic_mixing_plots.rds"))
+      saveRDS(plot_fit_mixing, file=paste0("$prefix", "_viber_best_st_mixing_plots.rds"))
+      saveRDS(plot_fit_mixing_heuristic, file=paste0("$prefix", "_viber_best_st_heuristic_mixing_plots.rds"))
     }
 
     # Save report plot
@@ -195,9 +202,9 @@ process VIBER {
 
     #report_fig = patchwork::wrap_plots(top_p, bottom_p, design=ifelse(n_samples>2, "AAAB", "AAB"))
     report_fig = ggpubr::ggarrange(top_p, bottom_p, nrow = 2, heights = ifelse(n_samples>2, c(3,1), c(2,1)))
-    saveRDS(report_fig, file=paste0("$outDir", "REPORT_plots_viber.rds"))
-    ggplot2::ggsave(plot=report_fig, filename=paste0("$outDir", "REPORT_plots_viber.pdf"), height=210, width=210, units="mm", dpi = 200)
-    ggplot2::ggsave(plot=report_fig, filename=paste0("$outDir", "REPORT_plots_viber.png"), height=210, width=210, units="mm", dpi = 200)
+    saveRDS(report_fig, file=paste0("$prefix", "_REPORT_plots_viber.rds"))
+    ggplot2::ggsave(plot=report_fig, filename=paste0("$prefix", "_REPORT_plots_viber.pdf"), height=210, width=210, units="mm", dpi = 200)
+    ggplot2::ggsave(plot=report_fig, filename=paste0("$prefix", "_REPORT_plots_viber.png"), height=210, width=210, units="mm", dpi = 200)
 
     """
 }
