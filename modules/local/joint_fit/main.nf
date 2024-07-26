@@ -30,7 +30,7 @@ process JOINT_FIT {
     library(dplyr)
 
     patientID = "$meta.patient"
-    fits = strsplit(x="$mobster_best_fits", ",") %>% unlist()  # list of mobster fitnames
+    fits = strsplit(x="$mobster_best_fits", " ") %>% unlist()  # list of mobster fitnames
 
     check_mutation_id = function(mutations_table) {
       if (!"mutation_id" %in% colnames(mutations_table))
