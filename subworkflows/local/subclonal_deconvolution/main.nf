@@ -166,6 +166,10 @@ workflow SUBCLONAL_DECONVOLUTION {
         input_joint_fit.join(in_join).view()
         rds_join = JOINT_FIT(input_joint_fit.join(in_join))
         rds_join.view()
+    } else {
+     if (params.remove_tail && !params.remove_tail.contains("never")){
+         error "None method for tail deconvolution specified"
+     }
     }
     if (params.tools && params.tools.split(",").contains("viber")){
         VIBER(rds_join)
