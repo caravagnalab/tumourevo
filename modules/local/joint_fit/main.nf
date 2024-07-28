@@ -99,10 +99,10 @@ process JOINT_FIT {
       if (class(obj) == "m_cnaqc") {
         obj_filtered = discard_mutations_from_mCNAqc(obj, muts_to_discard)
 
-        saveRDS(obj_filtered, file = paste0("$prefix","_multi_cnaqc_filtered.rds"))
+        saveRDS(obj_filtered, file = paste0("$prefix","_","$params.remove_tail","_multi_cnaqc_filtered.rds"))
       } else {
         cli::cli_alert_warning("Object of class {class($rds_join)} not supported. Saving the original object.")
-        saveRDS(obj, file = paste0("$prefix","_multi_cnaqc_filtered.rds"))
+        saveRDS(obj, file = paste0("$prefix","_","$params.remove_tail","_multi_cnaqc_filtered.rds"))
       }
     }
 
