@@ -30,7 +30,7 @@ def input_processing(data):
 input_data = input_processing(input_data)
 
 #saving input matrix to txt
-input_data.to_csv('CLL/input_multisample/input_data.txt', sep='\t', index=False, header=True)
+input_data.to_csv('/u/cdslab/kdavydzenka/CLL/input_multisample/input_data.txt', sep='\t', index=False, header=True)
 
 #Install your desired reference genome
 #genInstall.install('GRCh37', rsync=False, bash=True)
