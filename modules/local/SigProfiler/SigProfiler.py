@@ -5,7 +5,7 @@ import os
 import shutil
 from SigProfilerExtractor import sigpro as sig
 from SigProfilerMatrixGenerator.scripts import SigProfilerMatrixGeneratorFunc as matGen
-from SigProfilerMatrixGenerator import install as genInstall
+#from SigProfilerMatrixGenerator import install as genInstall
 
 #create directory
 #path = '/orfeo/scratch/cdslab/kdavydzenka/SIGPROFILER/'
@@ -33,7 +33,7 @@ input_data = input_processing(input_data)
 input_data.to_csv('CLL/input_multisample/input_data.txt', sep='\t', index=False, header=True)
 
 #Install your desired reference genome
-genInstall.install('GRCh37', rsync=False, bash=True)
+#genInstall.install('GRCh37', rsync=False, bash=True)
 
 
 #mutation's counts matrix generation
@@ -50,7 +50,7 @@ output_path = "output/SBS/CLL.SBS96.all"
 # Perform model fitting
 sig.sigProfilerExtractor(input_type = "matrix", 
                          output = "results", 
-                         input_data = input_path+output_path,  
+                         input_data = input_path_sigprof+output_path,  
                          exome = False,
                          minimum_signatures = 1,
                          maximum_signatures = 10,
