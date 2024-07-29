@@ -9,6 +9,8 @@ process PYCLONEVI {
 
     output:
       tuple val(meta), path("*_cluster_table.csv"), emit: ctree_input
+      tuple val(meta), path("*.tsv)
+      
       // tuple val(meta), path("${outDir_ctree}/ctree_input_pyclonevi.csv"), emit: ctree_input
       tuple val(meta), path("*_all_fits.h5"), emit: pyclone_all_fits
       tuple val(meta), path("*_best_fit.txt"), emit: pyclone_best_fit
