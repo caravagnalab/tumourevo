@@ -1,49 +1,51 @@
 process VCF_PROCESSING {
-    publishDir params.publish_dir, mode: 'copy'
+    tag "$meta.id"
+
+    container "docker://lvaleriani/cnaqc:dev1"
 
     input:
-     tuple val(datasetID), val(patientID), val(sampleID), path(vcfFile)
-
+        tuple val(meta), path(vcf), path(tbi)
+    
     output:
-     tuple val(datasetID), val(patientID), val(sampleID), path("formatter/vcf2CNAqc/$datasetID/$patientID/$sampleID/*.rds"), emit: rds 
+        tuple val(meta), path("*.rds"), emit: rds
+
+    when:
+        task.ext.when == null || task.ext.when
 
     script:
-        def args              = task.ext.args                         ?: ''
+        def args = task.ext.args ?: ''    
+        def prefix = task.ext.prefix ?: "${meta.id}"
         def filter_mutations  = args!='' && args.filter_mutations     ?  "$args.filter_mutations" : ""
 
     """
     #!/usr/bin/env Rscript 
-    
     library(tidyverse)
     library(vcfR)
     
-    res_dir = paste0("formatter/vcf2CNAqc/", "$datasetID", "/", "$patientID", "/", "$sampleID", "/")
-    dir.create(res_dir, recursive = T, showWarnings = F)
-
     source(paste0("$moduleDir", '/parser_vcf.R'))
 
     # Read vcf file
-    vcf = vcfR::read.vcfR("$vcfFile")
+    vcf = vcfR::read.vcfR("$vcf")
 
     # Check from which caller the .vcf has been produced
     source = vcfR::queryMETA(vcf, element = 'source')[[1]]
 
     if (grepl(pattern = 'Mutect', x = source)){
-        calls = parse_Mutect(vcf, sample_id = "$sampleID", filter_mutations = as.logical("$filter_mutations"))
+        calls = parse_Mutect(vcf, tumour_id = "$meta.tumour_sample", normal_id = "$meta.normal_sample", filter_mutations = as.logical("$filter_mutations"))
         
     } else if (grepl(pattern = 'strelka', x = source)){
-        calls = parse_Strelka(vcf, sample_id = "$sampleID", filter_mutations = as.logical("$filter_mutations"))
+        calls = parse_Strelka(vcf, tumour_id = "$meta.tumour_sample", normal_id = "$meta.normal_sample", filter_mutations = as.logical("$filter_mutations"))
     
     } else if (grepl(pattern = 'Platypus', x = source)){
-        calls = parse_Platypus(vcf, sample_id = "$sampleID", filter_mutations = as.logical("$filter_mutations"))
+        calls = parse_Platypus(vcf, tumour_id = "$meta.tumour_sample", normal_id = "$meta.normal_sample", filter_mutations = as.logical("$filter_mutations"))
 
     } else if (grepl(pattern = 'freeBayes', x = source)){
-        calls = parse_Freebayes(vcf, sample_id = "$sampleID", filter_mutations = as.logical("$filter_mutations"))
+        calls = parse_Freebayes(vcf, tumour_id = "$meta.tumour_sample", normal_id = "$meta.normal_sample", filter_mutations = as.logical("$filter_mutations"))
 
     } else {
         stop('Variant Caller not supported.')
     }
 
-    saveRDS(object = calls, file = paste0(res_dir, "VCF.rds"))
+    saveRDS(object = calls, file = paste0("$prefix", "_snv.rds"))
     """
 }

@@ -1,15 +1,20 @@
 process JOIN_POSITIONS {
-    publishDir params.publish_dir, mode: 'copy'
+    tag "$meta.id"
+    container = 'docker://lvaleriani/cnaqc:dev1'
 
     input:
-    tuple val(datasetID), val(patientID), val(sampleID), path(rds), path(vcf_pileup)
-    tuple val(d2), val(p2), val(s2), path(positions)
+    tuple val(meta), path(rds), path(vcf_pileup)
+    tuple val(meta2), path(positions)
  
     output:
 
-    tuple val(datasetID), val(patientID), val(sampleID), path("Lifter/mpileup/$datasetID/$patientID/$sampleID/*.rds"), emit: rds
+    tuple val(meta), path("*.rds"), emit: rds
 
     script:
+    def args = task.ext.args ?: ''
+    def prefix = task.ext.prefix ?: "${meta.id}"
+
+
     """
     #!/usr/bin/env Rscript
 

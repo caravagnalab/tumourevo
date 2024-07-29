@@ -1,8 +1,9 @@
 library(tidyverse)
 library(vcfR)
 
+# adjust tumour and normal sample id!!!!!
 # to add VEP
-parse_FreeBayes = function(vcf, sample_id, filter_mutations = FALSE){
+parse_FreeBayes = function(vcf, tumour_id, normal_id, filter_mutations = FALSE){
   tb = vcfR::vcfR2tidy(vcf)
   
   gt_field = tb$gt %>% 
@@ -90,7 +91,7 @@ parse_FreeBayes = function(vcf, sample_id, filter_mutations = FALSE){
 }
 
 
-parse_Mutect = function(vcf, sample_id, filter_mutations = FALSE){
+parse_Mutect = function(vcf, tumour_id, normal_id, filter_mutations = FALSE){
     # Transform vcf to tidy 
     tb = vcfR::vcfR2tidy(vcf)
 
@@ -198,7 +199,7 @@ retrieve_ref_alt = function(row){
   ref_alt
 }
 
-parse_Strelka = function(vcf, sample_id, filter_mutations = FALSE){
+parse_Strelka = function(vcf, tumour_id, normal_id, filter_mutations = FALSE){
   tb = vcfR::vcfR2tidy(vcf)
   gt_field = tb$gt %>% rename(sample = Indiv)  
   samples_list = gt_field$sample %>% unique
@@ -285,7 +286,7 @@ parse_Strelka = function(vcf, sample_id, filter_mutations = FALSE){
 }
 
 
-parse_Platypus = function(vcf, sample_id, filter_mutations = FALSE){
+parse_Platypus = function(vcf, tumour_id, normal_id, filter_mutations = FALSE){
     tb = vcfR::vcfR2tidy(vcf)
 
     gt_field = tb$gt %>% 

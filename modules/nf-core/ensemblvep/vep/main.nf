@@ -6,7 +6,7 @@ process ENSEMBLVEP_VEP {
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/ensembl-vep:111.0--pl5321h2a3209d_0' :
         'biocontainers/ensembl-vep:111.0--pl5321h2a3209d_0' }"
-
+    
     input:
     tuple val(meta), path(vcf), path(custom_extra_files)
     val   genome
@@ -33,6 +33,8 @@ process ENSEMBLVEP_VEP {
     def prefix = task.ext.prefix ?: "${meta.id}"
     def dir_cache = cache ? "\${PWD}/${cache}" : "/.vep"
     def reference = fasta ? "--fasta $fasta" : ""
+
+    
     """
     vep \\
         -i $vcf \\

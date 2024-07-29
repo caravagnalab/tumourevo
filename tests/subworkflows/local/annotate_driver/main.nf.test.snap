@@ -1,0 +1,23 @@
+{
+    "Should run without failures": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "idProva",
+                            "tumour_sample": "Set6_42",
+                            "cancer_type": "PANCANCER"
+                        },
+                        "idProva_driver.rds:md5,476b185bad29cbcfef6173103c3e6c6a"
+                    ]
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.0",
+            "nextflow": "23.10.1"
+        },
+        "timestamp": "2024-07-23T10:58:01.890217858"
+    }
+}

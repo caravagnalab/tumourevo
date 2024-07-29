@@ -1,19 +1,21 @@
 process JOIN_CNAQC {
-  publishDir params.publish_dir, mode: 'copy'
+  tag "$meta.id"
+  container = 'docker://lvaleriani/cnaqc:dev1'
 
   input:
     
-    tuple val(datasetID), val(patientID), val(sampleID), path(rds_list, stageAs: '*.rds')
+    tuple val(meta), path(rds_list, stageAs: '*.rds'), val(tumour_samples)
   
   output:
 
-    tuple val(datasetID), val(patientID), val (sampleID), path("QC/join_CNAqc/$datasetID/$patientID/*.rds"), emit: rds
+    tuple val(meta), path("*.rds"), val(tumour_samples), emit: rds
 
   script:
 
-    def args                                    = task.ext.args                                             ?: ''
-    def qc_filter                               = args!='' && args.qc_filter                                ?  "$args.qc_filter" : ""
-    def keep_original                           = args!='' && args.keep_original                            ?  "$args.keep_original" : ""
+    def args                                = task.ext.args    
+    def prefix                              = task.ext.prefix                                       ?: "${meta.id}"                                      ?: ''
+    def qc_filter                           = args!='' && args.qc_filter                            ?  "$args.qc_filter" : ""
+    def keep_original                       = args!='' && args.keep_original                        ?  "$args.keep_original" : ""
 
     """
     #!/usr/bin/env Rscript
@@ -21,10 +23,7 @@ process JOIN_CNAQC {
     library(tidyverse)
     library(CNAqc)
     
-    res_dir = paste0("QC/join_CNAqc/", "$datasetID", "/", "$patientID", "/")
-    dir.create(res_dir, recursive = TRUE)
-    
-    samples = substr("$sampleID", 2, nchar("$sampleID")-1)
+    samples = substr("$tumour_samples", 2, nchar("$tumour_samples")-1)
     samples = strsplit(samples, ", ")[[1]]
 
     result = lapply(strsplit("$rds_list", " ")[[1]], FUN = function(file){
@@ -40,6 +39,6 @@ process JOIN_CNAQC {
                             QC_filter = as.logical("$qc_filter"), 
                             keep_original = as.logical("$keep_original"), 
                             discard_private = FALSE)
-    saveRDS(object = out, file = paste0(res_dir, "multi_cnaqc.rds"))
+    saveRDS(object = out, file = paste0("$prefix", "_multi_cnaqc.rds"))
     """
 }

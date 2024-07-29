@@ -1,0 +1,36 @@
+nextflow_workflow {
+
+    name "Test Workflow DRIVER_ANNOTATION"
+    script "subworkflows/local/annotate_driver/main.nf"
+    workflow "DRIVER_ANNOTATION"
+
+    test("Should run without failures") {
+
+        when {
+            params {
+                // define parameters here. Example:
+                // outdir = "tests/results"
+            }
+            workflow {
+                """
+                meta = [
+                    id : "idProva",
+                    tumour_sample: "Set6_42",
+                    cancer_type: "PANCANCER" 
+                ]
+                
+                snv_RDS = file("${projectDir}/results/formatter/vcf2cnaqc/MSeq/Set06/Set6_42/MSeq_Set06_Set6_42_snv.rds", checkIfExists: true)
+                // Create a tuple with metadata and file path
+                input[0] = tuple(meta, snv_RDS)
+                """
+            }
+        }
+
+        then {
+            assert workflow.success
+            assert snapshot(workflow.out).match()
+        }
+
+    }
+
+}

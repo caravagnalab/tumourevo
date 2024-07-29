@@ -1,8 +1,8 @@
 library(tidyverse)
 
-parse_Sequenza = function(sample, run){
-    segments_file = paste0(run, '/', sample, '.smoothedSegs.txt') #_segments.txt')
-    purity_file = paste0(run, '/', sample, '_confints_CP.txt')
+parse_Sequenza = function(segments_file, extra_file){
+    #segments_file = paste0(run, '/', sample, '.smoothedSegs.txt') #_segments.txt')
+    #purity_file = paste0(run, '/', sample, '_confints_CP.txt')
 
     # Extract the segments information 
     segments = readr::read_tsv(segments_file, col_types = readr::cols()) %>%
@@ -14,7 +14,7 @@ parse_Sequenza = function(sample, run){
                         minor = B) %>%
                         dplyr::select(chr, from, to, Major, minor, dplyr::everything())
 
-    solutions = readr::read_tsv(purity_file, col_types = readr::cols())
+    solutions = readr::read_tsv(extra_file, col_types = readr::cols())
     purity = solutions$cellularity[2]
     ploidy = solutions$ploidy.estimate[2]
               
@@ -22,9 +22,9 @@ parse_Sequenza = function(sample, run){
 }
 
 
-parse_ASCAT = function(sample, run){
-  segments_file = paste0(run, '/', sample, '.segments.txt')
-  purity_file = paste0(run, '/', sample, '.purityploidy.txt')
+parse_ASCAT = function(segments_file, extra_file){
+  #segments_file = paste0(run, '/', sample, '.segments.txt')
+  #purity_file = paste0(run, '/', sample, '.purityploidy.txt')
   
   # Extract the segments information 
   segments = readr::read_tsv(segments_file, col_types = readr::cols()) %>%
@@ -35,7 +35,7 @@ parse_ASCAT = function(sample, run){
       Major = nMajor,
       minor = nMinor) %>%
     dplyr::select(chr, from, to, Major, minor)
-  solutions = readr::read_tsv(purity_file, col_types = readr::cols())
+  solutions = readr::read_tsv(extra_file, col_types = readr::cols())
   purity = solutions$AberrantCellFraction
   ploidy = solutions$Ploidy
   

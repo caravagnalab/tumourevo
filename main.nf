@@ -9,8 +9,6 @@
 ----------------------------------------------------------------------------------------
 */
 
-*/
-
 nextflow.enable.dsl = 2
 
 /*
@@ -19,8 +17,8 @@ nextflow.enable.dsl = 2
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { TUMOUREVO } from '${baseDir}/workflows/tumourevo'
-
+include { TUMOUREVO } from './workflows/tumourevo'
+include { samplesheetToList } from 'plugin/nf-schema'
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    PARSE INPUT FILE
@@ -29,19 +27,8 @@ include { TUMOUREVO } from '${baseDir}/workflows/tumourevo'
 
 // Initialize fasta file with meta map:
 fasta = params.fasta ? Channel.fromPath(params.fasta).map{ it -> [ [id:it.baseName], it ] }.collect() : Channel.empty()
+input = params.input ? Channel.fromList(samplesheetToList(params.input, "assets/schema_input.json")) : Channel.empty()
 
-input_vcf = Channel.fromPath(params.input).
-    splitCsv(header: true).
-    map {
-      row ->
-      meta = row.subMap('dataset', 'patient', 'tumour_sample', 'normal_sample', 'cancer_type', 'cnv_caller')
-      [meta, [
-          file(row.vcf),
-          file(row.vcf_tbi),
-          file(row.tumour_bam)
-          file(row.tumour_bai) 
-      ]]
-    }
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -55,17 +42,13 @@ input_vcf = Channel.fromPath(params.input).
  workflow NFCORE_TUMOUREVO {
 
     take:
-    input_vcf
-    input_cna
-    cancer_type
+    input
     fasta
 
     main:
-
+    
     TUMOUREVO (
-        input_vcf,
-        input_cna
-        cancer_type
+        input,
         fasta
     )
 
@@ -80,9 +63,7 @@ workflow {
     // WORKFLOW: Run main workflow
     //
     NFCORE_TUMOUREVO(
-        input_vcf,
-        input_cna
-        cancer_type
+        input,
         fasta
     )
 
