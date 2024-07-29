@@ -1,0 +1,95 @@
+{
+    "Should run without failures": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "idProva",
+                            "tumour_sample": "Set6_42",
+                            "cancer_type": "PANCANCER"
+                        },
+                        "idProva_qc.rds:md5,ba87717779c4517929b630128f33df1e"
+                    ]
+                ],
+                "1": [
+                    [
+                        {
+                            "id": "idProva",
+                            "tumour_sample": "Set6_42",
+                            "cancer_type": "PANCANCER"
+                        },
+                        "idProva_data_plot.rds:md5,369fd3d42ba038e9c20a663e9b8af980",
+                        "idProva_qc_plot.rds:md5,f8ce8df8b511d4a5cab603ad1a868883"
+                    ]
+                ],
+                "2": [
+                    [
+                        {
+                            "id": "idProva",
+                            "tumour_sample": "Set6_42",
+                            "cancer_type": "PANCANCER"
+                        },
+                        "idProva_data.pdf:md5,6811f5710ccb50183a6cda5b2384d10d"
+                    ]
+                ],
+                "3": [
+                    [
+                        {
+                            "id": "idProva",
+                            "tumour_sample": "Set6_42",
+                            "cancer_type": "PANCANCER"
+                        },
+                        "idProva_qc.pdf:md5,a79abb6509a88b0176fce049201f50cd"
+                    ]
+                ],
+                "plot_pdf_data": [
+                    [
+                        {
+                            "id": "idProva",
+                            "tumour_sample": "Set6_42",
+                            "cancer_type": "PANCANCER"
+                        },
+                        "idProva_data.pdf:md5,6811f5710ccb50183a6cda5b2384d10d"
+                    ]
+                ],
+                "plot_pdf_qc": [
+                    [
+                        {
+                            "id": "idProva",
+                            "tumour_sample": "Set6_42",
+                            "cancer_type": "PANCANCER"
+                        },
+                        "idProva_qc.pdf:md5,a79abb6509a88b0176fce049201f50cd"
+                    ]
+                ],
+                "plot_rds": [
+                    [
+                        {
+                            "id": "idProva",
+                            "tumour_sample": "Set6_42",
+                            "cancer_type": "PANCANCER"
+                        },
+                        "idProva_data_plot.rds:md5,369fd3d42ba038e9c20a663e9b8af980",
+                        "idProva_qc_plot.rds:md5,f8ce8df8b511d4a5cab603ad1a868883"
+                    ]
+                ],
+                "qc_rds": [
+                    [
+                        {
+                            "id": "idProva",
+                            "tumour_sample": "Set6_42",
+                            "cancer_type": "PANCANCER"
+                        },
+                        "idProva_qc.rds:md5,ba87717779c4517929b630128f33df1e"
+                    ]
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.0",
+            "nextflow": "23.10.1"
+        },
+        "timestamp": "2024-07-23T12:26:09.4748766"
+    }
+}

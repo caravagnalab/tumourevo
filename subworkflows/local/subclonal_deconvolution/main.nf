@@ -133,7 +133,10 @@ include { MOBSTERh } from "../../../modules/local/mobsterh/main"
 // include { MOBSTERh as MOBSTERh_MULTI } from "../../../modules/local/mobsterh/main"
 // include { FORMATTER as FORMATTER_RDS_SINGLE} from "../../../subworkflows/local/formatter/main"
 // include { FORMATTER as FORMATTER_RDS_MULTI} from "../../../subworkflows/local/formatter/main"
-// include { JOINT_FIT } from "../../../modules/local/joint_fit/main"
+include { JOINT_FIT } from "../../../modules/local/joint_fit/main"
+include { VIBER } from "../../../modules/local/viber/main"
+include { PYCLONEVI } from "../../../modules/local/pyclonevi/main"
+include { FORMATTER } from "../../../subworkflows/local/formatter/main"
 
 workflow SUBCLONAL_DECONVOLUTION {
     take: 
@@ -149,18 +152,32 @@ workflow SUBCLONAL_DECONVOLUTION {
     ctree_mobster_pdf = null
     pyclone_table = null
 
-    // check the number of samples in meta
-    // if n=1 then I do not need to transpose
-    // else (n>1) then I do need to transpose only if mobster in tools
-
-
     if (params.tools && params.tools.split(",").contains("mobster")){
         joinCNAqc = rds_join.transpose().map{ meta, rds, sample -> 
             meta = meta + ['tumour_sample': sample, 'id':"${meta.dataset}_${meta.patient}_${sample}"]
             [meta, rds]}
         MOBSTERh(joinCNAqc)
+        in_join = MOBSTERh.out.mobster_best_rds.map{ meta, rds -> 
+            meta = meta + [id: "${meta.dataset}_${meta.patient}"]
+            sample = meta.tumour_sample
+            [meta.subMap('dataset', 'patient', 'id'), rds, sample]}
+            | groupTuple
+        input_joint_fit = rds_join.map{meta, rds, sample-> [meta, rds]}
+        input_joint_fit.join(in_join).view()
+        rds_join = JOINT_FIT(input_joint_fit.join(in_join))
+        rds_join.view()
+    } else {
+     if (params.remove_tail && !params.remove_tail.contains("never")){
+         error "None method for tail deconvolution specified"
+     }
     }
-
+    if (params.tools && params.tools.split(",").contains("viber")){
+        VIBER(rds_join)
+    }
+    if (params.tools && params.tools.split(",").contains("pyclone-vi")){
+        FORMATTER(rds_join, "rds")
+        PYCLONEVI(FORMATTER.out)
+    }
 
     emit:
     pyclone_fits

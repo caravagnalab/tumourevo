@@ -1,25 +1,17 @@
 process PYCLONEVI {
     tag "$meta.id"
     container = 'https://depot.galaxyproject.org/singularity/pyclone-vi%3A0.1.3--pyhca03a8a_0'
-    // publishDir (
-    //   params.publish_dir,
-    //   mode: "copy"
-    // )
                
     input:
 
-      tuple val(meta), path(joint_table)
+      tuple val(meta), path(rds_join), val(tumour_samples)
       // tuple val(datasetID), val(patientID), val(sampleID), path(joint_table) // from the formatter output
 
     output:
-      // tuple val(meta), path("*_ctree_input_pyclonevi.csv"), emit: ctree_input
-      tuple val(meta), path("${outDir_ctree}/ctree_input_pyclonevi.csv"), emit: ctree_input
-      tuple val(meta), path("${outDir}/all_fits.h5"), emit: pyclone_all_fits
-      tuple val(meta), val(patientID), val(sampleID), path("${outDir}/best_fit.txt"), emit: pyclone_best_fit
-
-      // tuple val(datasetID), val(patientID), val(sampleID), path("${outDir_ctree}/ctree_input_pyclonevi.csv"), emit: ctree_input
-      // tuple val(datasetID), val(patientID), val(sampleID), path("${outDir}/all_fits.h5"), emit: pyclone_all_fits
-      // tuple val(datasetID), val(patientID), val(sampleID), path("${outDir}/best_fit.txt"), emit: pyclone_best_fit
+      tuple val(meta), path("*_cluster_table.csv"), emit: ctree_input
+      // tuple val(meta), path("${outDir_ctree}/ctree_input_pyclonevi.csv"), emit: ctree_input
+      tuple val(meta), path("*_all_fits.h5"), emit: pyclone_all_fits
+      tuple val(meta), path("*_best_fit.txt"), emit: pyclone_best_fit
     
     script:
       def args = task.ext.args ?: ''
@@ -28,36 +20,35 @@ process PYCLONEVI {
       def density_arg                    = args.density                     ?  "$args.density" : ""
       def n_grid_point_arg                    = args.n_grid_point                     ?  "$args.n_grid_point" : ""
       def n_restarts_arg                    = args.n_restarts                     ?  "$args.n_restarts" : ""
-      def mode                    = args.mode                     ?  "$args.mode" : ""
+      // def mode                    = args.mode                     ?  "$args.mode" : ""
+      sampleID_string = tumour_samples.join(" ")
 
-      if (mode == "singlesample") {
-        sampleID_string = sampleID
-        outDir = "subclonal_deconvolution/pyclonevi/$datasetID/$patientID/$sampleID"
-        outDir_ctree = "subclonal_deconvolution/ctree/$datasetID/$patientID/$sampleID"
-      } else if (mode == "multisample"){
-        if (!(sampleID instanceof String)) {
-          sampleID_string = sampleID.join(" ")
-        } else {
-          sampleID_string = sampleID
-        }
-        outDir = "subclonal_deconvolution/pyclonevi/$datasetID/$patientID"
-        outDir_ctree = "subclonal_deconvolution/ctree/$datasetID/$patientID"
-      }
+      // if (mode == "singlesample") {
+        // sampleID_string = sampleID
+        // outDir = "subclonal_deconvolution/pyclonevi/$datasetID/$patientID/$sampleID"
+        // outDir_ctree = "subclonal_deconvolution/ctree/$datasetID/$patientID/$sampleID"
+      // } else if (mode == "multisample"){
+        // if (!(sampleID instanceof String)) {
+          // sampleID_string = sampleID.join(" ")
+        // } else {
+          // sampleID_string = sampleID
+        // }
+        // outDir = "subclonal_deconvolution/pyclonevi/$datasetID/$patientID"
+        // outDir_ctree = "subclonal_deconvolution/ctree/$datasetID/$patientID"
+      // }
 
-      all_fits = "${outDir}/all_fits.h5"
-      best_fit = "${outDir}/best_fit.txt"
-      path_ctree = "${outDir_ctree}/ctree_input_pyclonevi.csv"
-      pyclone_joint = "${outDir}/pyclone_joint.tsv"
+      // all_fits = "${outDir}/all_fits.h5"
+      // best_fit = "${outDir}/best_fit.txt"
+      // path_ctree = "${outDir_ctree}/ctree_input_pyclonevi.csv"
+      // pyclone_joint = "${outDir}/pyclone_joint.tsv"
 
       """
 
-      mkdir -p $outDir
-      mkdir -p $outDir_ctree
       
       # format the input table in order to be pyclone compliant
-      python3 $moduleDir/pyclone_utils.py create_pyclone_input $joint_table $patientID $outDir/pyclone_input_all_samples.tsv
+      python3 $moduleDir/pyclone_utils.py create_pyclone_input $rds_join $meta.patient ${prefix}_pyclone_input_all_samples.tsv
 
-      colnames=\$(head -n 1 $outDir/pyclone_input_all_samples.tsv)
+      colnames=\$(head -n 1 ${prefix}_pyclone_input_all_samples.tsv)
 
       column_number=\$(echo -e "\$colnames" | awk -v col_name="sample_id" 'BEGIN { FS = "\t" } {
           for (i = 1; i <= NF; i++) {
@@ -69,15 +60,15 @@ process PYCLONEVI {
           exit 1  # Exit with error if column not found
       }')
 
-      echo -e "\$colnames" > $outDir/pyclone_input.tsv
+      echo -e "\$colnames" > ${prefix}_pyclone_input.tsv
       for i in $sampleID_string;
-        do awk '\$'\$column_number' == "'"\$i"'"' $outDir/pyclone_input_all_samples.tsv >> $outDir/pyclone_input.tsv;
+        do awk '\$'\$column_number' == "'"\$i"'"' ${prefix}_pyclone_input_all_samples.tsv >> ${prefix}_pyclone_input.tsv;
       done
       
-      pyclone-vi fit -i $outDir/pyclone_input.tsv -o $all_fits -c $n_cluster_arg -d $density_arg --num-grid-points $n_grid_point_arg --num-restarts $n_restarts_arg
-      pyclone-vi write-results-file -i $all_fits -o $best_fit
+      pyclone-vi fit -i ${prefix}_pyclone_input.tsv -o ${prefix}_all_fits.h5 -c $n_cluster_arg -d $density_arg --num-grid-points $n_grid_point_arg --num-restarts $n_restarts_arg
+      pyclone-vi write-results-file -i ${prefix}_all_fits.h5 -o ${prefix}_best_fit.txt
 
-      python3 $moduleDir/pyclone_ctree.py --joint $outDir/pyclone_input.tsv --best_fit $best_fit --ctree_input $path_ctree
+      python3 $moduleDir/pyclone_ctree.py --joint ${prefix}_pyclone_input.tsv --best_fit ${prefix}_best_fit.txt --ctree_input ${prefix}_cluster_table.csv
 
       """
 }
