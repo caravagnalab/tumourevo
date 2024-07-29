@@ -1,15 +1,15 @@
 nextflow_process {
 
-    name "Test Process VCF_PROCESSING"
-    script "modules/local/vcf2CNAqc/main.nf"
-    process "VCF_PROCESSING"
+    name "Test Process CNAQC"
+    script "modules/local/CNAqc/main.nf"
+    process "CNAQC"
 
     test("Should run without failures") {
 
         when {
             params {
                 // define parameters here. Example:
-                // meta = "tests/results"
+                // outdir = "tests/results"
             }
             process {
                 """
@@ -19,10 +19,14 @@ nextflow_process {
                     cancer_type: "PANCANCER" 
                 ]
                 
-                vcf = file("${projectDir}/results/variant_annotation/vep/MSeq/Set06/Set6_42/MSeq_Set06_Set6_42.vcf.gz", checkIfExists: true)
-                tbi = file("${projectDir}/results/variant_annotation/vep/MSeq/Set06/Set6_42/MSeq_Set06_Set6_42.vcf.gz.tbi", checkIfExists: true)
+                // From cna2cnaqc
+                cna_rds = file("${projectDir}/results/formatter/cna2cnaqc/MSeq/Set06/Set6_42/MSeq_Set06_Set6_42_cna.rds", checkIfExists: true)
+                // From vcf2cnaqc
+                snv_rds = file("${projectDir}/results/formatter/vcf2cnaqc/MSeq/Set06/Set6_42/MSeq_Set06_Set6_42_snv.rds", checkIfExists: true)
+                
                 // Create a tuple with metadata and file path
-                input[0] = tuple(meta, vcf, tbi)
+                input[0] = tuple(meta, cna_rds)
+                input[1] = tuple(meta, snv_rds)
                 """
             }
         }
