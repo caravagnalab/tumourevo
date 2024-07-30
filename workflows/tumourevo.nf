@@ -67,15 +67,16 @@ workflow TUMOUREVO {
 
     out_lifter = LIFTER(join_input.to_lift, fasta) 
     rds_input = join_input.multisample.map{ meta, rds, bam, bai -> 
-            [meta, rds]
+            [meta.subMap('dataset', 'patient', 'id', 'normal_sample', 'tumour_sample'), rds]
             }
 
     vcf_rds = rds_input.concat(out_lifter)
     annotation = DRIVER_ANNOTATION(vcf_rds)
+
     cna_out = FORMATTER_CNA.out.map{ meta, rds -> 
         [meta.subMap('dataset', 'patient', 'id', 'normal_sample', 'tumour_sample'), rds]
         }
-        
+
     in_cnaqc = cna_out.join(annotation)
     QC(in_cnaqc)
     //SUBCLONAL_DECONVOLUTION(QC.out.rds_join)
