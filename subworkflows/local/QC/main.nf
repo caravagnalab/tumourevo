@@ -12,9 +12,9 @@ workflow QC {
         input
 
     main:
-
-        // TINC(cna, vcf)
+        // TINC(input)
         CNAQC(input)
+
         in_join = CNAQC.out.qc_rds.map{ meta, rds -> 
             meta = meta + [id: "${meta.dataset}_${meta.patient}"]
             sample = meta.tumour_sample
@@ -31,6 +31,6 @@ workflow QC {
         // plot_rds_tinc = TINC.out.plot_rds
         // rds_tinc = TINC.out.rds
         // pdf_tinc = TINC.out.plot_pdf
-        
+
         rds_join = JOIN_CNAQC.out.rds
 }
