@@ -4,8 +4,7 @@ process CNAQC {
 
   input:
     
-    tuple val(meta), path(cna_rds)
-    tuple val(meta), path(snv_rds)
+    tuple val(meta), path(cna_rds), path(snv_rds)
   
   output:
 
