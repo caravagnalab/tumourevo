@@ -1,0 +1,5 @@
+nextflow_process {
+    name 'Test process DNDSCV'
+    script "modules/local/dndscv/main.nf"
+    process 'DNDSCV'
+}

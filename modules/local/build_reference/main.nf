@@ -1,14 +1,14 @@
 process BUILD_REFERENCE {
   tag "$meta.id"
-  container = '<container_path>'
+  container = 'quay.io/cellgeni/cellgeni-jupyter'
 
   input:
     
-    tuple val(meta)
+    tuple val(meta), path(cds), path(genome)
   
   output:
 
-    tuple val(meta), path(REFERENCE), emit: dnds_rds
+    tuple val(meta), path("reference.rda"), emit: dnds_rds
 
   script:
 
@@ -18,6 +18,13 @@ process BUILD_REFERENCE {
     """
     #!/usr/bin/env Rscript
 
-
+    library(dndscv)
+    print(dir())
+    buildref(
+      cdsfile="$cds", 
+      genomefile="$genome", 
+      outfile = "reference.rda", 
+      excludechrs="MT"
+    )
     """
 }

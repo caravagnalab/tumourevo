@@ -1,6 +1,6 @@
 process DNDSCV {
   tag "$meta.id"
-  container = '<container_path>'
+  container = 'quay.io/cellgeni/cellgeni-jupyter'
 
   input:
     
@@ -18,7 +18,11 @@ process DNDSCV {
     """
     #!/usr/bin/env Rscript
 
+    library(stringr)
     library(dndscv)
+
+    input <- readRDS($snv_rds)
+    sample_id <- input["${meta.tumour_sample}"]["sample"]
 
     """
 }
