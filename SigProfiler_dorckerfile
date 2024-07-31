@@ -1,0 +1,25 @@
+# add the platform to avoid problems related to apple silicon processors
+FROM --platform=linux/amd64 ubuntu:latest
+
+ENV DEBIAN_FRONTEND=noninteractive
+ARG USER_ID=root
+ENV USER_ID $USER_ID
+
+RUN  apt-get update \
+  && apt-get install -y wget \
+  && rm -rf /var/lib/apt/lists/*
+
+
+## Change user to $USER_ID
+USER $USER_ID
+WORKDIR /home/$USER_ID
+ENV HOME /home/$USER_ID
+
+## Git install
+RUN apt-get -y update
+RUN apt-get -y install git
+
+## Download SigProfilerExtractor
+git clone https://github.com/AlexandrovLab/SigProfilerExtractor.git
+cd SigProfilerExtractor
+pip install .

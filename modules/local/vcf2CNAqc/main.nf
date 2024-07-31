@@ -15,7 +15,8 @@ process VCF_PROCESSING {
     script:
         def args = task.ext.args ?: ''    
         def prefix = task.ext.prefix ?: "${meta.id}"
-        def filter_mutations  = args!='' && args.filter_mutations     ?  "$args.filter_mutations" : ""
+        //def filter_mutations = args!='' && args.filter_mutations ?  "$args.filter_mutations" : ""
+        def filter_mutations = args.filter_mutations ? "$args.filter_mutations": "NULL"
 
     """
     #!/usr/bin/env Rscript 
@@ -40,7 +41,7 @@ process VCF_PROCESSING {
         calls = parse_Platypus(vcf, tumour_id = "$meta.tumour_sample", normal_id = "$meta.normal_sample", filter_mutations = as.logical("$filter_mutations"))
 
     } else if (grepl(pattern = 'freeBayes', x = source)){
-        calls = parse_Freebayes(vcf, tumour_id = "$meta.tumour_sample", normal_id = "$meta.normal_sample", filter_mutations = as.logical("$filter_mutations"))
+        calls = parse_FreeBayes(vcf, tumour_id = "$meta.tumour_sample", normal_id = "$meta.normal_sample", filter_mutations = as.logical("$filter_mutations"))
 
     } else {
         stop('Variant Caller not supported.')

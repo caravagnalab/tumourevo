@@ -9,13 +9,12 @@ include { JOIN_CNAQC } from '../../../modules/local/join_CNAqc/main'
 
 workflow QC {
     take: 
-        cna
-        vcf
+        input
 
     main:
+        // TINC(input)
+        CNAQC(input)
 
-        TINC(cna, vcf)
-        CNAQC(cna, vcf)
         in_join = CNAQC.out.qc_rds.map{ meta, rds -> 
             meta = meta + [id: "${meta.dataset}_${meta.patient}"]
             sample = meta.tumour_sample
@@ -29,9 +28,9 @@ workflow QC {
         plot_cnaqc_data = CNAQC.out.plot_pdf_data
         plot_cnaqc_qc = CNAQC.out.plot_pdf_qc
 
-        plot_rds_tinc = TINC.out.plot_rds
-        rds_tinc = TINC.out.rds
-        pdf_tinc = TINC.out.plot_pdf
-        
+        // plot_rds_tinc = TINC.out.plot_rds
+        // rds_tinc = TINC.out.rds
+        // pdf_tinc = TINC.out.plot_pdf
+
         rds_join = JOIN_CNAQC.out.rds
 }
