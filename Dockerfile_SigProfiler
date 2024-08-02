@@ -1,0 +1,80 @@
+# add the platform to avoid problems related to apple silicon processors
+
+FROM --platform=linux/arm64 ubuntu:latest
+
+ENV DEBIAN_FRONTEND=noninteractive
+ARG USER_ID=root
+ENV USER_ID $USER_ID
+
+RUN  apt-get update \
+  && apt-get install -y wget \
+  && rm -rf /var/lib/apt/lists/*
+
+
+## Change user to $USER_ID
+USER $USER_ID
+
+# Set the working directory in the container
+WORKDIR /home/$USER_ID
+ENV HOME /home/$USER_ID
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+  build-essential \
+  libgit2-dev \
+  libssl-dev \
+  libcurl4-openssl-dev \
+  libfontconfig1-dev \
+  zlib1g-dev \
+  libharfbuzz-dev \
+  libfribidi-dev  \
+  libfreetype6-dev \
+  libpng-dev \
+  libtiff5-dev \
+  libjpeg-dev \
+  libxml2-dev \
+  libbz2-dev \
+  liblapack-dev \
+  ca-certificates \
+  gcc \
+  cmake
+
+## Install ANACONDA for Linux
+ENV ANACONDA_PATH /home/$USER_ID/anaconda3
+ENV ANACONDA_INSTALLER Anaconda3-2024.06-1-Linux-aarch64.sh
+
+#Add the Anaconda bin directory to the system PATH
+ENV LD_LIBRARY_PATH $ANACONDA_PATH/lib
+ENV PATH $ANACONDA_PATH/bin:$PATH
+
+
+RUN mkdir /home/root/download && cd /home/root/download && \
+  wget https://repo.anaconda.com/archive/$ANACONDA_INSTALLER -nv -q
+
+
+#Install Anaconda by running the installer script
+RUN /bin/bash ~/download/$ANACONDA_INSTALLER -b
+
+
+RUN conda update --yes conda && \
+  conda update --yes anaconda && \
+  conda update --yes --all && \
+  conda clean --yes --all && \
+  conda init bash
+
+RUN conda install -c conda-forge libstdcxx-ng
+
+## create a conda env
+RUN conda create -n sigprofiler python=3.12 -y
+RUN . $ANACONDA_PATH/bin/activate sigprofiler && \
+  conda install pip
+
+RUN pip install pandas
+RUN pip install SigProfilerMatrixGenerator
+RUN pip install SigProfilerExtractor
+
+## Set writable permissions
+RUN chmod -R ugo+rwx /home/root/
+
+## Install genome
+RUN SigProfilerMatrixGenerator install GRCh37
+RUN SigProfilerMatrixGenerator install GRCh38
