@@ -1,6 +1,6 @@
 process BUILD_REFERENCE {
   tag "$meta.id"
-  container = 'quay.io/cellgeni/cellgeni-jupyter'
+  container = 'docker://lvaleriani/cnaqc:dev1'
 
   input:
     

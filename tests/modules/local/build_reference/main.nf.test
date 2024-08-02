@@ -1,29 +1,30 @@
 nextflow_process {
-    name 'Test process BUILD_REFERENCE'
-    script "modules/local/build_reference/main.nf"
-    process 'BUILD_REFERENCE'
-    // temporary override for testing
-    config 'tests/modules/local/build_reference/test.config'
-    
-    test("Should run without failures") {
-        when {
-            process {
-                """
-                meta = [
-                    id : "idProva",
-                    tumour_sample: "Set6_42",
-                    cancer_type: "PANCANCER" 
-                ]
+  name 'Test process BUILD_REFERENCE'
+  script "modules/local/build_reference/main.nf"
+  process 'BUILD_REFERENCE'
 
-                cds_table = file('/home/davide.rambaldi/BioMart_human_GRCh37_chr3_segment.txt')
-                genome_fasta = file('/home/davide.rambaldi/chr3_segment.fa')
-                input[0] = tuple(meta, cds_table, genome_fasta)
-                """
-            }
-        }
+  // FIXME temporary override for testing
+  config 'tests/modules/local/build_reference/test.config'
+  
+  test("Should run without failures") {
+    when {
+      process {
+        """
+        meta = [
+            id : "idProva",
+            tumour_sample: "Set6_42",
+            cancer_type: "PANCANCER" 
+        ]
 
-        then {
-            assert process.success
-        }
+        cds_table = file(params.testdata_base_path + '/DNDSCV/BUILD_REFERENCE/BioMart_human_GRCh37_chr3_segment.txt', checkIfExists: true)
+        genome_fasta = file(params.testdata_base_path + '/DNDSCV/BUILD_REFERENCE/chr3_segment.fa', checkIfExists: true)
+        input[0] = tuple(meta, cds_table, genome_fasta)
+        """
+      }
     }
+
+    then {
+      assert process.success
+    }
+  }
 }
