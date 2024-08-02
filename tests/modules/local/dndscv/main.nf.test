@@ -1,5 +1,30 @@
 nextflow_process {
-    name 'Test process DNDSCV'
-    script "modules/local/dndscv/main.nf"
-    process 'DNDSCV'
+  name 'Test process DNDSCV'
+  script "modules/local/dndscv/main.nf"
+  process 'DNDSCV'
+  // temporary override for testing
+  config 'tests/modules/local/dndscv/test.config'
+  
+  test("Should run without failures") {
+    when {
+      process {
+        """
+        meta = [
+            id : "idProva",
+            tumour_sample: "Set6_42",
+            cancer_type: "PANCANCER" 
+        ]
+        snv_rds = file('/Users/davide.rambaldi/Projects/nextflow_dev/tumourevo_datasets/VCF.rds')
+        driver_list = file('/Users/davide.rambaldi/Documents/Projects/nextflow_dev/tumourevo_datasets/driver_list.txt')
+        reference = file('/Users/davide.rambaldi/Documents/Projects/nextflow_dev/tumourevo_datasets/RefCDS_human_GRCh37_dNdScv.0.1.0.rda')
+
+        input[0] = tuple(meta, snv_rds, driver_list, reference)
+        """            
+      }
+    }
+
+    then {
+      assert process.success
+    }
+  }
 }
