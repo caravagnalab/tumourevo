@@ -8,7 +8,7 @@ process BUILD_REFERENCE {
   
   output:
 
-    tuple val(meta), path("reference.rda"), emit: dnds_rds
+    tuple val(meta), path("reference.rda"), emit: dnds_reference
 
   script:
 
