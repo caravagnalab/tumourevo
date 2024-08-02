@@ -3,9 +3,6 @@ nextflow_process {
   script "modules/local/build_reference/main.nf"
   process 'BUILD_REFERENCE'
 
-  // FIXME temporary override for testing
-  config 'tests/modules/local/build_reference/test.config'
-  
   test("Should run without failures") {
     when {
       process {
