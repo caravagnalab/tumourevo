@@ -19,7 +19,7 @@ process BUILD_REFERENCE {
     #!/usr/bin/env Rscript
 
     library(dndscv)
-    print(dir())
+    
     buildref(
       cdsfile="$cds", 
       genomefile="$genome", 
