@@ -1,6 +1,6 @@
 process BUILD_REFERENCE {
   tag "$meta.id"
-  container = 'docker://lvaleriani/cnaqc:dev1'
+  container='file:///fast/cdslab/ebusca00/singularity/cdslab.sif'
 
   input:
     
