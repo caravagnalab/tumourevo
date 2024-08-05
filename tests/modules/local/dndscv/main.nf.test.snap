@@ -1,21 +1,33 @@
 {
     "Should run without failures": {
         "content": [
-            [
-                [
-                    {
-                        "id": "idProva",
-                        "tumour_sample": "Set6_42",
-                        "cancer_type": "PANCANCER"
-                    },
-                    "idProva_dnds.rds:md5,71340e9776302392d1b0dbd40f62acae"
+            {
+                "0": [
+                    [
+                        {
+                            "id": "idProva",
+                            "tumour_sample": "Set6_42",
+                            "cancer_type": "PANCANCER"
+                        },
+                        "idProva_dnds.rds:md5,71340e9776302392d1b0dbd40f62acae"
+                    ]
+                ],
+                "dnds_rds": [
+                    [
+                        {
+                            "id": "idProva",
+                            "tumour_sample": "Set6_42",
+                            "cancer_type": "PANCANCER"
+                        },
+                        "idProva_dnds.rds:md5,71340e9776302392d1b0dbd40f62acae"
+                    ]
                 ]
-            ]
+            }
         ],
         "meta": {
             "nf-test": "0.8.4",
             "nextflow": "23.10.1"
         },
-        "timestamp": "2024-08-05T09:41:12.96725"
+        "timestamp": "2024-08-05T12:16:41.427418"
     }
 }

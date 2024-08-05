@@ -63,12 +63,6 @@ process DNDSCV {
     
     driver_genes <- read_lines("${driver_list}")
 
-    # remove from driver genes the genes not in RefCDS
-    refcds_genes = unlist(lapply(RefCDS, function(x){ x\$gene_name }), use.names=FALSE)
-
-    # TODO some kind of report on removed drivers
-    driver_genes <- driver_genes[driver_genes %in% refcds_genes]
-
     dndscv_result <- dndscv::dndscv(
       mutations = dndscv_input,
       outmats = TRUE,
@@ -77,7 +71,6 @@ process DNDSCV {
       outp = 3,
       use_indel_sites = TRUE,
       min_indels = 1,
-      gene_list=driver_genes,
       refdb=reference
     )
 
@@ -87,8 +80,14 @@ process DNDSCV {
       dplyr::select(!sampleID) |> 
       dplyr::rename(from="pos", alt="mut")
 
-    # TODO flag DRIVERs
+    # Add column known_driver based on driver list and potential_driver based on dndscv result
+    annotation <- annotation |> 
+      dplyr::mutate(
+        known_driver=gene %in% driver_genes, 
+        potential_driver = (qmis_cv <= 0.1 | qtrunc_cv <= 0.1 | qallsubs_cv <= 0.1)
+      )
     
+
     # Here I must add chr when needed, as before 
     # I remove by default and reapply when needed
     mutations <- mutations |> dplyr::mutate(chr=str_replace(chr,"chr",""))
