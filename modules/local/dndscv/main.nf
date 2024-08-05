@@ -44,8 +44,10 @@ process DNDSCV {
     mutations <- input\$`${meta.tumour_sample}`\$mutations
     
     # check if reference and mutations start with chr
-    reference_with_chr <- startsWith(RefCDS[[1]]\$chr, "chr")
-    mutations_with_chr <- startsWith(mutations\$chr[1],"chr")
+    chr_ref <- as.character(RefCDS[[1]]\$chr)
+    reference_with_chr <- startsWith(chr_ref, "chr")
+    chr_mut <- as.character(mutations\$chr[1])
+    mutations_with_chr <- startsWith(chr_mut,"chr")
     
     # always remove chr in dndscv_input
     dndscv_input <- mutations |>
