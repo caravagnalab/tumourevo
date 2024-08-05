@@ -40,19 +40,21 @@ process DNDSCV {
 
     load(reference)
     
-    # check reference chr mode
-    reference_with_chr <- startsWith(RefCDS[[1]]\$chr, "chr")
-
     sample_id <- input\$`${meta.tumour_sample}`\$sample
     mutations <- input\$`${meta.tumour_sample}`\$mutations
     
+    # check if reference and mutations start with chr
+    reference_with_chr <- startsWith(RefCDS[[1]]\$chr, "chr")
+    mutations_with_chr <- startsWith(mutations\$chr[1],"chr")
+    
+    # always remove chr in dndscv_input
     dndscv_input <- mutations |>
       dplyr::select(chr,from,ref,alt) |>
       dplyr::rename(pos="from") |>
       dplyr::mutate(sample=sample_id, .before = chr) |>
       dplyr::mutate(chr=str_replace(chr,"chr",""))
 
-    # replace in dndscv_input and read if
+    # add chr in dndscv_input when needed
     if (reference_with_chr) {
       dndscv_input |> dplyr::mutate(chr=paste("chr",chr,sep=""))
     }
@@ -61,6 +63,8 @@ process DNDSCV {
 
     # remove from driver genes the genes not in RefCDS
     refcds_genes = unlist(lapply(RefCDS, function(x){ x\$gene_name }), use.names=FALSE)
+
+    # TODO some kind of report on removed drivers
     driver_genes <- driver_genes[driver_genes %in% refcds_genes]
 
     dndscv_result <- dndscv::dndscv(
@@ -81,7 +85,17 @@ process DNDSCV {
       dplyr::select(!sampleID) |> 
       dplyr::rename(from="pos", alt="mut")
 
-    # TODO here I must add chr when needed
+    # TODO flag DRIVERs
+    
+    # ere I must add chr when needed, as before 
+    # I remove by default and reapply when needed
+    mutations <- mutations |> dplyr::mutate(chr=str_replace(chr,"chr",""))
+    annotation <- annotation |> dplyr::mutate(chr=str_replace(chr,"chr",""))
+    if (mutations_with_chr) {
+      mutations <- mutations |> dplyr::mutate(chr=paste("chr",chr,sep=""))
+      annotation <- annotation |> dplyr::mutate(chr=paste("chr",chr,sep=""))
+    }
+    
     output_mutations <- left_join(mutations, annotation)
 
     output <- input
