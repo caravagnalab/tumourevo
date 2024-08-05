@@ -9,15 +9,15 @@
                             "tumour_sample": "Set6_42",
                             "cancer_type": "PANCANCER"
                         },
-                        "idProva_dnds.rds:md5,71340e9776302392d1b0dbd40f62acae"
+                        "idProva_dnds.rds:md5,5bc01a3bd0f782654629ffcab598f931"
                     ]
                 ]
             }
         ],
         "meta": {
             "nf-test": "0.8.4",
-            "nextflow": "23.10.1"
+            "nextflow": "24.04.4"
         },
-        "timestamp": "2024-08-05T11:56:32.137153"
+        "timestamp": "2024-08-05T16:17:37.021987"
     }
 }

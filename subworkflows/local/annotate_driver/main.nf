@@ -17,7 +17,6 @@ workflow DRIVER_ANNOTATION {
     main:
 
         if (params.dndscv_refcds_rda) {
-            println(params.dndscv_refcds_rda)
             rda = Channel.from(file(params.dndscv_refcds_rda, checkIfExists: true))
             dndscv_ch = rds.combine(driver_list).combine(rda)
         } else {

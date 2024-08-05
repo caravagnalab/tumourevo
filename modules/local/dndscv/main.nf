@@ -12,7 +12,8 @@
 process DNDSCV {
   debug true
   tag "$meta.id"
-  container='file:///fast/cdslab/ebusca00/singularity/cdslab.sif'
+  container "${workflow.containerEngine == 'singularity' ? 'docker://tucano/dndscv:latest' : 'tucano/dndscv:latest'}"
+
 
   input:
     
@@ -84,7 +85,7 @@ process DNDSCV {
     annotation <- annotation |> 
       dplyr::mutate(
         known_driver=gene %in% driver_genes, 
-        potential_driver = (qmis_cv <= 0.1 | qtrunc_cv <= 0.1 | qallsubs_cv <= 0.1)
+        potential_driver = (qmis_cv <= ${params.dndscv_qmis_cv} | qtrunc_cv <= ${params.dndscv_qtrunc_cv} | qallsubs_cv <= 0.1)
       )
     
 

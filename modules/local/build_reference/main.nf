@@ -16,7 +16,7 @@
 process BUILD_REFERENCE {
 
   tag "BUILD_REFERENCE"
-  container='file:///fast/cdslab/ebusca00/singularity/cdslab.sif'
+  container "${workflow.containerEngine == 'singularity' ? 'docker://tucano/dndscv:latest' : 'tucano/dndscv:latest'}"
 
   input:
     path(cds)
