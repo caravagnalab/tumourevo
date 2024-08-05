@@ -1,5 +1,15 @@
+//
+// DNDSCV PROCESS
+//
+// dndscv module based on knitr prototype
+// dndscv script (SINGLE SAMPLE ONLY)
+// TODO multisamples
+// 1. load input rds get mutations and sample id  
+// 2. create dndscv input
+// 3. Get list of drivers from file
+// 4. Use custom reference
+
 process DNDSCV {
-  // dndscv module based on knitr prototype
   debug true
   tag "$meta.id"
   container='file:///fast/cdslab/ebusca00/singularity/cdslab.sif'
@@ -11,14 +21,7 @@ process DNDSCV {
   output:
 
     tuple val(meta), path("*_dnds.rds"), emit: dnds_rds
-
-  // dndscv script (SINGLE SAMPLE ONLY)
-  // TODO multisamples
-  // 1. load input rds get mutations and sample id  
-  // 2. create dndscv input
-  // 3. Get list of drivers from file
-  // 4. Use custom reference
-
+  
   script:
 
     def args                                = task.ext.args    

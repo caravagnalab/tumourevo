@@ -1,15 +1,5 @@
 //
 // DRIVER_ANNOTATION SUB-WORKFLOW
-//
-// Build reference doc: 
-//   http://htmlpreview.github.io/?http://github.com/im3sanger/dndscv/blob/master/vignettes/buildref.html
-//
-// We need 2 additional files:
-//  - the path to a tab-delimited table of transcripts
-//  - the path to a fasta file for the reference genome of interest
-//
-// For now I am using params for input files.
-// Testing with files: BioMart_human_GRCh37_chr3_segment.txt and chr3_segment.fa
 // 
 
 include { BUILD_REFERENCE } from '../../../modules/local/annotate_driver/main'
