@@ -87,7 +87,7 @@ process DNDSCV {
 
     # TODO flag DRIVERs
     
-    # ere I must add chr when needed, as before 
+    # Here I must add chr when needed, as before 
     # I remove by default and reapply when needed
     mutations <- mutations |> dplyr::mutate(chr=str_replace(chr,"chr",""))
     annotation <- annotation |> dplyr::mutate(chr=str_replace(chr,"chr",""))

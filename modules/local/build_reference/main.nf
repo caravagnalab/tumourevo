@@ -10,25 +10,23 @@
 //
 // For now I am using params for input files.
 // Testing with files: BioMart_human_GRCh37_chr3_segment.txt and chr3_segment.fa
-
+// 
+// I do not need a meta here
+//
 process BUILD_REFERENCE {
 
-  tag "$meta.id"
+  tag "BUILD_REFERENCE"
   container='file:///fast/cdslab/ebusca00/singularity/cdslab.sif'
 
   input:
-    
-    tuple val(meta), path(cds), path(genome)
+    path(cds)
+    path(genome)
   
   output:
-
-    tuple val(meta), path("reference.rda"), emit: dnds_reference
+    path("reference.rda"), emit: dnds_reference
 
   script:
-
-    def args                                = task.ext.args    
-    def prefix                              = task.ext.prefix                                       ?: "${meta.id}"  
-
+    // no nedd for arg or prefix here    
     """
     #!/usr/bin/env Rscript
 

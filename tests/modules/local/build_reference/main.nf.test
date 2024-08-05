@@ -7,15 +7,10 @@ nextflow_process {
     when {
       process {
         """
-        meta = [
-            id : "idProva",
-            tumour_sample: "Set6_42",
-            cancer_type: "PANCANCER" 
-        ]
-
         cds_table = file(params.testdata_base_path + '/DRIVER_ANNOTATION/BUILD_REFERENCE/BioMart_human_GRCh37_chr3_segment.txt', checkIfExists: true)
         genome_fasta = file(params.testdata_base_path + '/DRIVER_ANNOTATION/BUILD_REFERENCE/chr3_segment.fa', checkIfExists: true)
-        input[0] = tuple(meta, cds_table, genome_fasta)
+        input[0] = cds_table
+        input[1] = genome_fasta
         """
       }
     }
