@@ -4,6 +4,14 @@
 # davide.rambaldi@gmail.com
 # github.com/tucano
 
+####################################################################################################################
+# dndscv script (SINGLE SAMPLE ONLY)
+# TODO multisamples
+#
+# Usage: ./bin/dndscv_runner.R -i ../tumourevo_datasets/VCF.rds -r ../tumourevo_datasets/RefCDS_human_GRCh37_dNdScv.0.1.0.rda -s Set6_42 -d ../tumourevo_datasets/driver_list.txt  -o test.rds
+#
+####################################################################################################################
+
 library(optparse)
 library(stringr)
 library(readr)
@@ -135,4 +143,8 @@ if (mutations_with_chr) {
 output_mutations <- left_join(mutations, annotation)
 output <- input
 output[[sample_id]]$mutations <- mutations
+
+# add globaldnds as a data.frame
+output[[sample_id]]$globaldnds <- dndscv_result$globaldnds
+
 saveRDS(output,opt$o)

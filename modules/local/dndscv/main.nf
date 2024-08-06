@@ -1,14 +1,6 @@
 //
 // DNDSCV PROCESS
 //
-// dndscv module based on knitr prototype
-// dndscv script (SINGLE SAMPLE ONLY)
-// TODO multisamples
-// 1. load input rds get mutations and sample id  
-// 2. create dndscv input
-// 3. Get list of drivers from file
-// 4. Use custom reference
-
 process DNDSCV {
   debug true
   tag "$meta.id"
@@ -25,8 +17,8 @@ process DNDSCV {
   
   script:
 
-    def args                                = task.ext.args ?: ""
-    def prefix                              = task.ext.prefix ?: "${meta.id}"  
+    def args    = task.ext.args ?: ""
+    def prefix  = task.ext.prefix ?: "${meta.id}"  
     
     """
     dndscv_runner.R \\
