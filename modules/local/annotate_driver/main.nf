@@ -18,7 +18,8 @@ process ANNOTATE_DRIVER {
 
     def args = task.ext.args ?: ''    
     def prefix = task.ext.prefix ?: "${meta.id}"
-    
+    def drivers = file("${params.drivers_table}", checkIfExists: true)
+
     """
     #!/usr/bin/env Rscript
 
@@ -29,7 +30,7 @@ process ANNOTATE_DRIVER {
     SNV = data[["$meta.tumour_sample"]]
     SNV = SNV\$mutations
 
-    drivers_table = readr::read_tsv(file = "$params.drivers_table") 
+    drivers_table = readr::read_tsv(file = "${drivers}") 
     
     if("$meta.cancer_type" == 'PANCANCER'){
       drivers_table = drivers_table %>% 

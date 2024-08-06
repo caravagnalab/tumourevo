@@ -17,7 +17,7 @@ nextflow_process {
                     cancer_type: "PANCANCER" 
                 ]
                 
-                snv_RDS = file("${projectDir}/results/formatter/vcf2cnaqc/MSeq/Set06/Set6_42/MSeq_Set06_Set6_42_snv.rds", checkIfExists: true)
+                snv_RDS = file(params.testdata_base_path + '/DRIVER_ANNOTATION/DNDSCV/VCF.rds', checkIfExists: true)
                 // Create a tuple with metadata and file path
                 input[0] = tuple(meta, snv_RDS)
                 """
