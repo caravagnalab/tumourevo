@@ -49,6 +49,24 @@ option_list = list(
     default=NA, 
     type='character',
     help="drivers list"
+  ),
+
+  make_option(
+    "--qmis_cv",
+    default=0.1, 
+    help="drivers list"
+  ),
+  
+  make_option(
+    "--qtrunc_cv",
+    default=0.1, 
+    help="drivers list"
+  ),
+
+  make_option(
+    "--qallsubs_cv",
+    default=0.1, 
+    help="drivers list"
   )
 )
 
@@ -102,7 +120,7 @@ annotation <- annotation |>
 annotation <- annotation |> 
   dplyr::mutate(
     known_driver=gene %in% driver_genes, 
-    potential_driver = (qmis_cv <= 0.1 | qtrunc_cv <= 0.1 | qallsubs_cv <= 0.1)
+    potential_driver = (qmis_cv <= opt$qmis_cv | qtrunc_cv <= opt$qtrunc_cv | qallsubs_cv <= opt$qallsubs_cv)
   )
 
 # Here I must add chr when needed, as before 

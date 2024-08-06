@@ -25,10 +25,19 @@ process DNDSCV {
   
   script:
 
-    def args                                = task.ext.args    
-    def prefix                              = task.ext.prefix                                       ?: "${meta.id}"  
+    def args                                = task.ext.args ?: ""
+    def prefix                              = task.ext.prefix ?: "${meta.id}"  
     
     """
-    dndscv_runner.R -i ${snv_rds} -s ${meta.tumour_sample} -d ${driver_list} -r ${reference} -o "${prefix}_dnds.rds"
+    dndscv_runner.R \\
+      -i ${snv_rds} \\
+      -s ${meta.tumour_sample} \\
+      -d ${driver_list} \\
+      -r ${reference} \\
+      -o "${prefix}_dnds.rds" \\
+      --qmis_cv ${params.dndscv_qmis_cv} \\
+      --qtrunc_cv ${params.dndscv_qtrunc_cv} \\
+      --qallsubs_cv ${params.dndscv_qallsubs_cv} \\
+      ${args}
     """
 }
