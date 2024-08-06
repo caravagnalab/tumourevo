@@ -33,8 +33,8 @@ process BUILD_REFERENCE {
     library(dndscv)
     
     buildref(
-      cdsfile="$cds", 
-      genomefile="$genome", 
+      cdsfile="${cds}", 
+      genomefile="${genome}", 
       outfile = "reference.rda", 
       excludechrs="MT"
     )
