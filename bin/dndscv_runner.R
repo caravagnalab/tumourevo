@@ -147,4 +147,7 @@ output[[sample_id]]$mutations <- mutations
 # add globaldnds as a data.frame
 output[[sample_id]]$globaldnds <- dndscv_result$globaldnds
 
+# add theta 
+# theta < 1 may reflect problems with the suitability of the dNdScv model for the dataset.
+output[[sample_id]]$dndscv$theta <- dndscv_result$nbreg$theta
 saveRDS(output,opt$o)

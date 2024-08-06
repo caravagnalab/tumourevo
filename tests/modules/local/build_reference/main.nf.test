@@ -18,8 +18,11 @@ nextflow_process {
     then {
       assertAll(
         { assert process.success },
+        { assert process.out.dnds_reference },
+        { assert process.out.dnds_reference.size() == 1 },
+        { assert process.out.dnds_reference.get(0) ==~ ".*/reference.rda" },
         { assert snapshot(process.out.dnds_reference).match() }
-      )      
+      )  
     }
   }
 }

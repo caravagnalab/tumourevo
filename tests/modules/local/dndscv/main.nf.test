@@ -24,6 +24,9 @@ nextflow_process {
     then {
       assertAll(
         { assert process.success },
+        { assert process.out.dnds_rds },
+        { assert process.out.dnds_rds.size() == 1 },
+        { assert process.out.dnds_rds.get(0).get(1) ==~ "idProva_dnds.rds" },
         { assert snapshot(process.out).match() }
       )      
     }
