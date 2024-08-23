@@ -28,7 +28,7 @@ include { samplesheetToList } from 'plugin/nf-schema'
 // Initialize fasta file with meta map:
 fasta = params.fasta ? Channel.fromPath(params.fasta).map{ it -> [ [id:it.baseName], it ] }.collect() : Channel.empty()
 input = params.input ? Channel.fromList(samplesheetToList(params.input, "assets/schema_input.json")) : Channel.empty()
-
+drivers_table =  params.fasta ? Channel.fromPath(params.drivers_table).map{ it -> [ it ] }.collect() : Channel.empty()
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -44,12 +44,14 @@ input = params.input ? Channel.fromList(samplesheetToList(params.input, "assets/
     take:
     input
     fasta
+    drivers_table
 
     main:
     
     TUMOUREVO (
         input,
-        fasta
+        fasta,
+        drivers_table
     )
 
     emit:
@@ -64,7 +66,8 @@ workflow {
     //
     NFCORE_TUMOUREVO(
         input,
-        fasta
+        fasta,
+        drivers_table
     )
 
 }

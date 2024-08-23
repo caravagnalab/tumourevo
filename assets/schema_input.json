@@ -118,12 +118,12 @@
                 "format": "file-path",
                 "exists": true
             },
-            "tumour_bam": {
-                "errorMessage": "Tumour BAM file cannot contain spaces and must have extension '.bam'",
+            "tumour_alignment": {
+                "errorMessage": "Tumour BAM or CRAM file cannot contain spaces and must have extension '.bam' or '.cram'",
                 "anyOf": [
                     {
                         "type": "string",
-                        "pattern": "^\\S+\\.bam$"
+                        "pattern": "^\\S+\\.(bam|cram)$"
                     },
                     {
                         "type": "string",
@@ -133,12 +133,12 @@
                 "format": "file-path",
                 "exists": true
             },
-            "tumour_bai": {
-                "errorMessage": "Tumour BAM index file cannot contain spaces and must have extension '.bai'",
+            "tumour_alignment_index": {
+                "errorMessage": "Tumour BAI or CRAI index file cannot contain spaces and must have extension '.bai' or '.crai'",
                 "anyOf": [
                     {
                         "type": "string",
-                        "pattern": "^\\S+\\.bai$"
+                        "pattern": "^\\S+\\.(bai|crai)$"
                     },
                     {
                         "type": "string",

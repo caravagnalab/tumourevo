@@ -3,13 +3,12 @@ process GET_POSITIONS {
     container = 'docker://lvaleriani/cnaqc:dev1'
 
     input:
-
-    tuple val(meta), path(rds_list, stageAs: '*.rds'), path(bam), path(bai), val(sample_list)
+    tuple val(meta), path(rds_list, stageAs: '*.rds'), val(sample_list)
 
     output:
 
     tuple val(meta), path("*_all_positions.bed"), val(sample_list), emit: all_pos
-    tuple val(meta), path("*_positions_missing.bed"),  path(bam), path(bai), val(sample_list), emit: bed
+    tuple val(meta), path("*_positions_missing.bed"), val(sample_list), emit: bed
 
     script:
     def args = task.ext.args ?: ''
@@ -27,19 +26,20 @@ process GET_POSITIONS {
         df = readRDS(rds)
         df = df[[1]]\$mutations %>% dplyr::mutate(id = paste(chr, from, to, sep = ":")) %>% dplyr::select(chr, from, to, ref, alt, id)
     }) 
+    names(positions) = samples
 
     all_positions = positions %>% dplyr::bind_rows() %>% dplyr::pull(id) %>% unlist() %>% unique()
     all = positions %>% dplyr::bind_rows() %>% dplyr::distinct() %>% dplyr::select(-id)
-
     write.table(file = paste0("$prefix", "_all_positions.bed"), all, quote = F, sep = "\t", row.names = F, col.names = T)
 
-    missed = lapply(seq(1,length(positions)), FUN = function(s){
+    missed = lapply(samples, FUN = function(s){
         all_positions[!(all_positions %in% positions[[s]]\$id)]
     }) 
+    names(missed) = samples
 
-    for (i in seq(1,length(missed))){
-        sample = samples[[i]]
-        df = dplyr::tibble(id = missed[[i]]) %>% 
+    for (sample in samples){
+        print(sample)
+        df = dplyr::tibble(id = missed[[sample]]) %>% 
                 tidyr::separate(id,into = c('chr', 'from', 'to'), sep = ':') %>% 
                 dplyr::filter(chr %in% c(paste0('chr', seq(1,22)), 'chrX', 'chrY'))
 

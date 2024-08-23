@@ -119,24 +119,24 @@ parse_Mutect = function(vcf, tumour_id, normal_id, filter_mutations = FALSE){
                 dplyr::select(Description) %>% 
                 dplyr::pull() 
 
-    vep_field = strsplit(vep_field, split = "|", fixed = TRUE)[[1]]
-    vep_field = vep_field[2:length(vep_field)-1]
+      vep_field = strsplit(vep_field, split = "|", fixed = TRUE)[[1]]
+      vep_field = vep_field[2:length(vep_field)-1]
 
     # Tranform the fix field by splittig the CSQ and select the columns needed
-    fix_field = tb$fix %>%
-      dplyr::rename(
-        chr = CHROM,
-        from = POS,
-        ref = REF,
-        alt = ALT) %>%
-      dplyr::rowwise() %>%
-      dplyr::mutate(
-        from = as.numeric(from),
-        to = from + nchar(alt)) %>%
-      dplyr::ungroup() %>%
-      dplyr::select(chr, from, to, ref, alt, CSQ, dplyr::everything()) %>% 
-      tidyr::separate(CSQ, vep_field, sep = "\\|") %>% 
-      dplyr::select(chr, from, to, ref, alt, IMPACT, SYMBOL, Gene, dplyr::everything(), -DP) #can add other thing, CSQ, HGSP
+      fix_field = tb$fix %>%
+        dplyr::rename(
+          chr = CHROM,
+          from = POS,
+          ref = REF,
+          alt = ALT) %>%
+        dplyr::rowwise() %>%
+        dplyr::mutate(
+          from = as.numeric(from),
+          to = from + nchar(alt)) %>%
+        dplyr::ungroup() %>%
+        dplyr::select(chr, from, to, ref, alt, CSQ, dplyr::everything()) %>% 
+        tidyr::separate(CSQ, vep_field, sep = "\\|") %>% 
+        dplyr::select(chr, from, to, ref, alt, IMPACT, SYMBOL, Gene, dplyr::everything(), -DP) #can add other thing, CSQ, HGSP
     
     } else {
         # Take from fix field some columns
@@ -178,8 +178,8 @@ parse_Mutect = function(vcf, tumour_id, normal_id, filter_mutations = FALSE){
             })
 
     names(calls) = samples_list
-    # normal = names(calls)[length(calls)] 
-    # calls = calls[c(sample_id, normal)]
+    samples = c(tumour_id, normal_id)
+    calls = calls[samples]
     return(calls)
 }
 
@@ -283,6 +283,8 @@ parse_Strelka = function(vcf, tumour_id, normal_id, filter_mutations = FALSE){
     })
   
   names(calls) = samples_list
+  samples = c(tumour_id, normal_id)
+  calls = calls[samples]
   return(calls)
 }
 
@@ -369,7 +371,7 @@ parse_Platypus = function(vcf, tumour_id, normal_id, filter_mutations = FALSE){
         })
 
     names(calls) = samples_list
-    # normal = names(calls)[length(calls)] 
-    # calls = calls[c(sample_id, normal)]
+    samples = c(tumour_id, normal_id)
+    calls = calls[samples]
     return(calls)
 }
