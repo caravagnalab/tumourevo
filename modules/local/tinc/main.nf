@@ -6,9 +6,7 @@ process TINC {
   
     input:
    
-    tuple val(meta), path(cna_RDS)
-    tuple val(meta), path(snv_RDS)
-    // tuple val(datasetID), val(patientID), val(sampleID), path(snv_RDS)
+    tuple val(meta), path(cna_RDS), path(snv_RDS)
   
   output:
     tuple val(meta), path("*_fit.rds"), emit: rds 
@@ -39,21 +37,26 @@ process TINC {
 
     tumor_sample = "$meta.tumour_sample"
     normal_sample = "$meta.normal_sample"
+
     tumor_mutations = all_mutations[[tumor_sample]]\$mutations %>% 
       select(chr, from, to, ref, alt, NV, DP, NR, VAF) %>% 
       rename(t_alt_count = NV, t_ref_count = NR, t_tot_count = DP, t_vaf = VAF)
 
     normal_mutations = all_mutations[[normal_sample]]\$mutations %>% 
-      select(chr, from, to, ref, alt, NV, DP, NR,VAF) %>% 
+      select(chr, from, to, ref, alt, NV, DP, NR, VAF) %>% 
       rename(n_alt_count = NV, n_ref_count = NR, n_tot_count = DP, n_vaf = VAF)
 
-    input_mut <- dplyr::full_join(tumor_mut, normal_mut, by = c("chr", "from", "ref", "alt")) %>% 
-        mutate(VAF.x = case_when(is.na(VAF.x) ~ 0, .default = VAF.x)) %>%
-        mutate(VAF.y = case_when(is.na(VAF.y) ~ 0, .default = VAF.y)) %>%
-        mutate(VAF.x = as.numeric(VAF.x), VAF.y = as.numeric(VAF.y))
+    input_mut = dplyr::full_join(tumor_mutations, normal_mutations, by = c("chr", "from", "to", "ref", "alt")) %>% 
+        #mutate(VAF.x = case_when(is.na(VAF.x) ~ 0, .default = VAF.x)) %>%
+        #mutate(VAF.y = case_when(is.na(VAF.y) ~ 0, .default = VAF.y)) %>%
+        #mutate(VAF.x = as.numeric(VAF.x), VAF.y = as.numeric(VAF.y))
+        mutate(t_vaf = case_when(is.na(t_vaf) ~ 0, .default = t_vaf)) %>%
+        mutate(n_vaf = case_when(is.na(n_vaf) ~ 0, .default = n_vaf)) %>%
+        mutate(t_vaf = as.numeric(t_vaf), n_vaf = as.numeric(n_vaf)) %>%
+        filter(t_vaf > 0)
+
 
     CNAs = readRDS("$cna_RDS")\$segments
-    
     TINC_fit = TINC::autofit(input = input_mut, 
                     cna = CNAs, 
                     VAF_range_tumour = eval(parse(text="$vaf_range_tumour")),
@@ -65,9 +68,9 @@ process TINC {
                     
     tinc_plot = plot(TINC_fit)
     
-    saveRDS(filename = paste0("${prefix}", "_plot.rds"), object = tinc_plot)
+    saveRDS(file = paste0("${prefix}", "_plot.rds"), object = tinc_plot)
     ggplot2::ggsave(plot = tinc_plot, filename = paste("${prefix}", "_plot.pdf"), width = 210, height = 297, units="mm", dpi = 200)
-    saveRDS(filename = paste0("${prefix}", "_fit.rds"), object = TINC_fit)
+    saveRDS(file = paste0("${prefix}", "_fit.rds"), object = TINC_fit)
 
     """
 }

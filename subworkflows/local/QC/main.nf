@@ -12,7 +12,7 @@ workflow QC {
         input
 
     main:
-        // TINC(input)
+        TINC(input)
         CNAQC(input)
 
         in_join = CNAQC.out.qc_rds.map{ meta, rds -> 
@@ -28,9 +28,9 @@ workflow QC {
         plot_cnaqc_data = CNAQC.out.plot_pdf_data
         plot_cnaqc_qc = CNAQC.out.plot_pdf_qc
 
-        // plot_rds_tinc = TINC.out.plot_rds
-        // rds_tinc = TINC.out.rds
-        // pdf_tinc = TINC.out.plot_pdf
+        plot_rds_tinc = TINC.out.plot_rds
+        rds_tinc = TINC.out.rds
+        pdf_tinc = TINC.out.plot_pdf
 
         rds_join = JOIN_CNAQC.out.rds
 }
