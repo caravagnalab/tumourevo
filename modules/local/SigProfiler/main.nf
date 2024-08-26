@@ -61,13 +61,13 @@ process SIG_PROFILER {
       #from SigProfilerMatrixGenerator import install as genInstall
   
     
-      #if os.path.exists(output_path):
-       #shutil.rmtree(output_path)
-    
-      os.mkdir("$datasetID")
-      #os.mkdir("signature_deconvolution/Sigprofiler/$datasetID/")
-   
       input_path = "$datasetID/"
+
+      
+      if not os.path.exists(input_path):
+          os.mkdir(input_path)
+      
+
       output_path = "output/SBS/CLL.SBS96.all"
       output_folder_sigprof = "results/SBS96/"
 
