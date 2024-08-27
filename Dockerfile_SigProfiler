@@ -9,7 +9,7 @@ ENV HOME=/home/$USER_ID
 ENV ANACONDA_PATH=$HOME/anaconda3
 ENV ANACONDA_INSTALLER=Anaconda3-2024.06-1-Linux-aarch64.sh
 ENV PATH=$ANACONDA_PATH/bin:$PATH
-ENV LD_LIBRARY_PATH=$ANACONDA_PATH/lib:$LD_LIBRARY_PATH
+#ENV LD_LIBRARY_PATH=$ANACONDA_PATH/lib:$LD_LIBRARY_PATH
 
 
 # Combine apt-get commands to reduce layers and clean up after installations
