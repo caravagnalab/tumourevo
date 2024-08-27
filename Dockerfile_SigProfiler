@@ -63,7 +63,9 @@ RUN chmod -R ugo+rwX $HOME
 
 #Install genomes for Sigprofiler
 
-RUN /bin/bash -c "source activate sigprofiler && SigProfilerMatrixGenerator install GRCh37 && SigProfilerMatrixGenerator install GRCh38"
+#RUN /bin/bash -c "source activate sigprofiler && SigProfilerMatrixGenerator install GRCh37 && SigProfilerMatrixGenerator install GRCh38"
 
-#This can be final entry point
-#CMD ["bash"]
+# Set the entry point to start with the conda environment activated
+
+CMD ["/bin/bash", "-c", "source activate sigprofiler && bash"]
+
