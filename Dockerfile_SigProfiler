@@ -53,19 +53,21 @@ RUN conda update --yes conda && \
   conda install -c conda-forge libstdcxx-ng
 
 # Create and activate the conda environment, install Python and packages
-RUN conda create -n sigprofiler python=3.12 -y && \
-  conda install -n sigprofiler pip pandas -y && \
-  /bin/bash -c "source activate sigprofiler && pip install SigProfilerMatrixGenerator SigProfilerExtractor"
+#RUN conda create -n sigprofiler python=3.12 -y && \
+  #conda install -n sigprofiler pip pandas -y && \
+  #/bin/bash -c "source activate sigprofiler && pip install SigProfilerMatrixGenerator SigProfilerExtractor"
+
+RUN pip install pandas SigProfilerMatrixGenerator SigProfilerExtractor
 
 # Set appropriate permissions
 RUN chmod -R ugo+rwX $HOME
 
 
 #Install genomes for Sigprofiler
-
 #RUN /bin/bash -c "source activate sigprofiler && SigProfilerMatrixGenerator install GRCh37 && SigProfilerMatrixGenerator install GRCh38"
 
 # Set the entry point to start with the conda environment activated
+#CMD ["/bin/bash", "-c", "source activate sigprofiler && bash"]
 
-CMD ["/bin/bash", "-c", "source activate sigprofiler && bash"]
-
+# Set the default command to start a bash shell
+CMD ["bash"]
