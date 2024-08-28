@@ -15,24 +15,30 @@ workflow LIFTER {
     main:
         out = Channel.empty()
 
+        bam = data.map{ meta, rds, bam, bai -> 
+            [meta.subMap('dataset', 'patient', 'id', 'normal_sample', 'tumour_sample'), bam]
+        }
+
         rds = data.map{ meta, rds, bam, bai -> 
             meta = meta + [id: "${meta.dataset}_${meta.patient}"]
             sample = meta.tumour_sample
-            [meta.subMap('dataset', 'patient', 'id', 'normal_sample'), rds, bam, bai, sample]}
+            [meta.subMap('dataset', 'patient', 'id', 'normal_sample'), rds, sample]}
             | groupTuple
 
         GET_POSITIONS(rds)
         all_pos = GET_POSITIONS.out.all_pos.transpose().map{meta, rds, sample -> 
             [meta, rds]
         }
-
-        bed = GET_POSITIONS.out.bed.transpose().map{ meta, bed, bam, bai, sample ->
-            meta = meta + [tumour_sample: "${sample}".toInteger()]
+        
+        bed = GET_POSITIONS.out.bed.transpose().map{ meta, bed, sample ->
+            meta = meta + [tumour_sample: "${sample}".toString()]
             meta = meta + [id: "${meta.dataset}_${meta.patient}_${meta.tumour_sample}"]
-            [meta, bam, bed]
+            [meta, bed]
         }
+        
+        in_pileup = bam.join(bed, by: [0])
 
-        BCFTOOLS_MPILEUP(bed, fasta, false)
+        BCFTOOLS_MPILEUP(in_pileup, fasta, false)
         tmp_data = data.map{ meta, rds, bam, bai -> 
             [meta.subMap('dataset', 'patient', 'id', 'normal_sample', 'tumour_sample'), rds]
         }

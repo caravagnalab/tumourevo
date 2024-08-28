@@ -12,11 +12,11 @@ include { SIGNATURE_DECONVOLUTION } from "${baseDir}/subworkflows/local/signatur
 workflow TUMOUREVO {
 
   take:
-  input_samplesheet
-  fasta
+    input_samplesheet
+    fasta
+    drivers_table
   
   main:
-
     input = input_samplesheet.map{ meta, vcf, tbi, bam, bai, cna_segs, cna_extra -> 
             meta = meta + [id: "${meta.dataset}_${meta.patient}_${meta.tumour_sample}"]
             [meta.dataset + meta.patient, meta, vcf, tbi, bam, bai, cna_segs, cna_extra] }
@@ -71,14 +71,17 @@ workflow TUMOUREVO {
             }
 
     vcf_rds = rds_input.concat(out_lifter)
-    annotation = DRIVER_ANNOTATION(vcf_rds)
 
+    //cds = []
+    //annotation = DRIVER_ANNOTATION(vcf_rds, drivers_table, cds, fasta)
+
+    annotation = vcf_rds
     cna_out = FORMATTER_CNA.out.map{ meta, rds -> 
         [meta.subMap('dataset', 'patient', 'id', 'normal_sample', 'tumour_sample'), rds]
         }
 
     in_cnaqc = cna_out.join(annotation)
     QC(in_cnaqc)
-    //SUBCLONAL_DECONVOLUTION(QC.out.rds_join)
+    SUBCLONAL_DECONVOLUTION(QC.out.rds_join)
     // SIGNATURE_DECONVOLUTION(QC.out.rds_join)
 }

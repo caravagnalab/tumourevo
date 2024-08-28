@@ -1,0 +1,14 @@
+{
+    "Should run without failures": {
+        "content": [
+            [
+                "reference.rda:md5,5dae69316bdee4e2dc3e2cd9188ec69a"
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.8.4",
+            "nextflow": "24.04.4"
+        },
+        "timestamp": "2024-08-05T16:07:47.220145"
+    }
+}

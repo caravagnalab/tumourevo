@@ -31,16 +31,16 @@ process VCF_PROCESSING {
     # Check from which caller the .vcf has been produced
     source = vcfR::queryMETA(vcf, element = 'source')[[1]]
 
-    if (grepl(pattern = 'Mutect', x = source)){
+    if (TRUE %in% grepl(pattern = 'Mutect', x = source)){
         calls = parse_Mutect(vcf, tumour_id = "$meta.tumour_sample", normal_id = "$meta.normal_sample", filter_mutations = as.logical("$filter_mutations"))
         
-    } else if (grepl(pattern = 'strelka', x = source)){
+    } else if (TRUE %in% grepl(pattern = 'strelka', x = source)){
         calls = parse_Strelka(vcf, tumour_id = "$meta.tumour_sample", normal_id = "$meta.normal_sample", filter_mutations = as.logical("$filter_mutations"))
     
-    } else if (grepl(pattern = 'Platypus', x = source)){
+    } else if (TRUE %in% grepl(pattern = 'Platypus', x = source)){
         calls = parse_Platypus(vcf, tumour_id = "$meta.tumour_sample", normal_id = "$meta.normal_sample", filter_mutations = as.logical("$filter_mutations"))
 
-    } else if (grepl(pattern = 'freeBayes', x = source)){
+    } else if (TRUE %in% grepl(pattern = 'freeBayes', x = source)){
         calls = parse_FreeBayes(vcf, tumour_id = "$meta.tumour_sample", normal_id = "$meta.normal_sample", filter_mutations = as.logical("$filter_mutations"))
 
     } else {

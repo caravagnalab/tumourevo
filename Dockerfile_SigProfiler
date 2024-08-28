@@ -1,0 +1,73 @@
+# add the platform to avoid problems related to apple silicon processors
+
+FROM --platform=linux/arm64 ubuntu:24.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+ARG USER_ID=root
+ENV USER_ID=$USER_ID
+ENV HOME=/home/$USER_ID
+ENV ANACONDA_PATH=$HOME/anaconda3
+ENV ANACONDA_INSTALLER=Anaconda3-2024.06-1-Linux-aarch64.sh
+ENV PATH=$ANACONDA_PATH/bin:$PATH
+#ENV LD_LIBRARY_PATH=$ANACONDA_PATH/lib:$LD_LIBRARY_PATH
+
+
+# Combine apt-get commands to reduce layers and clean up after installations
+RUN apt-get update && apt-get install -y --no-install-recommends \
+  wget \
+  build-essential \
+  libgit2-dev \
+  libssl-dev \
+  libcurl4-openssl-dev \
+  libfontconfig1-dev \
+  zlib1g-dev \
+  libharfbuzz-dev \
+  libfribidi-dev \
+  libfreetype6-dev \
+  libpng-dev \
+  libtiff5-dev \
+  libjpeg-dev \
+  libxml2-dev \
+  libbz2-dev \
+  liblapack-dev \
+  ca-certificates \
+  gcc \
+  cmake \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/*
+
+# Set the working directory and ensure it exists
+WORKDIR $HOME
+
+# Download and install Anaconda, then clean up
+RUN wget https://repo.anaconda.com/archive/$ANACONDA_INSTALLER -q -P /tmp && \
+  /bin/bash /tmp/$ANACONDA_INSTALLER -b -p $ANACONDA_PATH && \
+  rm -rf /tmp/$ANACONDA_INSTALLER
+
+
+# Update conda, clean up, and set up the environment
+RUN conda update --yes conda && \
+  conda update --yes --all && \
+  conda clean --yes --all && \
+  conda init bash && \
+  conda install -c conda-forge libstdcxx-ng
+
+# Create and activate the conda environment, install Python and packages
+#RUN conda create -n sigprofiler python=3.12 -y && \
+  #conda install -n sigprofiler pip pandas -y && \
+  #/bin/bash -c "source activate sigprofiler && pip install SigProfilerMatrixGenerator SigProfilerExtractor"
+
+RUN pip install pandas SigProfilerMatrixGenerator SigProfilerExtractor
+
+# Set appropriate permissions
+RUN chmod -R ugo+rwX $HOME
+
+
+#Install genomes for Sigprofiler
+#RUN /bin/bash -c "source activate sigprofiler && SigProfilerMatrixGenerator install GRCh37 && SigProfilerMatrixGenerator install GRCh38"
+
+# Set the entry point to start with the conda environment activated
+#CMD ["/bin/bash", "-c", "source activate sigprofiler && bash"]
+
+# Set the default command to start a bash shell
+CMD ["bash"]

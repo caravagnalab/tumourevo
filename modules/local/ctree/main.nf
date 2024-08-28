@@ -1,15 +1,19 @@
 process CTREE {
-  publishDir params.publish_dir, mode: "copy"
+  tag "$meta.id"
+  container='file:///fast/cdslab/ebusca00/singularity/cdslab.sif'
+
 
   input:
-    tuple val(datasetID), val(patientID), val(sampleID), path(ctree_input)
+    
+    tuple val(meta), path(ctree_input)
+    //tuple val(datasetID), val(patientID), val(sampleID), path(ctree_input)
 
   output:
-    tuple val(datasetID), val(patientID), val(sampleID), path("${outDir}/ctree_{VIBER,MOBSTERh,pyclonevi}.rds"), emit: ctree_rds, optional: true 
-    tuple val(datasetID), val(patientID), val(sampleID), path("${outDir}/ctree_{VIBER,MOBSTERh,pyclonevi}_plots.rds"), emit: ctree_plots_rds, optional: true
-    tuple val(datasetID), val(patientID), val(sampleID), path("${outDir}/REPORT_plots_ctree_{VIBER,MOBSTERh,pyclonevi}.rds"), emit: ctree_report_rds, optional: true
-    tuple val(datasetID), val(patientID), val(sampleID), path("${outDir}/REPORT_plots_ctree_{VIBER,MOBSTERh,pyclonevi}.pdf"), emit: ctree_report_pdf, optional: true
-    tuple val(datasetID), val(patientID), val(sampleID), path("${outDir}/REPORT_plots_ctree_{VIBER,MOBSTERh,pyclonevi}.png"), emit: ctree_report_png, optional: true
+    tuple val(meta), , path("ctree_{VIBER,MOBSTERh,pyclonevi}.rds"), emit: ctree_rds, optional: true
+    tuple val(meta), path("ctree_{VIBER,MOBSTERh,pyclonevi}_plots.rds"), emit: ctree_plots_rds, optional: true
+    tuple val(meta), path("REPORT_plots_ctree_{VIBER,MOBSTERh,pyclonevi}.rds"), emit: ctree_report_rds, optional: true
+    tuple val(meta), path("REPORT_plots_ctree_{VIBER,MOBSTERh,pyclonevi}.pdf"), emit: ctree_report_pdf, optional: true
+    tuple val(meta), path("REPORT_plots_ctree_{VIBER,MOBSTERh,pyclonevi}.png"), emit: ctree_report_png, optional: true
 
   script:
 
@@ -17,13 +21,13 @@ process CTREE {
     def sspace_cutoff = args!="" && args.sspace_cutoff ? "$args.sspace_cutoff" : ""
     def n_sampling = args!="" && args.n_sampling ? "$args.n_sampling" : ""
     def store_max = args!="" && args.store_max ? "$args.store_max" : ""
-    def mode = args!="" && args.mode ?  "$args.mode" : ""
+    // def mode = args!="" && args.mode ?  "$args.mode" : ""
 
-    if (mode == "singlesample") {
-      outDir = "subclonal_deconvolution/ctree/$datasetID/$patientID/$sampleID"
-    } else if (mode == "multisample") {
-      outDir = "subclonal_deconvolution/ctree/$datasetID/$patientID"
-    }
+    // if (mode == "singlesample") {
+      // outDir = "subclonal_deconvolution/ctree/$datasetID/$patientID/$sampleID"
+    // } else if (mode == "multisample") {
+      // outDir = "subclonal_deconvolution/ctree/$datasetID/$patientID"
+    // }
 
     """
     #!/usr/bin/env Rscript
@@ -138,7 +142,7 @@ process CTREE {
       plot_tree = plot(trees[[1]])
 
       # save rds and plots
-      dir.create("$outDir/", recursive = TRUE)
+      # dir.create("$outDir/", recursive = TRUE)
       saveRDS(object=trees, file=paste0("$outDir/", ctree_output, ".rds"))
       saveRDS(object=plot_tree, file=paste0("$outDir/", ctree_output, "_plots.rds"))
 
