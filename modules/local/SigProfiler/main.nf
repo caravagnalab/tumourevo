@@ -140,7 +140,6 @@ process SIG_PROFILER {
                                    collapse_to_SBS96 = bool("$collapse_to_SBS96"), 
                                    get_all_signature_matrices = bool("$get_all_signature_matrices"),
                                    export_probabilities = bool("$export_probabilities"))
-       
           
          
            #Generates a stacked bar plot showing activities in individuals
@@ -148,8 +147,6 @@ process SIG_PROFILER {
                         #output_file = "$output_file"", 
                         #bin_size = int("$bin_size"))
 
-
-          
 
 
       #save the output results
