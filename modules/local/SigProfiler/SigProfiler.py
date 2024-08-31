@@ -7,14 +7,14 @@ from SigProfilerExtractor import sigpro as sig
 from SigProfilerMatrixGenerator.scripts import SigProfilerMatrixGeneratorFunc as matGen
 #from SigProfilerMatrixGenerator import install as genInstall
 
-#create directory
-#path = '/orfeo/scratch/cdslab/kdavydzenka/SIGPROFILER/'
-#os.mkdir(path)
 
 #import input data
 joint_table = "/u/cdslab/kdavydzenka/mutationsTable.tsv"
 input_data = pd.read_csv(joint_table, sep = '\t')
 input_path_sigprof = "/u/cdslab/kdavydzenka/CLL/input_multisample/"
+
+output_path = "output/SBS/CLL.SBS96.all"
+output_folder_sigprof = "results/SBS96/"
 
 #input data preprocessing
 def input_processing(data):
@@ -41,10 +41,8 @@ input_matrix = matGen.SigProfilerMatrixGeneratorFunc(project = "CLL",
                                                      reference_genome = "GRCh37", 
                                                      path_to_input_files = input_path_sigprof)
 
-#chose the data type that you would like to import: "vcf" or "matrix"
-#data = sig.importdata("matrix")
 
-SBS_file = "/u/cdslab/kdavydzenka/CLL/input_multisample/output/SBS/CLL.SBS96.all"
+#SBS_file = "/u/cdslab/kdavydzenka/CLL/input_multisample/output/SBS/CLL.SBS96.all"
 output_path = "output/SBS/CLL.SBS96.all"
 
 # Perform model fitting
@@ -63,16 +61,24 @@ sig.sigProfilerExtractor(input_type = "matrix",
                          max_nmf_iterations = 1000000, 
                          nmf_test_conv = 10000, 
                          nmf_tolerance = 1e-15,
-                         cpu = 4,
+                         cpu = 6,
                          gpu = False,
-                         cosmic_version = 3.1,
+                         cosmic_version = 3.4,
                          make_decomposition_plots = True, 
                          collapse_to_SBS96 = True, 
                          get_all_signature_matrices = True,
                          export_probabilities = True)
 
 
+#Generate a stacked bar plot showing activities in individuals
+plotActivity(activity_file, 
+             output_file = "Activity_in_samples.pdf", 
+             bin_size = 50, 
+             log = False)
+
+
 #save the output results
-source_dir = ""
-dest_dir = ""
-shutil.copytree(source_dir, dest_dir)
+dest_dir = "signature_deconvolution/Sigprofiler/CLL/"
+source_dir = "results"
+shutil.copytree(source_dir, dest_dir, dirs_exist_ok=True)
+

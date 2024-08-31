@@ -48,6 +48,10 @@ process SIG_PROFILER {
       def collapse_to_SBS96                 = args!='' && args.collapse_to_SBS96            ? "$args.collapse_to_SBS96" : ""
       def get_all_signature_matrices        = args!='' && args.get_all_signature_matrices   ? "$args.get_all_signature_matrices" : ""
       def export_probabilities              = args!='' && args.export_probabilities         ? "$args.export_probabilities": ""   
+      def activity_file                     = args!='' && args.activity_file                ? "$args.activity_file": ""
+      def output_file                       = args!='' && args.output_file                  ? "$args.output_file": ""
+      def bin_size                          = args!='' && args.bin_size                     ? "$args.bin_size": ""
+
 
     
       """
@@ -63,7 +67,6 @@ process SIG_PROFILER {
     
       input_path = "$datasetID/"
 
-      
       if not os.path.exists(input_path):
           os.mkdir(input_path)
       
@@ -92,56 +95,66 @@ process SIG_PROFILER {
       #genInstall.install('$reference_genome', rsync=False, bash=True)
 
       #mutation's counts matrix generation
-      input_matrix = matGen.SigProfilerMatrixGeneratorFunc(
-              project = "$datasetID", 
-              reference_genome = "$reference_genome", 
-              path_to_input_files = input_path)
-              #exome = bool("$exome"),
-              #bed_file = eval("$bed_file"),
-              #chrom_based = bool("$chrom_based"),
-              #plot = bool("$plot"),
-              #tsb_stat = bool("$tsb_stat"),
-              #seqInfo = bool("$seqInfo),
-              #cushion = int("$cushion))
+      if __name__ == '__main__':
+          input_matrix = matGen.SigProfilerMatrixGeneratorFunc(
+                  project = "$datasetID", 
+                  reference_genome = "$reference_genome", 
+                  path_to_input_files = input_path)
+                  #volume = "$volume",
+                  #exome = bool("$exome"),
+                  #bed_file = eval("$bed_file"),
+                  #chrom_based = bool("$chrom_based"),
+                  #plot = bool("$plot"),
+                  #tsb_stat = bool("$tsb_stat"),
+                  #seqInfo = bool("$seqInfo),
+                  #cushion = int("$cushion))
 
-      # Perform model fitting
-      sig.sigProfilerExtractor(input_type = "$input_type", 
-                               output = "results", 
-                               input_data = input_path+output_path,  
-                               context_type = "$context_type",  
-                               exome = "$exome",
-                               minimum_signatures = int("$minimum_signatures"),  
-                               maximum_signatures = int("$maximum_signatures"), 
-                               nmf_replicates = int("$nmf_replicates"),
-                               resample = bool("$resample"),
-                               matrix_normalization = "$matrix_normalization", 
-                               seeds= "$seeds",
-                               nmf_init = "$nmf_init", 
-                               min_nmf_iterations = int("$min_nmf_iterations"), 
-                               max_nmf_iterations = int("$max_nmf_iterations"),
-                               nmf_test_conv = int("$nmf_test_conv"), 
-                               nmf_tolerance = float("$nmf_tolerance"), 
-                               cpu = int("$cpu"),
-                               stability = float("$stability"),
-                               min_stability = float("$min_stability"),
-                               combined_stability = float("$combined_stability"),
-                               cosmic_version = float("$cosmic_version"),
-                               nnls_add_penalty = float("$nnls_add_penalty"),
-                               nnls_remove_penalty = float("$nnls_remove_penalty"),
-                               initial_remove_penalty = float("$initial_remove_penalty"),
-                               make_decomposition_plots = bool("$make_decomposition_plots"), 
-                               collapse_to_SBS96 = bool("$collapse_to_SBS96"), 
-                               get_all_signature_matrices = bool("$get_all_signature_matrices"),
-                               export_probabilities = bool("$export_probabilities"))
-    
-    
+          # Perform model fitting
+          sig.sigProfilerExtractor(input_type = "$input_type", 
+                                   output = "results", 
+                                   input_data = input_path+output_path,  
+                                   context_type = "$context_type",  
+                                   exome = "$exome",
+                                   minimum_signatures = int("$minimum_signatures"),  
+                                   maximum_signatures = int("$maximum_signatures"), 
+                                   nmf_replicates = int("$nmf_replicates"),
+                                   resample = bool("$resample"),
+                                   matrix_normalization = "$matrix_normalization", 
+                                   seeds= "$seeds",
+                                   nmf_init = "$nmf_init", 
+                                   min_nmf_iterations = int("$min_nmf_iterations"), 
+                                   max_nmf_iterations = int("$max_nmf_iterations"),
+                                   nmf_test_conv = int("$nmf_test_conv"), 
+                                   nmf_tolerance = float("$nmf_tolerance"), 
+                                   cpu = int("$cpu"),
+                                   batch_size = int("batch_size"),
+                                   #stability = float("$stability"),
+                                   #min_stability = float("$min_stability"),
+                                   #combined_stability = float("$combined_stability"),
+                                   cosmic_version = float("$cosmic_version"),
+                                   #nnls_add_penalty = float("$nnls_add_penalty"),
+                                   #nnls_remove_penalty = float("$nnls_remove_penalty"),
+                                   #initial_remove_penalty = float("$initial_remove_penalty"),
+                                   make_decomposition_plots = bool("$make_decomposition_plots"), 
+                                   collapse_to_SBS96 = bool("$collapse_to_SBS96"), 
+                                   get_all_signature_matrices = bool("$get_all_signature_matrices"),
+                                   export_probabilities = bool("$export_probabilities"))
+       
+          
+         
+           #Generates a stacked bar plot showing activities in individuals
+           #plotActivity(activity_file = "$activity_file",
+                        #output_file = "$output_file"", 
+                        #bin_size = int("$bin_size"))
+
+
+          
+
 
       #save the output results
-      os.mkdir("signature_deconvolution/Sigprofiler/$datasetID/")
-
-      source_dir = "output_folder_sigprof"
       dest_dir = "signature_deconvolution/Sigprofiler/$datasetID/"
-      shutil.copytree(source_dir, dest_dir)
+      source_dir = "results"
+      shutil.copytree(source_dir, dest_dir, dirs_exist_ok=True)
 
    """
 }
