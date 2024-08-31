@@ -60,6 +60,7 @@ process SIG_PROFILER {
       import os
       import shutil
       import pandas as pd
+      import multiprocessing
       from SigProfilerExtractor import sigpro as sig
       from SigProfilerMatrixGenerator.scripts import SigProfilerMatrixGeneratorFunc as matGen
       #from SigProfilerMatrixGenerator import install as genInstall
