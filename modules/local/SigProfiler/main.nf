@@ -7,8 +7,6 @@ process SIG_PROFILER {
        tuple val(meta), path(joint_table)
 
     output:
-       //tuple val(datasetID), path("signature_deconvolution/Sigprofiler/$datasetID/SBS96/SBS96_selection_plot.pdf"), emit: signatures_selection_plot
-       //tuple val(datasetID), path("signature_deconvolution/Sigprofiler/$datasetID/SBS96/Suggested_Solution/"), emit: signature_suggested_solution
        tuple val(datasetID), path("signature_deconvolution/Sigprofiler/$datasetID/SBS96"), emit: signature_SBS96 
       
     script:
