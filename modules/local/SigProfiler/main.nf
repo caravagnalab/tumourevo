@@ -38,7 +38,6 @@ process SIG_PROFILER {
       def get_all_signature_matrices        = args!='' && args.get_all_signature_matrices   ? "$args.get_all_signature_matrices" : ""
       def export_probabilities              = args!='' && args.export_probabilities         ? "$args.export_probabilities": ""   
   
-
     
       """
       #!/usr/bin/env python3
@@ -61,8 +60,7 @@ process SIG_PROFILER {
       
 
           output_path = "output/SBS/${datasetID}.SBS96.all"
-          #output_folder_sigprof = "results/SBS96/"
-
+         
           input_data = pd.read_csv("$joint_table", sep = "\\t")
      
           #input data preprocessing
