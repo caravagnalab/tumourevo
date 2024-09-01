@@ -30,15 +30,16 @@ process SIG_PROFILER {
       def max_nmf_iterations                = args!='' && args.max_nmf_iterations           ? "$args.max_nmf_iterations" : ""
       def nmf_test_conv                     = args!='' && args.nmf_test_conv                ? "$args.nmf_test_conv" : ""
       def nmf_tolerance                     = args!='' && args.nmf_tolerance                ? "$args.nmf_tolerance" : ""
-      def cpu                               = args!='' && args.cpu                          ? "$args.cpu" : ""  
+      def cpu                               = args!='' && args.cpu                          ? "$args.cpu" : ""
+      def stability                         = args!='' && args.stability                    ? "$args.stability" : ""
+      def min_stability                     = args!='' && args.min_stability                ? "$args.min_stability" : ""
+      def combined_stability                = args!='' && args.combined_stability           ? "$args.combined_stability" : ""  
       def cosmic_version                    = args!='' && args.cosmic_version               ? "$args.cosmic_version" : ""
       def make_decomposition_plots          = args!='' && args.make_decomposition_plots     ? "$args.make_decomposition_plots" : ""
       def collapse_to_SBS96                 = args!='' && args.collapse_to_SBS96            ? "$args.collapse_to_SBS96" : ""
       def get_all_signature_matrices        = args!='' && args.get_all_signature_matrices   ? "$args.get_all_signature_matrices" : ""
       def export_probabilities              = args!='' && args.export_probabilities         ? "$args.export_probabilities": ""   
-      def activity_file                     = args!='' && args.activity_file                ? "$args.activity_file": ""
-      def output_file                       = args!='' && args.output_file                  ? "$args.output_file": ""
-      def bin_size                          = args!='' && args.bin_size                     ? "$args.bin_size": ""
+  
 
     
       """
@@ -110,6 +111,9 @@ process SIG_PROFILER {
                                    nmf_test_conv = int("$nmf_test_conv"), 
                                    nmf_tolerance = float("$nmf_tolerance"), 
                                    cpu = int("$cpu"),
+                                   stability = float("$stability"),
+                                   min_stability = float("$min_stability"),
+                                   combined_stability = float("$combined_stability"),
                                    cosmic_version = float("$cosmic_version"),
                                    make_decomposition_plots = bool("$make_decomposition_plots"), 
                                    collapse_to_SBS96 = bool("$collapse_to_SBS96"), 
@@ -117,17 +121,11 @@ process SIG_PROFILER {
                                    export_probabilities = bool("$export_probabilities"))
           
          
-           #Generates a stacked bar plot showing activities in individuals
-           #plotActivity(activity_file = "$activity_file",
-                        #output_file = "$output_file"", 
-                        #bin_size = int("$bin_size"))
-
-
-
-      #save the output results
-      dest_dir = "signature_deconvolution/Sigprofiler/$datasetID/"
-      source_dir = "results/SBS96"
-      shutil.copytree(source_dir, dest_dir, dirs_exist_ok=True)
+           
+          #save the output results
+          dest_dir = "signature_deconvolution/Sigprofiler/$datasetID/"
+          source_dir = "results/"
+          shutil.copytree(source_dir, dest_dir, dirs_exist_ok=True)
 
    """
 }
