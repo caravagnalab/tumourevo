@@ -2,9 +2,7 @@ process VIBER {
   tag "$meta.id"
   container='file:///fast/cdslab/ebusca00/singularity/cdslab.sif'
 
-
   input:
-    
     tuple val(meta), path(rds_join), val(tumour_samples) //rds from either JOIN_CNAQC or JOIN_FIT, should be always grouped
 
   output:
@@ -15,14 +13,6 @@ process VIBER {
     tuple val(meta), path("*_REPORT_plots_viber.rds"), emit: viber_report_rds
     tuple val(meta), path("*_REPORT_plots_viber.pdf"), emit: viber_report_pdf
     tuple val(meta), path("*_REPORT_plots_viber.png"), emit: viber_report_png
-
-    // tuple val(datasetID), val(patientID), val(sampleID), path("${outDir}/viber_best_st_fit.rds"), emit: viber_rds
-    // tuple val(datasetID), val(patientID), val(sampleID), path("${outDir}/viber_best_st_heuristic_fit.rds"), emit: viber_heuristic_rds
-    // tuple val(datasetID), val(patientID), val(sampleID), path("${outDir}/${plot1}"), emit: viber_plots_rds
-    // tuple val(datasetID), val(patientID), val(sampleID), path("${outDir}/${plot2}"), emit: viber_heuristic_plots_rds
-    // tuple val(datasetID), val(patientID), val(sampleID), path("${outDir}/REPORT_plots_viber.rds"), emit: viber_report_rds
-    // tuple val(datasetID), val(patientID), val(sampleID), path("${outDir}/REPORT_plots_viber.pdf"), emit: viber_report_pdf
-    // tuple val(datasetID), val(patientID), val(sampleID), path("${outDir}/REPORT_plots_viber.png"), emit: viber_report_png
 
   script:
     // viber fit params

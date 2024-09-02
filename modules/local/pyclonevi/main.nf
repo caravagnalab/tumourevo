@@ -1,9 +1,8 @@
 process PYCLONEVI {
     tag "$meta.id"
     container = 'https://depot.galaxyproject.org/singularity/pyclone-vi%3A0.1.3--pyhca03a8a_0'
-               
-    input:
 
+    input:
       tuple val(meta), path(rds_join), val(tumour_samples)
 
     output:
@@ -11,34 +10,15 @@ process PYCLONEVI {
       tuple val(meta), path("*.tsv")
       tuple val(meta), path("*_all_fits.h5"), emit: pyclone_all_fits
       tuple val(meta), path("*_best_fit.txt"), emit: pyclone_best_fit
-    
+
     script:
       def args = task.ext.args ?: ''
-      def prefix                              = task.ext.prefix                                       ?: "${meta.id}" 
-      def n_cluster_arg                    = args.n_cluster                     ?  "$args.n_cluster" : ""
-      def density_arg                    = args.density                     ?  "$args.density" : ""
-      def n_grid_point_arg                    = args.n_grid_point                     ?  "$args.n_grid_point" : ""
-      def n_restarts_arg                    = args.n_restarts                     ?  "$args.n_restarts" : ""
+      def prefix = task.ext.prefix ?:"${meta.id}" 
+      def n_cluster_arg = args.n_cluster ? "$args.n_cluster" : ""
+      def density_arg = args.density ? "$args.density" : ""
+      def n_grid_point_arg = args.n_grid_point ? "$args.n_grid_point" : ""
+      def n_restarts_arg = args.n_restarts ? "$args.n_restarts" : ""
       sampleID_string = tumour_samples.join(" ")
-
-      // if (mode == "singlesample") {
-        // sampleID_string = sampleID
-        // outDir = "subclonal_deconvolution/pyclonevi/$datasetID/$patientID/$sampleID"
-        // outDir_ctree = "subclonal_deconvolution/ctree/$datasetID/$patientID/$sampleID"
-      // } else if (mode == "multisample"){
-        // if (!(sampleID instanceof String)) {
-          // sampleID_string = sampleID.join(" ")
-        // } else {
-          // sampleID_string = sampleID
-        // }
-        // outDir = "subclonal_deconvolution/pyclonevi/$datasetID/$patientID"
-        // outDir_ctree = "subclonal_deconvolution/ctree/$datasetID/$patientID"
-      // }
-
-      // all_fits = "${outDir}/all_fits.h5"
-      // best_fit = "${outDir}/best_fit.txt"
-      // path_ctree = "${outDir_ctree}/ctree_input_pyclonevi.csv"
-      // pyclone_joint = "${outDir}/pyclone_joint.tsv"
 
       """
 
