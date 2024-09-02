@@ -38,8 +38,10 @@ workflow SUBCLONAL_DECONVOLUTION {
         rds_join = JOINT_FIT(input_joint_fit.join(in_join))
         rds_join.view()
 
+        CTREE_MOBSTERh(MOBSTERh.out.mobster_best_rds)
+
         mobster_pdf = MOBSTERh.out.mobster_report_pdf
-        ctree_mobster_pdf = CTREE_MOBSTERh(MOBSTERh.out.mobster_best_rds).out.ctree_report_pdf
+        ctree_mobster_pdf = CTREE_MOBSTERh.out.ctree_report_pdf
 
     } else {
         if (params.remove_tail && !params.remove_tail.contains("never")){
@@ -49,19 +51,21 @@ workflow SUBCLONAL_DECONVOLUTION {
 
     if (params.tools && params.tools.split(",").contains("viber")) {
         VIBER(rds_join)
+        CTREE_VIBER(VIBER.out.viber_rds)
 
         viber_pdf = VIBER.out.viber_report_pdf
-        ctree_viber_pdf = CTREE_VIBER(VIBER.out.viber_rds).out.ctree_report_pdf
+        ctree_viber_pdf = CTREE_VIBER.out.ctree_report_pdf
     }
 
     if (params.tools && params.tools.split(",").contains("pyclone-vi")) {
         FORMATTER(rds_join, "rds")
         PYCLONEVI(FORMATTER.out)
+        CTREE_PYCLONEVI(PYCLONEVI.out.ctree_input)
 
         pyclone_fits = PYCLONEVI.out.pyclone_all_fits
         pyclone_best = PYCLONEVI.out.pyclone_best_fit
         pyclone_table = FORMATTER.out.out
-        ctree_pyclone_pdf = CTREE_PYCLONEVI(PYCLONEVI.out.ctree_input).out.ctree_report_pdf
+        ctree_pyclone_pdf = CTREE_PYCLONEVI.out.ctree_report_pdf
     }
 
     emit:
