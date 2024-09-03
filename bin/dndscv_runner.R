@@ -115,7 +115,8 @@ dndscv_result <- dndscv::dndscv(
   outp = 3,
   use_indel_sites = TRUE,
   min_indels = 1,
-  refdb=reference
+  refdb=reference,
+  cv=NULL
 )
 
 sel <- left_join(dndscv_result[['sel_cv']], dndscv_result[['sel_loc']])
