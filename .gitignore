@@ -7,3 +7,12 @@ testing/
 *.pyc
 .nf-test*
 .nf-test/
+clean_nextflow.sh
+err
+job_test.sh
+job.sh
+log
+test_err
+test_log
+test_results/
+test_input/

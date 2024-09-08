@@ -1,0 +1,49 @@
+nextflow_process {
+
+    name "Test Process GET_POSITIONS"
+    script "modules/local/get_positions/main.nf"
+    process "GET_POSITIONS"
+
+    test("Should run without failures") {
+
+        when {
+            params {
+                // define module specific parameters here
+                // outdir = "tests/results"
+            }
+            process {
+                """
+                //Lifter input
+                join_input = vcf_file.join(input_bam).map{ meta, rds, bam, bai -> 
+                [ meta, rds, bam, bai ] }
+                .branch { meta, rds, bam, bai ->
+                    to_lift: meta.lifter == true
+                    multisample: meta.lifter == false
+                }
+
+                lifter_input = join_input.to_lift
+
+                meta = [
+                    id : "MSeq_Set06_Set6_42",
+                    dataset : "MSeq",
+                    patient : "Set06",
+                    tumour_sample: "Set6_42",
+                    normal_sample: "54_N",
+                    cancer_type: "PANCANCER" 
+                ]
+                bam = 
+                bai =
+                snv_rds = file(params.local_testdata_base_path + '/from_vcf2CNAqc/MSeq_Set06_Set6_42_snv.rds', checkIfExists: true)
+                input[0] = tuple(meta, snv_rds)
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert snapshot(process.out).match()
+        }
+
+    }
+
+}
