@@ -2,14 +2,13 @@ process CTREE {
   tag "$meta.id"
   container='file:///fast/cdslab/ebusca00/singularity/cdslab.sif'
 
-
   input:
-    
+
     tuple val(meta), path(ctree_input)
     //tuple val(datasetID), val(patientID), val(sampleID), path(ctree_input)
 
   output:
-    tuple val(meta), , path("ctree_{VIBER,MOBSTERh,pyclonevi}.rds"), emit: ctree_rds, optional: true
+    tuple val(meta), path("ctree_{VIBER,MOBSTERh,pyclonevi}.rds"), emit: ctree_rds, optional: true
     tuple val(meta), path("ctree_{VIBER,MOBSTERh,pyclonevi}_plots.rds"), emit: ctree_plots_rds, optional: true
     tuple val(meta), path("REPORT_plots_ctree_{VIBER,MOBSTERh,pyclonevi}.rds"), emit: ctree_report_rds, optional: true
     tuple val(meta), path("REPORT_plots_ctree_{VIBER,MOBSTERh,pyclonevi}.pdf"), emit: ctree_report_pdf, optional: true
@@ -18,16 +17,10 @@ process CTREE {
   script:
 
     def args = task.ext.args ?: ""
+    def prefix = task.ext.prefix ?: "${meta.id}"
     def sspace_cutoff = args!="" && args.sspace_cutoff ? "$args.sspace_cutoff" : ""
     def n_sampling = args!="" && args.n_sampling ? "$args.n_sampling" : ""
     def store_max = args!="" && args.store_max ? "$args.store_max" : ""
-    // def mode = args!="" && args.mode ?  "$args.mode" : ""
-
-    // if (mode == "singlesample") {
-      // outDir = "subclonal_deconvolution/ctree/$datasetID/$patientID/$sampleID"
-    // } else if (mode == "multisample") {
-      // outDir = "subclonal_deconvolution/ctree/$datasetID/$patientID"
-    // }
 
     """
     #!/usr/bin/env Rscript
@@ -142,9 +135,8 @@ process CTREE {
       plot_tree = plot(trees[[1]])
 
       # save rds and plots
-      # dir.create("$outDir/", recursive = TRUE)
-      saveRDS(object=trees, file=paste0("$outDir/", ctree_output, ".rds"))
-      saveRDS(object=plot_tree, file=paste0("$outDir/", ctree_output, "_plots.rds"))
+      saveRDS(object=trees, file=paste0("$prefix/", ctree_output, ".rds"))
+      saveRDS(object=plot_tree, file=paste0("$prefix/", ctree_output, "_plots.rds"))
 
       # Save report plot
       top_phylo = plot(trees[[1]])
@@ -159,11 +151,10 @@ process CTREE {
 
       #report_fig = patchwork::wrap_plots(ccf, info_transfer, top_phylo, clone_size, phylos, design="A#BBD#CCEEEE")
       report_fig = ggpubr::ggarrange(plotlist = list(ccf, info_transfer, top_phylo, clone_size, phylos), nrow = 3, ncol = 2)
-      
-      
-      saveRDS(object=report_fig, file=paste0("$outDir/REPORT_plots_", ctree_output, ".rds"))
-      ggplot2::ggsave(plot=report_fig, filename=paste0("$outDir/REPORT_plots_", ctree_output, ".pdf"), height=297, width=210, units="mm", dpi = 200)
-      ggplot2::ggsave(plot=report_fig, filename=paste0("$outDir/REPORT_plots_", ctree_output, ".png"), height=297, width=210, units="mm", dpi = 200)
+
+      saveRDS(object=report_fig, file=paste0("$prefix/REPORT_plots_", ctree_output, ".rds"))
+      ggplot2::ggsave(plot=report_fig, filename=paste0("$prefix/REPORT_plots_", ctree_output, ".pdf"), height=297, width=210, units="mm", dpi = 200)
+      ggplot2::ggsave(plot=report_fig, filename=paste0("$prefix/REPORT_plots_", ctree_output, ".png"), height=297, width=210, units="mm", dpi = 200)
     }
 
     """

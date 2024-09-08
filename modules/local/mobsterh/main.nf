@@ -7,13 +7,6 @@ process MOBSTERh {
     tuple val(meta), path(rds_join) // rds from JOIN_CNAQC 
 
   output:
-    // tuple val(datasetID), val(patientID), val(sampleID), path("${outDir}/*/mobsterh_st_fit.rds"), emit: mobster_rds
-    // tuple val(datasetID), val(patientID), val(sampleID), path("${outDir}/*/mobsterh_st_best_fit.rds"), emit: mobster_best_rds
-    // tuple val(datasetID), val(patientID), val(sampleID), path("${outDir}/*/*plots.rds"), emit: mobster_plots_rds
-    // tuple val(datasetID), val(patientID), val(sampleID), path("${outDir}/*/REPORT_plots_mobster.rds"), emit: mobster_report_rds
-    // tuple val(datasetID), val(patientID), val(sampleID), path("${outDir}/*/REPORT_plots_mobster.pdf"), emit: mobster_report_pdf
-    // tuple val(datasetID), val(patientID), val(sampleID), path("${outDir}/*/REPORT_plots_mobster.png"), emit: mobster_report_png
-
     tuple val(meta), path("*_mobsterh_st_fit.rds"), emit: mobster_rds
     tuple val(meta), path("*_mobsterh_st_best_fit.rds"), emit: mobster_best_rds
     tuple val(meta), path("*_plots.rds"), emit: mobster_plots_rds
@@ -39,14 +32,6 @@ process MOBSTERh {
     def n_cutoff = args!="" && args.n_cutoff ? "$args.n_cutoff" : ""
     def auto_setup = args!="" && args.auto_setup ? "$args.auto_setup" : ""
     def silent = args!="" && args.silent ? "$args.silent" : ""
-
-    // outDir = "subclonal_deconvolution/mobster/$datasetID/$patientID"
-    
-    // if (!(sampleID instanceof String)) {
-    //  sampleID_string = sampleID.join(",")
-    //} else {
-    //  sampleID_string = sampleID
-    //}
 
     """
     #!/usr/bin/env Rscript

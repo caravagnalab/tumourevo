@@ -11,7 +11,7 @@ workflow FORMATTER {
     take:
         input
         extension
-    
+
     main:
 
         if (extension == "vcf"){
