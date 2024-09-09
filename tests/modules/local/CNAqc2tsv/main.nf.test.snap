@@ -5,21 +5,27 @@
                 "0": [
                     [
                         {
-                            "id": "idProva",
+                            "id": "MSeq_Set06_Set6_42",
+                            "dataset": "MSeq",
+                            "patient": "Set06",
                             "tumour_sample": "Set6_42",
                             "cancer_type": "PANCANCER"
                         },
-                        "idProva_snv.rds:md5,c4b77e75362923a79167f239ef6f9415"
+                        "MSeq_Set06_Set6_42_joint_table.tsv:md5,c4ce0ff591c005bea2922ab991394690",
+                        "Set6_42"
                     ]
                 ],
-                "rds": [
+                "tsv": [
                     [
                         {
-                            "id": "idProva",
+                            "id": "MSeq_Set06_Set6_42",
+                            "dataset": "MSeq",
+                            "patient": "Set06",
                             "tumour_sample": "Set6_42",
                             "cancer_type": "PANCANCER"
                         },
-                        "idProva_snv.rds:md5,c4b77e75362923a79167f239ef6f9415"
+                        "MSeq_Set06_Set6_42_joint_table.tsv:md5,c4ce0ff591c005bea2922ab991394690",
+                        "Set6_42"
                     ]
                 ]
             }
@@ -28,6 +34,6 @@
             "nf-test": "0.9.0",
             "nextflow": "23.10.1"
         },
-        "timestamp": "2024-07-23T11:25:56.188604711"
+        "timestamp": "2024-08-29T12:06:24.433060716"
     }
 }

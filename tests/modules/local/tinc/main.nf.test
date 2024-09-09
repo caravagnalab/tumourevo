@@ -1,9 +1,11 @@
 nextflow_process {
-    name "Test Process VCF_PROCESSING (vcf2CNAqc)"
-    script "modules/local/vcf2CNAqc/main.nf"
-    process "VCF_PROCESSING"
+
+    name "Test Process TINC"
+    script "modules/local/tinc/main.nf"
+    process "TINC"
 
     test("Should run without failures") {
+
         when {
             params {
                 // define module specific parameters here. Example:
@@ -20,10 +22,13 @@ nextflow_process {
                     cancer_type: "PANCANCER" 
                 ]
                 
-                vcf = file(params.local_testdata_base_path + "/from_ensembleVEP/MSeq_Set06_Set6_42.vcf.gz", checkIfExists: true)
-                tbi = file(params.local_testdata_base_path + "/from_ensembleVEP/MSeq_Set06_Set6_42.vcf.gz.tbi", checkIfExists: true)
+                // From cna2cnaqc
+                cna_rds = file(params.local_testdata_base_path + "/from_cna2CNAqc/MSeq_Set06_Set6_42_cna.rds", checkIfExists: true)
+                // From vcf2cnaqc
+                snv_rds = file(params.local_testdata_base_path + "/from_dndscv/MSeq_Set06_Set6_42_dnds.rds", checkIfExists: true)
+                
                 // Create a tuple with metadata and file path
-                input[0] = tuple(meta, vcf, tbi)
+                input[0] = tuple(meta, cna_rds, snv_rds)
                 """
             }
         }
@@ -36,3 +41,7 @@ nextflow_process {
     }
 
 }
+
+/** Infos:
+*   it requires at least 4 cores to run!
+*/

@@ -9,23 +9,23 @@
                             "dataset": "MSeq",
                             "patient": "Set06",
                             "tumour_sample": "Set6_42",
-                            "normal_sample": "54_N",
-                            "cancer_type": "PANCANCER"
+                            "cancer_type": "PANCANCER",
+                            "cna_caller": "sequenza"
                         },
-                        "MSeq_Set06_Set6_42_dnds.rds:md5,1e445e25de56e28a62ce14dd1b3c699d"
+                        "MSeq_Set06_Set6_42_cna.rds:md5,3274b43f2743dc170d5957329d64b455"
                     ]
                 ],
-                "dnds_rds": [
+                "rds": [
                     [
                         {
                             "id": "MSeq_Set06_Set6_42",
                             "dataset": "MSeq",
                             "patient": "Set06",
                             "tumour_sample": "Set6_42",
-                            "normal_sample": "54_N",
-                            "cancer_type": "PANCANCER"
+                            "cancer_type": "PANCANCER",
+                            "cna_caller": "sequenza"
                         },
-                        "MSeq_Set06_Set6_42_dnds.rds:md5,1e445e25de56e28a62ce14dd1b3c699d"
+                        "MSeq_Set06_Set6_42_cna.rds:md5,3274b43f2743dc170d5957329d64b455"
                     ]
                 ]
             }
@@ -34,6 +34,6 @@
             "nf-test": "0.9.0",
             "nextflow": "23.10.1"
         },
-        "timestamp": "2024-08-30T12:53:22.924122477"
+        "timestamp": "2024-08-29T17:12:09.579553143"
     }
 }

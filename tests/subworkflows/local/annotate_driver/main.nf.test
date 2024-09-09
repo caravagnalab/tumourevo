@@ -12,11 +12,10 @@ nextflow_workflow {
                 // outdir = "tests/results"
                 dndscv_refcds_rda = "https://raw.githubusercontent.com/nicola-calonaci/test-datasets/evoverse/data/DRIVER_ANNOTATION/DNDSCV/RefCDS_human_GRCh37_dNdScv.0.1.0.rda"
             }
-
             workflow {
                 """
                 meta = [
-                    id : "idProva",
+                    id : "MSeq_Set06_Set6_42",
                     tumour_sample: "Set6_42",
                     cancer_type: "PANCANCER" 
                 ]
@@ -31,7 +30,6 @@ nextflow_workflow {
                 input[1] = Channel.from(driver_list)
                 input[2] = cds_table
                 input[3] = genome_fasta
-                """
             }
         }
 

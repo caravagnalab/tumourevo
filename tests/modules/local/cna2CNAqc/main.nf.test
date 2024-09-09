@@ -1,7 +1,7 @@
 nextflow_process {
-    name "Test Process VCF_PROCESSING (vcf2CNAqc)"
-    script "modules/local/vcf2CNAqc/main.nf"
-    process "VCF_PROCESSING"
+    name "Test Process CNA_PROCESSING (cna2CNAqc)"
+    script "modules/local/cna2CNAqc/main.nf"
+    process "CNA_PROCESSING"
 
     test("Should run without failures") {
         when {
@@ -16,14 +16,12 @@ nextflow_process {
                     dataset : "MSeq",
                     patient : "Set06",
                     tumour_sample: "Set6_42",
-                    normal_sample: "54_N",
-                    cancer_type: "PANCANCER" 
+                    cancer_type: "PANCANCER" ,
+                    cna_caller : "sequenza"
                 ]
-                
-                vcf = file(params.local_testdata_base_path + "/from_ensembleVEP/MSeq_Set06_Set6_42.vcf.gz", checkIfExists: true)
-                tbi = file(params.local_testdata_base_path + "/from_ensembleVEP/MSeq_Set06_Set6_42.vcf.gz.tbi", checkIfExists: true)
-                // Create a tuple with metadata and file path
-                input[0] = tuple(meta, vcf, tbi)
+                cna_segs = file(params.local_testdata_base_path + '/from_input/Set6_42.smoothedSegs.txt', checkIfExists: true)
+                cna_extra = file(params.local_testdata_base_path + '/from_input/Set6_42_confints_CP.txt', checkIfExists: true)
+                input[0] = tuple(meta, cna_segs, cna_extra)
                 """
             }
         }

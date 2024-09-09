@@ -1,12 +1,14 @@
 nextflow_process {
-    name "Test Process VCF_PROCESSING (vcf2CNAqc)"
-    script "modules/local/vcf2CNAqc/main.nf"
-    process "VCF_PROCESSING"
+
+    name "Test Process GET_POSITIONS"
+    script "modules/local/get_positions/main.nf"
+    process "GET_POSITIONS"
 
     test("Should run without failures") {
+
         when {
             params {
-                // define module specific parameters here. Example:
+                // define module specific parameters here
                 // outdir = "tests/results"
             }
             process {
@@ -19,11 +21,9 @@ nextflow_process {
                     normal_sample: "54_N",
                     cancer_type: "PANCANCER" 
                 ]
-                
-                vcf = file(params.local_testdata_base_path + "/from_ensembleVEP/MSeq_Set06_Set6_42.vcf.gz", checkIfExists: true)
-                tbi = file(params.local_testdata_base_path + "/from_ensembleVEP/MSeq_Set06_Set6_42.vcf.gz.tbi", checkIfExists: true)
-                // Create a tuple with metadata and file path
-                input[0] = tuple(meta, vcf, tbi)
+                rds_list = file(params.local_testdata_base_path + "/from_vcf2CNAqc/MSeq_Set06_Set6_42_snv.rds", checkIfExists: true)
+                sample_list = "Set6_42"
+                input[0] = tuple(meta, rds_list, sample_list)
                 """
             }
         }
