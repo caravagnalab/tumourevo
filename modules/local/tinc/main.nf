@@ -40,21 +40,20 @@ process TINC {
 
     tumor_mutations = all_mutations[[tumor_sample]]\$mutations %>% 
       select(chr, from, to, ref, alt, NV, DP, NR, VAF) %>% 
+      filter(!is.na(DP)) %>%
       rename(t_alt_count = NV, t_ref_count = NR, t_tot_count = DP, t_vaf = VAF)
 
     normal_mutations = all_mutations[[normal_sample]]\$mutations %>% 
       select(chr, from, to, ref, alt, NV, DP, NR, VAF) %>% 
+      filter(!is.na(DP)) %>%
       rename(n_alt_count = NV, n_ref_count = NR, n_tot_count = DP, n_vaf = VAF)
 
-    input_mut = dplyr::full_join(tumor_mutations, normal_mutations, by = c("chr", "from", "to", "ref", "alt")) %>% 
-        #mutate(VAF.x = case_when(is.na(VAF.x) ~ 0, .default = VAF.x)) %>%
-        #mutate(VAF.y = case_when(is.na(VAF.y) ~ 0, .default = VAF.y)) %>%
-        #mutate(VAF.x = as.numeric(VAF.x), VAF.y = as.numeric(VAF.y))
-        mutate(t_vaf = case_when(is.na(t_vaf) ~ 0, .default = t_vaf)) %>%
-        mutate(n_vaf = case_when(is.na(n_vaf) ~ 0, .default = n_vaf)) %>%
+    input_mut = dplyr::full_join(tumor_mutations, normal_mutations, by = c("chr", "from", "to", "ref", "alt")) %>%
+        mutate(t_vaf = case_when(is.na(t_vaf) ~ 1e-5, .default = t_vaf)) %>%
+        mutate(n_vaf = case_when(is.na(n_vaf) ~ 1e-5, .default = n_vaf)) %>%
         mutate(t_vaf = as.numeric(t_vaf), n_vaf = as.numeric(n_vaf)) %>%
-        filter(t_vaf > 0)
-
+        filter(t_vaf > 0) %>% 
+        mutate(t_alt_count = as.numeric(t_alt_count), t_ref_count = as.numeric(t_ref_count), n_tot_count = as.numeric(n_tot_count), n_ref_count = as.numeric(n_ref_count))
 
     CNAs = readRDS("$cna_RDS")\$segments
     TINC_fit = TINC::autofit(input = input_mut, 
