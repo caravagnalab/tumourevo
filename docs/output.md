@@ -25,15 +25,17 @@ Intermediate steps of the pipeline will output unpublished results which will be
 The pipeline is built using [Nextflow](https://www.nextflow.io/) and consists in five main subworkflows:
 
 * [Variant Annotation](#variant-annotation)
+* [Driver Annotation](#driver-annotation)
 * [QC](#qc)
 * [Signature Deconvolution](#signature-deconvolution)
 * [Subclonal Deconvolution](#subclonal-deconvolution)
+* [Genome Interpreter](#genome-interpreter)
 
 Intermediate steps connetting the main subworkflows will output [unpublished results](#unpublished-results) which will be available in the working directory of the pipeline. These steps consist in:
 
 * [Formatter](#formatter)
 * [Lifter](#lifter)
-* [Driver Annotation](#driver-annotation)
+
 
 ## Variant Annotation
 
@@ -48,7 +50,7 @@ This step starts from VCF files.
 
 **Output directory: `{publish_dir}/VariantAnnotation/VEP/<dataset>/<patient>/<sample>/`**
 
-- `vep.vcf.gz`
+- `{dataset_patient_sample}.vcf.gz`
   - annotated VCF file
 
 
@@ -113,10 +115,50 @@ In this step, all retrieved mutations are joined with original mutations present
   - RDS containing shared and private mutations
 
 </details> -->
+## Driver Annotation
+Add description of this step
+
+### Build reference
+Add description
+
+<details markdown="1">
+<summary>Output files for all samples</summary>
+
+**Output directory: `{publish_dir}/DriverAnnotation/BuildReference/<dataset>/<patient>/<sample>/`**
+- `fit.rds`
+  - add description
+- `plot.rds`
+  - add description
+</details>
+
+### dndsCV
+Add description
+
+<details markdown="1">
+<summary>Output files for all samples</summary>
+
+**Output directory: `{publish_dir}/DriverAnnotation/DNDSCV/<dataset>/<patient>/<sample>/`**
+- `dnds.rds`
+  - DNDSCV object in RDS format
+</details>
 
 ## QC
 The QC subworkflows requires in input a segmentation file from allele-specific copy number callers (either [Sequenza](https://sequenzatools.bitbucket.io/#/home), [ASCAT](https://github.com/VanLoo-lab/ascat)) and the joint VCF file from [join_positions](#join_positions) subworkflow. The QC sub-workflows first conduct quality control on CNV and somatic mutation data for individual samples in [CNAqc](#cnaqc) step, and subsequently summarize validated information at patient level in [join_CNAqc](#join_cnaqc) step.
 The QC subworkflow is a crucial step of the pipeline as it ensures high confidence in identifying clonal and subclonal events while accounting for variations in tumor purity.
+
+### TINC
+[TINC](https://caravagnalab.github.io/TINC/index.html) is a package to calculate the contamination of tumor DNA in a matched normal sample. TINC provides estimates of the proportion of cancer cells, containing the normal sample, and the proportion of cancer cells in the tumor sample (tumor purity).
+
+<details markdown="1">
+<summary>Output files for all samples</summary>
+
+**Output directory: `{publish_dir}/QC/tinc/<dataset>/<patient>/<sample>/`**
+- `{dataset_patient_sample}_fit.rds`
+  - TINC report contianign TIN and TIT estimates in RDS;
+- `{dataset_patient_sample}_plot.rds`
+  - TINC report contianign TIN and TIT estimates in PDF.
+</details>
+
 
 ### CNAqc
 [CNAqc](https://caravagnalab.github.io/CNAqc/) is a package to quality control (QC) bulk cancer sequencing data for validating copy number segmentations against variant allele frequencies of somatic mutations.
@@ -124,32 +166,26 @@ The QC subworkflow is a crucial step of the pipeline as it ensures high confiden
 <details markdown="1">
 <summary>Output files for all samples</summary>
 
-<!-- **Output directory: `{outdir}/subclonal_deconvolution/mobster/<dataset>/<patient>/<sample>/`** -->
 **Output directory: `{publish_dir}/QC/CNAqc/<dataset>/<patient>/<sample>/`**
-- `plot_data.rds`
+- `{dataset_patient_sample}_data_plot.rds`
   - CNAqc report with genome wide mutation and allele specific copy number plots in RDS
-- `data.pdf`
-  - CNAqc report with genome wide mutation and allele specific copy number plots in PDF
-- `plot_qc.rds`
+<!-- - `{dataset_patient_sample}_data.pdf`
+  - CNAqc report with genome wide mutation and allele specific copy number plots in PDF -->
+- `{dataset_patient_sample}_qc_plot.rds`
   - QC step report resulting from peak analysis in RDS
-- `qc.pdf`
-  - QC step report resulting from peak analysis in PDF
-- `qc.rds`
+- `{dataset_patient_sample}_qc.rds`
   -  CNAqc RDS object
 </details>
 
 ### join_CNAqc
 This module creates a multi-CNAqc object for patient by summarizing the quality check performed at the single sample level. For more information about the strucutre of multi-CNAqc object see [CNAqc documentation]((https://caravagnalab.github.io/CNAqc/)).
 
-<!-- **Output directory: `results/datasetID/patientID/join_CNAqc`**
-* `multi_cnaqc.rds`
-  * multi-CNAqc object  -->
 
 <details markdown="1">
 <summary>Output files for all patients</summary>
 
 **Output directory: `{publish_dir}/QC/join_CNAqc/<dataset>/<patient>/`**
-- `multi_cnaqc.rds`
+- `{dataset_patient}_multi_cnaqc.rds`
   - multi-CNAqc object
 </details>
 
@@ -198,7 +234,12 @@ The results of this step are collected in `{pubslish_dir}/signature_deconvolutio
 
 ## Subclonal Deconvolution
 
-The subclonal deconvolution subworkflow requires in input a joint `mCNAqc` object resulting from the [join_CNAqc](#join_cnaqc) step. Two different modalities can be specified by the user using `--mode` parameter: single sample and multi sample mode.
+The subclonal deconvolution subworkflow requires in input a joint `mCNAqc` object resulting from the [join_CNAqc](#join_cnaqc) step. The subworkflow will perform multi-sample deconvolution if more than one sample for each patient is present. The user can run MOBSTER before performing subclonal deconvolution in three different ways by specifing the parameter `--remove_tail`.
+
+> **NB:** If `--remove_tail all,once` and MOBSTER is not specified in the tools for subclonal deconvolution, the pipeline will throw an error.
+
+
+<!-- Two different modalities can be specified by the user using `--mode` parameter: single sample and multi sample mode. -->
 <!-- If `--mode singlesample` is provided, each sample is analysed individually providing a snapshot of clonal and subclonal diversity starting from allele frequency of detected somatic variants. When multiple samples from the same patient are provided, the user may take advantage of the multisample modality, by setting `--mode multisample`. -->
 <!-- This approach allows for a more detailed and accurate identification of subclonal populations, as it can capture spatial and temporal heterogeneity within the tumor. By integrating data across multiple samples, it improves the resolution of subclonal structures and provides insights into the evolutionary dynamics and progression of the tumor. -->
 
@@ -206,29 +247,35 @@ The subclonal deconvolution subworkflow requires in input a joint `mCNAqc` objec
 
 The results of subclonal decovnultion step are collected in `{publish_dir}/subclonal_deconvolution/` directory.
 
-### Single sample
+<!-- ### Single sample
 
-If `--mode singlesample` is provided, each sample is analysed individually providing a snapshot of clonal and subclonal diversity starting from allele frequency of detected somatic variants. Available tools provides different ways of performing subclonal deconvolution. Both MOBSTER and VIBER model mutation counts as mixture of binomial distribution; however, MOBSTER includes a pareto Type-I power law distribution to model within-clone neutral dynamics. Instead, PyClone-VI models clonal architecture taking into account variant allele frequencies corrected for coincident copy number variation.
+If `--mode singlesample` is provided, each sample is analysed individually providing a snapshot of clonal and subclonal diversity starting from allele frequency of detected somatic variants. Available tools provides different ways of performing subclonal deconvolution. Both MOBSTER and VIBER model mutation counts as mixture of binomial distribution; however, MOBSTER includes a pareto Type-I power law distribution to model within-clone neutral dynamics. Instead, PyClone-VI models clonal architecture taking into account variant allele frequencies corrected for coincident copy number variation. -->
 
-#### MOBSTER
+### MOBSTER
 
-[MOBSTER](https://caravagnalab.github.io/mobster/) processes mutant allelic frequencies to identify and remove neutral tails from the input data, so that subclonal reconstruction algorithms can be applied downstream to find subclones from the processed read counts.
+[MOBSTER](https://caravagnalab.github.io/mobster/) processes mutant allelic frequencies to identify and remove neutral tails from the input data, so that subclonal reconstruction algorithms can be applied downstream to find subclones from the processed read counts. 
 
 <details markdown="1">
 <summary>Output files for all samples</summary>
 
 **Output directory: `{publish_dir}/subclonal_deconvolution/mobster/<dataset>/<patient>/<sample>/`**
 
-- `mobsterh_st_fit.rds`
+- `{dataset_patient_sample}_mobsterh_st_fit.rds`
   - RDS object contains all fits of subclonal deconvolution
-- `mobsterh_st_best_fit.rds`
+- `{dataset_patient_sample}_mobsterh_st_best_fit.rds`
   - RDS object contains best fit of subclonal deconvolution
-- `mobsterh_st_best_fit_plots.rds`
-  - summary plots of best fit in RDS
+- `{dataset_patient_sample}_plots.rds`
+  - summary plots of all and best fits in RDS
+- `{dataset_patient_sample}_REPORT_plots_mobster.rds`
+  - report of mobster deconvolution in RDS
+- `{dataset_patient_sample}_REPORT_plots_mobster.pdf`
+  - report of mobster deconvolution in PDF
+- `{dataset_patient_sample}_REPORT_plots_mobster.png`
+  - report of mobster deconvolution in PNG
 
 </details>
 
-#### PyClone-VI
+### PyClone-VI
 
 [PyClone-VI](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-020-03919-2) is a computationally efficient Bayesian statistical method for inferring the clonal population structure of cancers, by considering allele fractions and coincident copy number variation using a variational inference approach.
 
@@ -237,13 +284,15 @@ If `--mode singlesample` is provided, each sample is analysed individually provi
 
 **Output directory: `{publish_dir}/subclonal_deconvolution/pyclonevi/<dataset>/<patient>/<sample>/`**
 
-- `all_fits.h5`
+- `{dataset_patient,dataset_patient_sample}_all_fits.h5`
   - HDF5 file for all possible fit and summary stats
-- `best_fit.txt`
+- `{dataset_patient,dataset_patient_sample}_best_fit.txt`
   - TSV file for the best fit
+- `{dataset_patient,dataset_patient_sample}_cluster_table.csv`
+  - CSV file wtih clone assignment
 </details>
 
-#### VIBER
+### VIBER
 
 [VIBER](https://caravagnalab.github.io/VIBER/index.html) is an R package that implements a variational Bayesian model to fit multi-variate Binomial mixtures. In the context of subclonal deconvolution in singlesample modality, VIBER models read counts that are associated with the most represented karyotype.
 
@@ -252,25 +301,35 @@ If `--mode singlesample` is provided, each sample is analysed individually provi
 
 **Output directory: `{publish_dir}/subclonal_deconvolution/viber/<dataset>/<patient>/<sample>/`**
 
-- `viber_best_st_fit.rds`
+- `{dataset_patient,dataset_patient_sample}_viber_best_st_fit.rds`
   - RDS file for best standard fit
-- `viber_best_st_fit_plots.rds`
-  - RDS file containing summary plots for best standard fit
-- `viber_best_st_heuristic_fit.rds`
+- `{dataset_patient,dataset_patient_sample}_viber_best_st_heuristic_fit.rds`
   - RDS file for best standard fit with applied heuristic
-- `viber_best_st_heuristic_fit_plots.rds`
-  - RDS file containing summary plots for best standard fit  with applied heuristic
+- `{dataset_patient,dataset_patient_sample}_viber_best_st_fit_plots.rds`
+  - RDS file containing summary plots for best standard fit (if multiple samples)
+- `{dataset_patient,dataset_patient_sample}_viber_best_st_heuristic_fit_plots.rds`
+  - RDS file containing summary plots for best standard fit with applied heuristic (if multiple samples)
+- `{dataset_patient,dataset_patient_sample}_viber_best_st_mixing_plots.rds`
+  - RDS file containing mixing proportion plot for best standard fit (if single samples)
+- `{dataset_patient,dataset_patient_sample}_viber_best_st_heuristic_mixing_plots.rds`
+  - RDS file containing mixing proportion plot for best standard fit with applied heuristic (if single samples)
+- `{dataset_patient,dataset_patient_sample}_REPORT_plots_viber.rds`
+  - report of VIBER deconvolution in RDS
+- `{dataset_patient,dataset_patient_sample}_REPORT_plots_viber.pdf`
+  - report of VIBER deconvolution in PDF
+- `{dataset_patient,dataset_patient_sample}_REPORT_plots_viber.png`
+  - report of VIBER deconvolution in PNG
 
 </details>
 
-### Multi samples
+<!-- ### Multi samples
 
 When multiple samples for the same patient are available (e.g. multi-regional or longitudinal experiment), we can be intersted in visualizing the tumor evolution at different level. In multi sample mode, a patient-specific subclonal deconvolution is perfomed.
 
 > **NB:** At this stage, it is strongly recommended that the user conducts single-sample subclonal deconvolution using `mosbter` to eliminate mutations assigned to the neutral tail before proceeding with multi-variate clone identification.
-> This process ensures a cleaned signal for downstream analyses aimed at focusing on functional intratumor heterogeneity.
+> This process ensures a cleaned signal for downstream analyses aimed at focusing on functional intratumor heterogeneity.  -->
 
-#### Pyclone-VI
+<!-- #### Pyclone-VI
 
 This folder contains the results of multivariate analysis using Pyclone-VI, which can be run prior to removal of mutations assigned to tail in all the samples.
 
@@ -282,7 +341,7 @@ This folder contains the results of multivariate analysis using Pyclone-VI, whic
 <!-- - `<patient>_with_mobster_all_fits.h5`
   - HDF5 file for all possible fit
 - `<patient>_with_mobster_best_fit.txt`
-  - TSV file for the best fit -->
+  - TSV file for the best fit
 
 - `all_fits.h5`
   - HDF5 file for all possible fit and summary stats
@@ -301,9 +360,9 @@ This folder contains the results of multivariate analysis using Pyclone-VI, whic
 - `without_mobster_best_fit.txt`
   - TSV file for the best fit
   
-</details>
+</details> -->
 
-#### VIBER
+<!-- #### VIBER
 
 This folder contains the results of multivariate analysis using VIBER, which can be run prior to removal of mutations assigned to tail in all the samples.
 
@@ -338,7 +397,7 @@ This folder contains the results of multivariate analysis using VIBER, which can
 - `viber_without_mobster_best_st_heuristic_mixing_plots.rds`
   - RDS file containing mixing proportion for best standard fit  with applied heuristic
   
-</details>
+</details> -->
 
 
 ## Clone Tree Inference
@@ -349,22 +408,28 @@ Subclonal deconvolution results are used to build clone tree from both single sa
 
 VIBER and MOBSTER fits are already suitable for ctree analysis.
 
-### Single sample
+<!-- ### Single sample -->
 <details markdown="1">
 <summary>Output files for all samples</summary>
 
-**Output directory: `{publish_dir}/subclonal_deconvolution/ctree/<patient>/<sample>/`**
+**Output directory: `{publish_dir}/subclonal_deconvolution/ctree/<dataset>/<patient>/<sample>/`**
 
 - `ctree_<tool>.rds`
   - RDS file containing inferred clone tree
 - `ctree_<tool>_plots.rds`
-  - RDS file for single sample clone tree plot
-- `ctree_input_pyclonevi.csv`
-  - CSV file required for clone tree inference from pyclone
+  - RDS file for clone tree plot
+- `REPORT_plots_ctree_<tool>.rds`
+  - RDS file for ctree report
+- `REPORT_plots_ctree_<tool>.pdf`
+  - PDF file for ctree report
+- `REPORT_plots_ctree_<tool>.png`
+  - PNG file for ctree report
+<!-- - `ctree_input_pyclonevi.csv`
+  - CSV file required for clone tree inference from pyclone -->
 
 </details>
 
-### Multi sample
+<!-- ### Multi sample
 <details markdown="1">
 <summary>Output files for all patients</summary>
 
@@ -378,7 +443,24 @@ VIBER and MOBSTER fits are already suitable for ctree analysis.
   - CSV file required for clone tree inference from pyclone
 
 
+</details> -->
+## Genome Interpreter
+
+Add description
+
+<details markdown="1">
+<summary>Output files for all samples</summary>
+
+**Output directory: `{publish_dir}/subclonal_deconvolution/ctree/<dataset>/<patient>/<sample>/`**
+
+- `name_of_the_file`
+  - add description on this part
+
+<!-- - `ctree_input_pyclonevi.csv`
+  - CSV file required for clone tree inference from pyclone -->
+
 </details>
+
 
 ## Unpublished results
 
@@ -468,7 +550,7 @@ In this step, all retrieved mutations are joined with original mutations present
   - RDS containing shared and private mutations
 
 </details>
-
+<!-- 
 
 ### Driver Annotation
 
@@ -480,4 +562,4 @@ Variants are annotated according to [IntOGen latest release](https://www.nature.
 **Output directory: `{work_dir}/DriverAnnotation/<dataset>/<patient>/<sample>/`**
 * `annotated_drivers.rds`
   * RDS file containing variants with annotated drivers.
-</details>
+</details> -->
