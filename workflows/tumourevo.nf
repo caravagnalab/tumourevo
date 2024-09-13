@@ -15,6 +15,7 @@ workflow TUMOUREVO {
     input_samplesheet
     fasta
     drivers_table
+    vep_cache
   
   main:
     input = input_samplesheet.map{ meta, vcf, tbi, bam, bai, cna_segs, cna_extra -> 
@@ -50,10 +51,10 @@ workflow TUMOUREVO {
     ch_extra_files = []
     VCF_ANNOTATE_ENSEMBLVEP(input_vcf, 
                             fasta,
-                            params.genome,
-                            params.species,
+                            params.vep_genome,
+                            params.vep_species,
                             params.vep_cache_version,
-                            params.vep_dir_cache,
+                            vep_cache,
                             ch_extra_files)
     vcf_file = FORMATTER_VCF(VCF_ANNOTATE_ENSEMBLVEP.out.vcf_tbi, "vcf")
     FORMATTER_CNA(input_cna, "cna")
@@ -83,5 +84,5 @@ workflow TUMOUREVO {
     in_cnaqc = cna_out.join(annotation)
     QC(in_cnaqc)
     SUBCLONAL_DECONVOLUTION(QC.out.rds_join)
-    // SIGNATURE_DECONVOLUTION(QC.out.rds_join)
+    //SIGNATURE_DECONVOLUTION(QC.out.rds_join)
 }
