@@ -71,5 +71,5 @@ RUN chmod -R ugo+rwX $HOME
 #CMD ["/bin/bash", "-c", "source activate sigprofiler && bash"]
 
 # Set the default command to start a bash shell
-#CMD ["bash"]
-CMD ["python"]
+CMD ["bash"]
+
