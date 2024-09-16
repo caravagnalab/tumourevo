@@ -5,7 +5,6 @@ include { LIFTER } from "${baseDir}/subworkflows/local/lifter/main"
 include { DRIVER_ANNOTATION } from "${baseDir}/subworkflows/local/annotate_driver/main"
 include { FORMATTER as FORMATTER_RDS} from "${baseDir}/subworkflows/local/formatter/main"
 include { QC } from "${baseDir}/subworkflows/local/QC/main"
-
 include { SUBCLONAL_DECONVOLUTION } from "${baseDir}/subworkflows/local/subclonal_deconvolution/main"
 include { SIGNATURE_DECONVOLUTION } from "${baseDir}/subworkflows/local/signature_deconvolution/main"
 
@@ -68,21 +67,17 @@ workflow TUMOUREVO {
 
     out_lifter = LIFTER(join_input.to_lift, fasta) 
     rds_input = join_input.multisample.map{ meta, rds, bam, bai -> 
-            [meta.subMap('dataset', 'patient', 'id', 'normal_sample', 'tumour_sample'), rds]
+            [meta, rds]
             }
-
     vcf_rds = rds_input.concat(out_lifter)
 
-    //cds = []
-    //annotation = DRIVER_ANNOTATION(vcf_rds, drivers_table, cds, fasta)
-
-    annotation = vcf_rds
-    cna_out = FORMATTER_CNA.out.map{ meta, rds -> 
-        [meta.subMap('dataset', 'patient', 'id', 'normal_sample', 'tumour_sample'), rds]
-        }
+    cds = []
+    annotation = DRIVER_ANNOTATION(vcf_rds, drivers_table, cds, fasta)
+    
+    cna_out = FORMATTER_CNA.out
 
     in_cnaqc = cna_out.join(annotation)
     QC(in_cnaqc)
-    SUBCLONAL_DECONVOLUTION(QC.out.rds_join)
+    //SUBCLONAL_DECONVOLUTION(QC.out.rds_join)
     //SIGNATURE_DECONVOLUTION(QC.out.rds_join)
 }
