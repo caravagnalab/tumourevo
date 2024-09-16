@@ -1,4 +1,4 @@
-process SIG_PROFILER {
+process SIGPROFILER {
     tag "$meta.id"
     container = 'docker://katiad/sigprofiler:latest'
     //container = 'docker://katiad/sigprofiler:dev1'

@@ -4,7 +4,7 @@
 
 include { FORMATTER as FORMATTER_RDS} from "../../../subworkflows/local/formatter/main"
 include { SPARSE_SIGNATURES } from "../../../modules/local/SparseSignatures/main"
-//include { SIG_PROFILER } from "../../modules/local/SigProfiler/main"
+include { SIGPROFILER } from "../../modules/local/SigProfiler/SigProfiler/main"
 
 
 workflow SIGNATURE_DECONVOLUTION {
@@ -36,11 +36,11 @@ workflow SIGNATURE_DECONVOLUTION {
     bestConf
     sign_cv
 
-    //if (params.tools && params.tools.split(',').contains('sigprofiler')) {
-    //    out = FORMATTER_RDS(joint_table, "rds")
-    //    SigProfiler_out = SIGPROFILER(out) // run SigProfiler
-    //  
-    //    emit:
-    //    SigProfiler_out
-    //}
+    if (params.tools && params.tools.split(',').contains('sigprofiler')) {
+        out = FORMATTER_RDS(joint_table, "rds")
+        SigProfiler_out = SIGPROFILER(out) // run SigProfiler
+      
+        emit:
+        SigProfiler_out
+    }
 }

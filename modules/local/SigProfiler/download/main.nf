@@ -7,7 +7,7 @@ process DOWNLOAD_SIGPROF {
        tuple val(meta)
 
     output:
-       tuple val(datasetID), path("signature_deconvolution/Sigprofiler/"), emit: genome 
+       tuple val(datasetID), path("signature_deconvolution/Sigprofiler/genome/"), emit: genome 
      
       
     script:
