@@ -83,13 +83,13 @@ results         # Finished results (configurable, see below)
 
 ## Input: Sample sheet configurations
 
-You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use the parameter `--samples` to specify its location. It has to be a comma-separated file with at least 5 columns, and a header row as shown in the examples below.
+You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use the parameter `--input` to specify its location. It has to be a comma-separated file with at least 5 columns, and a header row as shown in the examples below.
 
 It is recommended to use the absolute path of the files, but a relative path should also work.
 
 For the joint analysis of multiple samples, a tumor BAM file is required for each sample, such that the number of reads of a private mutation can be retrieved for all the samples thorugh `mpileup`.
 
-Multiple samples from the same patient must be specified with the same `dataset` ID, `patient` ID, and a different `sample` ID.
+Multiple samples from the same patient must be specified with the same `dataset` ID, `patient` ID, and a different `tumour_sample` ID. `normal_sample` columns is required. 
 
 Multiple patients from the same dataset must be specified with the same `dataset` ID, and a different `patient` ID.
 
@@ -103,11 +103,13 @@ Output from different workflows, subworkflows and modules will be in a specific 
 | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `dataset` | **Dataset ID**; when sequencing data from multiple datasets is analysed, it designates the source dataset of each patient; must be unique for each dataset, but one dataset can contain samples from multiple patients. <br /> _Required_                                                                                      |
 | `patient` | **Patient ID**; designates the patient/subject; must be unique for each patient, but one patient can have multiple samples (e.g. from multiple regions or multiple time points). <br /> _Required_                                                                                                                                |
-| `sample`  | **Sample ID** for each sample; more than one sample for each subject is possible. <br /> _Required_                                              |
+| `tumour_sample`  | **Sample ID** for each sample; more than one sample for each subject is possible. <br /> _Required_
+| `normal_sample` | **Normal sample ID** of each sample. <br /> _Required_      |                                 |
 | `vcf`  | Full path to the vcf file. <br /> _Required_                                                                                                        |
-| `vcf_tbi`  | Full path to the vcf `tabix` index file. <br /> _Required_                                                                                      |
-|`cnv_caller`| Name of the copy number caller used to generate your data. <br /> _Required_ |
-| `cnv_res`  | Full path to the directory containing text files from copy-number calling. <br /> _Required_ |
+| `tbi`  | Full path to the vcf `tabix` index file. <br /> _Required_                                                                                      |
+|`cna_caller`| Name of the copy number caller used to generate your data. <br /> _Required_ |
+| `cna_segments` | Full path to the segmentation files and copy number state from copy-number calling. <br /> _Required_ |
+| `cna_extra` | Full path to files including the ploidy and purity estimate from the copy-number caller. <br /> _Required_ |
 | `cancer_type` | Tumour type (either `PANCANCER` or one of the tumor type present in the driver table) <br /> *Required* |
 | `tumour_bam`  | Full path to the tumour bam file. <br /> _Required for `--mode multisample`_                                                       |
 | `tumour_bai`  | Full path to the tumour bam index file. <br /> _Required for `--mode multisample `_                                              |

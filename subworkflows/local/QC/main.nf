@@ -13,6 +13,13 @@ workflow QC {
 
     main:
         TINC(input)
+
+        contamination = Channel.of(TINC.out.tinc_csv)
+            .splitCsv( header: true )
+            .view( cont -> "${cont.normal_contamination}" )
+    
+        // input.map {meta, normal_contamination -> [ meta + ] }
+
         CNAQC(input)
 
         in_join = CNAQC.out.qc_rds.map{ meta, rds -> 
