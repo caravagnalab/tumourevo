@@ -52,8 +52,14 @@ process TINC {
         mutate(t_vaf = case_when(is.na(t_vaf) ~ 1e-5, .default = t_vaf)) %>%
         mutate(n_vaf = case_when(is.na(n_vaf) ~ 1e-5, .default = n_vaf)) %>%
         mutate(t_vaf = as.numeric(t_vaf), n_vaf = as.numeric(n_vaf)) %>%
-        filter(t_vaf > 0) %>% 
-        mutate(t_alt_count = as.numeric(t_alt_count), t_ref_count = as.numeric(t_ref_count), n_tot_count = as.numeric(n_tot_count), n_ref_count = as.numeric(n_ref_count))
+        filter(!(is.na(t_alt_count))) %>%
+        filter(!(is.na(n_alt_count))) %>%
+        #mutate(t_alt_count = case_when(is.na(t_alt_count) ~ 0, .default = t_alt_count)) %>%
+        #mutate(t_ref_count = case_when(is.na(t_ref_count) ~ 0, .default = t_ref_count)) %>%
+        #mutate(n_alt_count = case_when(is.na(n_alt_count) ~ 0, .default = n_alt_count)) %>%
+        #mutate(n_ref_count = case_when(is.na(n_ref_count) ~ 0, .default = n_ref_count)) %>%
+        mutate(t_alt_count = as.numeric(t_alt_count), t_ref_count = as.numeric(t_ref_count), n_tot_count = as.numeric(n_tot_count), n_ref_count = as.numeric(n_ref_count)) %>%
+        filter(t_vaf > 0)
 
     CNAs = readRDS("$cna_RDS")\$segments
     TINC_fit = TINC::autofit(input = input_mut, 

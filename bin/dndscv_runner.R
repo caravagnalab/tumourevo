@@ -143,7 +143,7 @@ if (mutations_with_chr) {
     
 output_mutations <- left_join(mutations, annotation)
 output <- input
-output[[sample_id]]$mutations <- mutations
+output[[sample_id]]$mutations <- output_mutations #mutations
 
 # add globaldnds as a data.frame
 output[[sample_id]]$globaldnds <- dndscv_result$globaldnds

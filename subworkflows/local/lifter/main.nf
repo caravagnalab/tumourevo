@@ -2,7 +2,8 @@
 // LIFTER SUB-WORKFLOW
 //
 
-include { GET_POSITIONS } from "../../../modules/local/get_positions/main"
+include { GET_POSITIONS_ALL } from "../../../modules/local/get_positions/main"
+include { GET_POSITIONS_REL } from "../../../modules/local/get_positions/main_rel"
 include { BCFTOOLS_MPILEUP } from '../../../modules/nf-core/bcftools/mpileup/main'
 include { JOIN_POSITIONS } from "../../../modules/local/join_positions/main"
 
@@ -16,35 +17,32 @@ workflow LIFTER {
         out = Channel.empty()
 
         bam = data.map{ meta, rds, bam, bai -> 
-            [meta.subMap('dataset', 'patient', 'id', 'normal_sample', 'tumour_sample'), bam]
+            [meta, bam]
         }
 
         rds = data.map{ meta, rds, bam, bai -> 
+                [meta, rds]
+        }
+
+        all_rds = data.map{ meta, rds, bam, bai -> 
             meta = meta + [id: "${meta.dataset}_${meta.patient}"]
-            sample = meta.tumour_sample
-            [meta.subMap('dataset', 'patient', 'id', 'normal_sample'), rds, sample]}
+            [meta.subMap('dataset', 'patient', 'id', 'normal_sample'), rds]}
             | groupTuple
 
-        GET_POSITIONS(rds)
-        all_pos = GET_POSITIONS.out.all_pos.transpose().map{meta, rds, sample -> 
-            [meta, rds]
-        }
         
-        bed = GET_POSITIONS.out.bed.transpose().map{ meta, bed, sample ->
-            meta = meta + [tumour_sample: "${sample}".toString()]
-            meta = meta + [id: "${meta.dataset}_${meta.patient}_${meta.tumour_sample}"]
-            [meta, bed]
+
+        GET_POSITIONS_ALL(all_rds)
+        all_pos = GET_POSITIONS_ALL.out.all_pos.transpose().map{ meta, rds -> 
+                [rds]
         }
-        
-        in_pileup = bam.join(bed, by: [0])
+
+        GET_POSITIONS_REL(rds.combine(all_pos))
+        in_pileup = bam.join(GET_POSITIONS_REL.out.bed, by: [0])
 
         BCFTOOLS_MPILEUP(in_pileup, fasta, false)
-        tmp_data = data.map{ meta, rds, bam, bai -> 
-            [meta.subMap('dataset', 'patient', 'id', 'normal_sample', 'tumour_sample'), rds]
-        }
+        join = rds.join(BCFTOOLS_MPILEUP.out.vcf, by:[0])
 
-        join = tmp_data.join(BCFTOOLS_MPILEUP.out.vcf)
-        out = JOIN_POSITIONS(join, all_pos)
+        out = JOIN_POSITIONS(join.combine(all_pos))
 
     emit:
         out 

@@ -3,8 +3,7 @@ process JOIN_POSITIONS {
     container = 'docker://lvaleriani/cnaqc:dev1'
 
     input:
-    tuple val(meta), path(rds), path(vcf_pileup) 
-    tuple val(meta2), path(positions)
+    tuple val(meta), path(rds), path(vcf_pileup), path(positions)
  
     output:
 
@@ -17,15 +16,10 @@ process JOIN_POSITIONS {
 
     """
     #!/usr/bin/env Rscript
-
     library(tidyverse)
     library(vcfR)
 
-    all_positions = read.table("$positions", header = T) %>% 
-                    dplyr::as_tibble() %>% 
-                    dplyr::mutate(id = paste(chr, from, to, sep = ':')) %>% 
-                    dplyr::select(id, alt)
-    
+    all_positions = readRDS("$positions")
     
     vcf = readRDS("$rds")
     mutations = vcf[["$meta.tumour_sample"]]\$mutations
@@ -62,10 +56,10 @@ process JOIN_POSITIONS {
         stop("Mismatch between the VCF fixed fields and the genotypes, will not process this file.")
    
     pileup_mutations = dplyr::bind_cols(fix_field, gt_field)  %>%
-                dplyr::select(chr, from, to, ref, NV, DP, VAF, dplyr::everything(), -alt) %>%
-                dplyr::mutate(id = paste(chr, from, to, sep = ':'))
+                dplyr::select(chr, from, to, ref, NV, DP, VAF, dplyr::everything(), -alt, -ChromKey) %>%
+                dplyr::mutate(from = from+1, to = to+1)
 
-    bind = inner_join(pileup_mutations, all_positions, by = join_by(id)) %>% select(-id)
+    bind = inner_join(pileup_mutations, all_positions, by = join_by(chr, from, to, ref))
 
     vcf[["$meta.tumour_sample"]]\$mutations = dplyr::bind_rows(mutations, bind)
     saveRDS(file = paste0("$prefix", "_pileup_VCF.rds"), object = vcf)

@@ -1,6 +1,7 @@
-process SIG_PROFILER {
+process SIGPROFILER {
     tag "$meta.id"
-    container = 'docker://katiad/sigprofiler:dev1'
+    container = 'docker://katiad/sigprofiler:latest'
+    //container = 'docker://katiad/sigprofiler:dev1'
 
     input:
        //tuple val(datasetID), val(patientID), val(sampleID), path(joint_table) //from formatter output
@@ -48,7 +49,7 @@ process SIG_PROFILER {
       import multiprocessing
       from SigProfilerExtractor import sigpro as sig
       from SigProfilerMatrixGenerator.scripts import SigProfilerMatrixGeneratorFunc as matGen
-      #from SigProfilerMatrixGenerator import install as genInstall
+      
   
       
       if __name__ == '__main__':    
@@ -78,15 +79,14 @@ process SIG_PROFILER {
           #saving input matrix to txt
           input_data.to_csv("$datasetID/input_data.txt", sep="\\t", index=False, header=True)
 
-          #download desired reference genome
-          #genInstall.install('$reference_genome', rsync=False, bash=True)
 
           #mutation's counts matrix generation
     
           input_matrix = matGen.SigProfilerMatrixGeneratorFunc(
                   project = "$datasetID", 
                   reference_genome = "$reference_genome", 
-                  path_to_input_files = input_path)
+                  path_to_input_files = input_path,
+                  volume = "$volume")
              
 
           # Perform model fitting
