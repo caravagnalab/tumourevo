@@ -6,6 +6,7 @@ process SIGPROFILER {
     input:
        //tuple val(datasetID), val(patientID), val(sampleID), path(joint_table) //from formatter output
        tuple val(meta), path(joint_table)
+       tuple val(meta), path(genome)
 
     output:
        tuple val(datasetID), path("signature_deconvolution/Sigprofiler/$datasetID/SBS96"), emit: signature_SBS96 
