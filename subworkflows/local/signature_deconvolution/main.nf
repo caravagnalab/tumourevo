@@ -47,7 +47,8 @@ workflow SIGNATURE_DECONVOLUTION {
 
             // Check if the pre-installed genome path exists
             if (!file(installed_genome_path).exists()) {
-                error "The pre-installed genome path $installed_genome_path does not exist! Please install the genome or set download_genome_sigprofiler to true."
+                //error "The pre-installed genome path $installed_genome_path does not exist! Please install the genome or set download_genome_sigprofiler to true."
+                genome = DOWNLOAD_GENOME_SIGPROFILER(meta).genome
             } else {
                 genome = installed_genome_path
             }
