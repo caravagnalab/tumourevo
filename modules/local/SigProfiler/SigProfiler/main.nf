@@ -6,10 +6,10 @@ process SIGPROFILER {
     input:
        //tuple val(datasetID), val(patientID), val(sampleID), path(joint_table) //from formatter output
        tuple val(meta), path(joint_table)
-       tuple val(meta), path(genome)
+       path(genome)
 
     output:
-       tuple val(datasetID), path("signature_deconvolution/Sigprofiler/$datasetID/SBS96"), emit: signature_SBS96 
+       tuple val(meta.datasetID), path("signature_deconvolution/Sigprofiler/$meta.datasetID/SBS96"), emit: signature_SBS96 
       
     script:
     
@@ -55,19 +55,19 @@ process SIGPROFILER {
       
       if __name__ == '__main__':    
           
-          input_path = "$datasetID/"
+          input_path = os.path.join(meta.datasetID)
 
           if not os.path.exists(input_path):
-              os.mkdir(input_path)
+              os.mkdir(input_path, exist_ok=True)
       
 
-          output_path = "output/SBS/${datasetID}.SBS96.all"
+          output_path = os.path.join("output", "SBS", f"{meta.datasetID}.SBS96.all")
          
           input_data = pd.read_csv("$joint_table", sep = "\\t")
      
           #input data preprocessing
           def input_processing(data):
-             new_columns = {'Project': "$datasetID", 'Genome': '$reference_genome', 'Type': "SOMATIC", 'mut_type': "SNP"}
+             new_columns = {'Project': "$meta.datasetID", 'Genome': '$reference_genome', 'Type': "SOMATIC", 'mut_type': "SNP"}
              df = data.assign(**new_columns)
              df['chr'] = df['chr'].astype(str).str[3:]
              df = df.rename(columns={'Indiv': 'Sample', 'chr': 'chrom', 'from': 'pos_start', 'to': 'pos_end'})
@@ -78,16 +78,16 @@ process SIGPROFILER {
           input_data = input_processing(input_data)
 
           #saving input matrix to txt
-          input_data.to_csv("$datasetID/input_data.txt", sep="\\t", index=False, header=True)
+          input_data.to_csv(f"{input_path}/input_data.txt", sep="\\t", index=False, header=True)
 
 
           #mutation's counts matrix generation
     
           input_matrix = matGen.SigProfilerMatrixGeneratorFunc(
-                  project = "$datasetID", 
+                  project = "$meta.datasetID", 
                   reference_genome = "$reference_genome", 
                   path_to_input_files = input_path,
-                  volume = "$volume")
+                  volume = f"{meta.datasetID}/{volume}")
              
 
           # Perform model fitting
@@ -120,7 +120,7 @@ process SIGPROFILER {
          
            
           #save the output results
-          dest_dir = "signature_deconvolution/Sigprofiler/$datasetID/"
+          dest_dir = "signature_deconvolution/Sigprofiler/$meta.datasetID/"
           source_dir = "results/"
           shutil.copytree(source_dir, dest_dir, dirs_exist_ok=True)
 

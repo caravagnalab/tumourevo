@@ -4,8 +4,8 @@
 
 include { FORMATTER as FORMATTER_RDS} from "../../../subworkflows/local/formatter/main"
 include { SPARSE_SIGNATURES } from "../../../modules/local/SparseSignatures/main"
-include { SIGPROFILER } from "../../modules/local/SigProfiler/SigProfiler/main"
 include { DOWNLOAD_GENOME_SIGPROFILER } from "../../modules/local/SigProfiler/download/main"
+include { SIGPROFILER } from "../../modules/local/SigProfiler/SigProfiler/main"
 
 
 workflow SIGNATURE_DECONVOLUTION {
@@ -19,6 +19,7 @@ workflow SIGNATURE_DECONVOLUTION {
     signatures_nmfOut = null 
     bestConf = null
     sign_cv = null
+    genome_path = null
     Sigprofiler_out = null
 
 
@@ -36,28 +37,24 @@ workflow SIGNATURE_DECONVOLUTION {
 
     if (params.tools && params.tools.split(',').contains('sigprofiler')) {
         // Check if we should download SigProfiler genome
-        if (params.download_genome_sigprofiler) {
+        if (params.download_sigprofiler_genome) {
             
-            genome = DOWNLOAD_GENOME_SIGPROFILER(meta).genome
+            genome_path = DOWNLOAD_GENOME_SIGPROFILER(meta).genome
         
-        } else {
+        } else if (params.genome_installed_path) {
+        // Use the installed genome path from params
+        genome_path = $genome_installed_path
            
-            // Use pre-installed genome path 
-            def installed_genome_path = "signature_deconvolution/Sigprofiler/genome/"
+        } else {
 
-            // Check if the pre-installed genome path exists
-            if (!file(installed_genome_path).exists()) {
-                //error "The pre-installed genome path $installed_genome_path does not exist! Please install the genome or set download_genome_sigprofiler to true."
-                genome = DOWNLOAD_GENOME_SIGPROFILER(meta).genome
-            } else {
-                genome = installed_genome_path
-            }
+            error "The pre-installed genome path ${params.genome_installed_path} does not exist! Installing the genome..."
+            genome_path = DOWNLOAD_GENOME_SIGPROFILER(meta).genome
         }
+        
+    }
             
-       
         out_sigprof = FORMATTER_RDS(joint_table, "rds")
-        Sigprofiler_out = SIGPROFILER(out_sigprof, genome) // run SigProfiler
-      
+        Sigprofiler_out = SIGPROFILER(out_sigprof, genome_path) // run SigProfiler
         
     }
 
