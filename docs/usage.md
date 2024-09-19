@@ -57,8 +57,8 @@ The typical command for running the pipeline is as follows:
 nextflow run nf-core/tumourevo \
  -r <VERSION> \
  -profile <PROFILE> \
- --samples <INPUT CSV> \
- --publish_dir ./results
+ --input <INPUT CSV> \
+ --outdir ./results
  --tools <TOOLS>
 ```
 
@@ -103,30 +103,33 @@ Output from different workflows, subworkflows and modules will be in a specific 
 | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `dataset` | **Dataset ID**; when sequencing data from multiple datasets is analysed, it designates the source dataset of each patient; must be unique for each dataset, but one dataset can contain samples from multiple patients. <br /> _Required_                                                                                      |
 | `patient` | **Patient ID**; designates the patient/subject; must be unique for each patient, but one patient can have multiple samples (e.g. from multiple regions or multiple time points). <br /> _Required_                                                                                                                                |
-| `tumour_sample`  | **Sample ID** for each sample; more than one sample for each subject is possible. <br /> _Required_
-| `normal_sample` | **Normal sample ID** of each sample. <br /> _Required_      |                                 |
+| `tumour_sample`  | **Sample ID** for each sample; more than one sample for each subject is possible. Must match the sample ID present in the VCF.  <br /> _Required_
+| `normal_sample` | **Normal sample ID** of each sample. Must match the normal sample ID present in the VCF. <br /> _Required_      |                                 |
 | `vcf`  | Full path to the vcf file. <br /> _Required_                                                                                                        |
 | `tbi`  | Full path to the vcf `tabix` index file. <br /> _Required_                                                                                      |
 |`cna_caller`| Name of the copy number caller used to generate your data. <br /> _Required_ |
 | `cna_segments` | Full path to the segmentation files and copy number state from copy-number calling. <br /> _Required_ |
 | `cna_extra` | Full path to files including the ploidy and purity estimate from the copy-number caller. <br /> _Required_ |
 | `cancer_type` | Tumour type (either `PANCANCER` or one of the tumor type present in the driver table) <br /> *Required* |
-| `tumour_bam`  | Full path to the tumour bam file. <br /> _Optional_                                                       |
-| `tumour_bai`  | Full path to the tumour bam index file. <br /> _Optional_                                              |
+| `tumour_alignment`  | Full path to the tumour bam file. <br /> _Optional_                                                       |
+| `tumour_alignment_index`  | Full path to the tumour bam index file. <br /> _Optional_                                              |
 
-An [example samplesheet](https://github.com/caravagnalab/nf-core-tumourevo/blob/dev/test_input.csv) has been provided with the pipeline.
+An [example samplesheet](https://github.com/caravagnalab/tumourevo/blob/dev/test_input.csv) has been provided with the pipeline.
 
 ## Pipeline modalities
 
 The tumourevo pipeline supports variant annotation, driver annotation, quality control processes, subclonal deconvolution and signature deconvolution analysis through various tools. It can be used to analyse both single sample experiments and longitudinal/multi-region assays, in which multiple samples of the same patient are avaiable. 
 As input, you must provide at least information on the samples, the VCF file from one of the supported callers and the output of one of the supported copy number caller. By default, if multiple samples from the same patient are provided, they will be analysed in a multivariate framework (which affects in particular the subclonal deconvolution deconvolution steps) to retrieve information useful in the reconstruction of the evolutionary process. Depending on the variant calling strategy (single sample or multi sample) and the provided input files, different strategies will be applied.
 
+
 <!-- aggiungi un riassunto di cosa voglia dire single e multi sample (analisi multivariata, soprattutto per subclonal deconv)
 E' possibile usarla sia nel caso di vc multi sample che indipendente -->
 
+## Variant calling
+
 ### 1. Multi-sample variant calling
 
-Modern tools (ie: Platypus and Mutect2) allow to perform variant calling directly in multisample mode. If the VCF provided as input are already multisample, no additional step is required. 
+Modern tools (ie: Platypus and Mutect2) allow to perform variant calling directly in multisample mode. If the VCFs provided as input are already multisample, no additional step is required. 
 
 <!-- If the variant calling had been performed indepentently on each sample from the same patient, 
 
@@ -143,8 +146,8 @@ Running the pipeline
 nextflow run nf-core/tumourevo \
  -r <VERSION> \
  -profile <PROFILE> \
- --samples <INPUT CSV> \
- --publish_dir ./results \
+ --input <INPUT CSV> \
+ --outdir results \
  --remove_tail all \
  --tools pyclonevi,mobster,viber,sparsesignature,sigprofiler
 ```
@@ -152,17 +155,33 @@ nextflow run nf-core/tumourevo \
 Minimal input file, two samples from the same patient: 
 
 ```bash
-dataset,patient,sample,vcf,vcf_tbi,cna_segments,cna_extra,cna_caller,cancer_type
-dataset1,patient1,S1,patient1_S1.vcf.gz,patient1_S1.vcf.gz.tbi,/CNA/patient1/S1/segments.txt,/CNA/patient1/S1/purity_ploidy.txt,caller,PANCANCER
-dataset1,patient1,S2,patient1_S1.vcf.gz,patient1_S1.vcf.gz.tbi,/CNA/patient1/S2/segments.txt,/CNA/patient1/S2/purity_ploidy.txt,caller,PANCANCER
+dataset,patient,sample,normal_sample,vcf,vcf_tbi,cna_segments,cna_extra,cna_caller,cancer_type
+dataset1,patient1,S1,N1,patient1_S1.vcf.gz,patient1_S1.vcf.gz.tbi,/CNA/patient1/S1/segments.txt,/CNA/patient1/S1/purity_ploidy.txt,caller,PANCANCER
+dataset1,patient1,S2,N1,patient1_S1.vcf.gz,patient1_S1.vcf.gz.tbi,/CNA/patient1/S2/segments.txt,/CNA/patient1/S2/purity_ploidy.txt,caller,PANCANCER
 ```
 
 ### 2. Single sample variant calling
 
+If the variant calling performed independently on each sample, even if coming from the same patient, you can provide the BAM and BAI files from each tumor sample. In this way, a classical pileup strategy will be used in order to retrieve the depth for all samples of private mutations, in order to correctly perform the subclonal deconvolution analysis.
+
+Input file for two patients without joint variant calling, bam files available:
+
+```bash 
+dataset,patient,sample,normal_sample,vcf,vcf_tbi,cna_segments,cna_extra,cna_caller,cancer_type,tumour_bam,tumour_bai
+dataset1,patient1,S1,N1,patient1_S1.vcf.gz,patient1_S1.vcf.gz.tbi,/CNA/patient1/S1/segments.txt,/CNA/patient1/S1/purity_ploidy.txt,caller,PANCANCER,patient1/BAM/S1.bam,patient1/BAM/S1.bam.bai 
+dataset1,patient1,S2,N1,patient1_S2.vcf.gz,patient1_S2.vcf.gz.tbi,/CNA/patient1/S2/segments.txt,/CNA/patient1/S2/purity_ploidy.txt,caller,PANCANCER,,patient1/BAM/S2.bam,patient1/BAM/S2.bam.bai  
+```
+If you can not include the bam files in the input csv, the pipeline will run anyway, treating each sample as independent. 
+
+<!-- You can use the `multisample` mode of tumourevo to analyse samples from multi-region and longitudinal assays. This allows you to track in space and time the existing tumor populations, and better understand its heterogeneity. This modality integrates data across multiple samples, thus improving the resolution of subclonal structures and providing insights into the evolutionary dynamics and progression of the tumor.
+Two of the avaiable tools for subclonal deconvolution, `pyclonevi` and `viber` can by-design be run in multi-sample mode, inferring the subclonal structure of samples. If you add `mobster` to the `--tool` parameter when running the pipeline in this modality, it will be run at first on each individual sample (since the tool does not support at the moment multi-sample analysis) in order to recognize neutral tail mutations and remove them. The mutations data manipulated in this way will then be processed by either `pyclone`, `viber` or both using the multivariate subclonal deconvolution as described before.  -->
+
+# Subclonal deconvolution
+
+### The `remove_tail` parameter 
 
 
-You can use the `multisample` mode of tumourevo to analyse samples from multi-region and longitudinal assays. This allows you to track in space and time the existing tumor populations, and better understand its heterogeneity. This modality integrates data across multiple samples, thus improving the resolution of subclonal structures and providing insights into the evolutionary dynamics and progression of the tumor.
-Two of the avaiable tools for subclonal deconvolution, `pyclonevi` and `viber` can by-design be run in multi-sample mode, inferring the subclonal structure of samples. If you add `mobster` to the `--tool` parameter when running the pipeline in this modality, it will be run at first on each individual sample (since the tool does not support at the moment multi-sample analysis) in order to recognize neutral tail mutations and remove them. The mutations data manipulated in this way will then be processed by either `pyclone`, `viber` or both using the multivariate subclonal deconvolution as described before. 
+
 
 #### Example
 
@@ -198,30 +217,7 @@ dataset,patient,sample,vcf,vcf_tbi,cna_dir,cna_caller
 dataset1,patient1,S1,patient1_S1.vcf.gz,patient1_S1.vcf.gz.tbi,/CNA/patient1/S1,caller
 dataset1,patient1,S2,patient1_S2.vcf.gz,patient1_S2.vcf.gz.tbi,/CNA/patient1/S2,caller
 ```
-### Joint variant calling
 
-Modern tools (ie: Platypus and Mutect2) allow to perform variant calling directly in multisample mode. If the VCF provided as input are already multisample, no additional step is required. Otherwise, a classical pileup strategy will be used in order to retrieve the depth for all samples of private mutations, in order to correctly perform the subclonal deconvolution analysis. Bam and bai files of tumor samples will therefore be required as input. 
-
-Input file for two patients without joint variant calling:
-
-<!-- se hai fatto calling multi sample -> splitted vcf e parti, se non hai fatto multi sample calling parte il lifter -->
-
-<!-- minimal csv senza bam -->
-
-<!-- aggiungi esempio di run con flag multisample e scelta dei tool -->
-
-
- <!-- If you had performed it in the multisample mode, no additional 
-, also bam files from the tumor samples will be required in order to perform a pileup.  -->
-<!-- mutations shared sono necessarie per alcuni tool come viber che richiede la dp come binomial process delle mutazioni a NV 0 -->
-
-```bash 
-dataset,patient,sample,vcf,vcf_tbi,cna_dir,cna_caller,tumour_bam,tumour_bai
-dataset1,patient1,S1,patient1_S1.vcf.gz,patient1_S1.vcf.gz.tbi,/CNA/patient1/S1,caller,patient1/BAM/S1,patient1/BAM/S1.bam.bai 
-dataset1,patient1,S2,patient1_S2.vcf.gz,patient1_S2.vcf.gz.tbi,/CNA/patient1/S2,caller,patient1/BAM/S2,patient1/BAM/S2.bam.bai 
-dataset1,patient1,S1,patient1_S1.vcf.gz,patient1_S1.vcf.gz.tbi,/CNA/patient2/S1,caller,patient1/BAM/S1,patient1/BAM/S1.bam.bai 
-dataset1,patient2,S2,patient2_S2.vcf.gz,patient2_S2.vcf.gz.tbi,/CNA/patient2/S2,caller,patient2/BAM/S2,patient2/BAM/S2.bam.bai 
-```
 ## Driver annotation
 You can retrieve tumor-specific drivers in the driver annotation step by specifying the tumor type in the input csv. Pan-cancer drivers will be retrieved by specifying `PANCANCER` as tumour type in the input csv file. 
 For this step, we currently refer to [IntOGen latest release](https://www.nature.com/articles/s41568-020-0290-x), but you can also provide a custom driver table that will be used in the analysis. 
