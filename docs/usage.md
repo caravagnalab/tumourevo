@@ -111,22 +111,26 @@ Output from different workflows, subworkflows and modules will be in a specific 
 | `cna_segments` | Full path to the segmentation files and copy number state from copy-number calling. <br /> _Required_ |
 | `cna_extra` | Full path to files including the ploidy and purity estimate from the copy-number caller. <br /> _Required_ |
 | `cancer_type` | Tumour type (either `PANCANCER` or one of the tumor type present in the driver table) <br /> *Required* |
-| `tumour_bam`  | Full path to the tumour bam file. <br /> _Required for `--mode multisample`_                                                       |
-| `tumour_bai`  | Full path to the tumour bam index file. <br /> _Required for `--mode multisample `_                                              |
+| `tumour_bam`  | Full path to the tumour bam file. <br /> _Optional_                                                       |
+| `tumour_bai`  | Full path to the tumour bam index file. <br /> _Optional_                                              |
 
 An [example samplesheet](https://github.com/caravagnalab/nf-core-tumourevo/blob/dev/test_input.csv) has been provided with the pipeline.
 
-## Pipeline modalities - `singlesample` vs `multisample`
+## Pipeline modalities
 
 The tumourevo pipeline supports variant annotation, driver annotation, quality control processes, subclonal deconvolution and signature deconvolution analysis through various tools. It can be used to analyse both single sample experiments and longitudinal/multi-region assays, in which multiple samples of the same patient are avaiable. 
-The pipeline can be run in two different modalities: `singlesample` or `multisample`. In the first mode, each sample is condisered as independent, while in the latter samples are analysed in a multivariate framework (which affects in particular the subclonal deconvolution deconvolution steps) to retrieve information useful in the reconstruction of the evolutionary process. 
+As input, you must provide at least information on the samples, the VCF file from one of the supported callers and the output of one of the supported copy number caller. By default, if multiple samples from the same patient are provided, they will be analysed in a multivariate framework (which affects in particular the subclonal deconvolution deconvolution steps) to retrieve information useful in the reconstruction of the evolutionary process. Depending on the variant calling strategy (single sample or multi sample) and the provided input files, different strategies will be applied.
+
 <!-- aggiungi un riassunto di cosa voglia dire single e multi sample (analisi multivariata, soprattutto per subclonal deconv)
 E' possibile usarla sia nel caso di vc multi sample che indipendente -->
-As input, you must provide at least the VCF file from one of the supported callers and the output of a copy number caller. 
 
-### 1. Single sample mode
+### 1. Multi-sample variant calling
 
-If you run the pipeline in `singlesample` mode, all the samples, even if belonging to the same patient, are assumed to be independent. In this framework, the subclonal deconvolution is affected, identifying clonal and subclonal composition of the sample starting from allele frequency of detected somatic variants and identifying mutagenic processes for each independent element. 
+Modern tools (ie: Platypus and Mutect2) allow to perform variant calling directly in multisample mode. If the VCF provided as input are already multisample, no additional step is required. 
+
+<!-- If the variant calling had been performed indepentently on each sample from the same patient, 
+
+If you run the pipeline in `singlesample` mode, all the samples, even if belonging to the same patient, are assumed to be independent. In this framework, the subclonal deconvolution is affected, identifying clonal and subclonal composition of the sample starting from allele frequency of detected somatic variants and identifying mutagenic processes for each independent element.  -->
 
 <!-- rephrase better -->
 <!-- Si assume che i campioni siano indipendenti e che quindi la subclonal deconv viene svolta cercando popolazioni sottoclonali a lv di singolo campione. Sign deconv si cercano i processi mutagenici comuni in un dataset fatto di elementi indipenti -->
@@ -141,26 +145,21 @@ nextflow run nf-core/tumourevo \
  -profile <PROFILE> \
  --samples <INPUT CSV> \
  --publish_dir ./results \
- --mode sigle_sample \
+ --remove_tail all \
  --tools pyclonevi,mobster,viber,sparsesignature,sigprofiler
 ```
 
-Minimal input file:
+Minimal input file, two samples from the same patient: 
 
 ```bash
-dataset,patient,sample,vcf,vcf_tbi,cna_dir,cna_caller
-dataset1,patient1,S1,patient1_S1.vcf.gz,patient1_S1.vcf.gz.tbi,/CNA/patient1/S1,caller
+dataset,patient,sample,vcf,vcf_tbi,cna_segments,cna_extra,cna_caller,cancer_type
+dataset1,patient1,S1,patient1_S1.vcf.gz,patient1_S1.vcf.gz.tbi,/CNA/patient1/S1/segments.txt,/CNA/patient1/S1/purity_ploidy.txt,caller,PANCANCER
+dataset1,patient1,S2,patient1_S1.vcf.gz,patient1_S1.vcf.gz.tbi,/CNA/patient1/S2/segments.txt,/CNA/patient1/S2/purity_ploidy.txt,caller,PANCANCER
 ```
 
-In this example, two samples come from the same patient: 
+### 2. Single sample variant calling
 
-```bash
-dataset,patient,sample,vcf,vcf_tbi,cna_dir,cna_caller
-dataset1,patient1,S1,patient1_S1.vcf.gz,patient1_S1.vcf.gz.tbi,/CNA/patient1/S1,caller
-dataset1,patient1,S2,patient1_S2.vcf.gz,patient1_S2.vcf.gz.tbi,/CNA/patient1/S2,caller
-```
 
-### 2. Multi sample mode
 
 You can use the `multisample` mode of tumourevo to analyse samples from multi-region and longitudinal assays. This allows you to track in space and time the existing tumor populations, and better understand its heterogeneity. This modality integrates data across multiple samples, thus improving the resolution of subclonal structures and providing insights into the evolutionary dynamics and progression of the tumor.
 Two of the avaiable tools for subclonal deconvolution, `pyclonevi` and `viber` can by-design be run in multi-sample mode, inferring the subclonal structure of samples. If you add `mobster` to the `--tool` parameter when running the pipeline in this modality, it will be run at first on each individual sample (since the tool does not support at the moment multi-sample analysis) in order to recognize neutral tail mutations and remove them. The mutations data manipulated in this way will then be processed by either `pyclone`, `viber` or both using the multivariate subclonal deconvolution as described before. 
