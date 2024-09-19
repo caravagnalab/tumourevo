@@ -41,17 +41,11 @@ workflow SIGNATURE_DECONVOLUTION {
             
             genome_path = DOWNLOAD_GENOME_SIGPROFILER(meta).genome
         
-        } else if (params.genome_installed_path) {
-        // Use the installed genome path from params
-        genome_path = $genome_installed_path
-           
         } else {
-
-            error "The pre-installed genome path ${params.genome_installed_path} does not exist! Installing the genome..."
-            genome_path = DOWNLOAD_GENOME_SIGPROFILER(meta).genome
+        // Use the installed genome path from params
+        genome_path = $params.genome_installed_path
+           
         }
-        
-    }
             
         out_sigprof = FORMATTER_RDS(joint_table, "rds")
         Sigprofiler_out = SIGPROFILER(out_sigprof, genome_path) // run SigProfiler

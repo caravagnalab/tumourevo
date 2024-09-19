@@ -6,10 +6,10 @@ process SIGPROFILER {
     input:
        //tuple val(datasetID), val(patientID), val(sampleID), path(joint_table) //from formatter output
        tuple val(meta), path(joint_table)
-       path(genome)
+       path(genome_path)
 
     output:
-       tuple val(meta.datasetID), path("signature_deconvolution/Sigprofiler/$meta.datasetID/SBS96"), emit: signature_SBS96 
+       tuple val(meta.datasetID), path("signature_deconvolution/Sigprofiler/$meta.datasetID/*"), emit: sigprofiler_results 
       
     script:
     
@@ -87,7 +87,7 @@ process SIGPROFILER {
                   project = "$meta.datasetID", 
                   reference_genome = "$reference_genome", 
                   path_to_input_files = input_path,
-                  volume = f"{meta.datasetID}/{volume}")
+                  volume = "$genome_path")
              
 
           # Perform model fitting
