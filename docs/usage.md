@@ -9,12 +9,11 @@
   - [Quickstart](#quickstart)
   - [Input: Sample sheet configurations](#input-sample-sheet-configurations)
     - [Overview: Samplesheet Columns](#overview-samplesheet-columns)
-  - [Pipeline modalities - `singlesample` vs `multisample`](#pipeline-modalities---singlesample-vs-multisample)
-    - [1. Single sample mode](#1-single-sample-mode)
-      - [Examples](#examples)
-    - [2. Multi sample mode](#2-multi-sample-mode)
-      - [Example](#example)
-    - [Joint variant calling](#joint-variant-calling)
+  - [Pipeline modalities](#pipeline-modalities)
+    - [Variant calling](#variant-calling)
+      - [Multi-sample variant calling](#1-multi-sample-variant-calling)
+      - [Single sample variant calling](#2-single-sample-variant-calling)
+    - [Subclonal deconvolution](#subclonal-deconvolution)
   - [Driver annotation](#driver-annotation)
   - [Avaiable tools](#avaiable-tools)
     - [Updating the pipeline](#updating-the-pipeline)
@@ -70,7 +69,7 @@ This documentation imply that any `nextflow run nf-core/tumourevo` command is ru
 
 This will launch the pipeline and perform variant calling with the tools specified in `--tools`, see the [parameter section]([https://github.com/caravagnalab/nf-core-tumourevo/tree/dev]) for details on the available tools.
 
-Unless running with the `test` profile, the paths of input files must be provided within the `<INPUT CSV>` file specified in `--samples`, see the [input section]([https://github.com/caravagnalab/nf-core-tumourevo/tree/dev]) for input requirements. 
+Unless running with the `test` profile, the paths of input files must be provided within the `<INPUT CSV>` file specified in `--input`, see the [input section]([https://github.com/caravagnalab/nf-core-tumourevo/tree/dev]) for input requirements. 
 
 Note that the pipeline will create the following files in your working directory:
 
