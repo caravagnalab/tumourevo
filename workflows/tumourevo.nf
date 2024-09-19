@@ -6,7 +6,7 @@ include { DRIVER_ANNOTATION } from "${baseDir}/subworkflows/local/annotate_drive
 include { FORMATTER as FORMATTER_RDS} from "${baseDir}/subworkflows/local/formatter/main"
 include { QC } from "${baseDir}/subworkflows/local/QC/main"
 include { SUBCLONAL_DECONVOLUTION } from "${baseDir}/subworkflows/local/subclonal_deconvolution/main"
-include { SIGNATURE_DECONVOLUTION } from "${baseDir}/subworkflows/local/signature_deconvolution/main"
+//include { SIGNATURE_DECONVOLUTION } from "${baseDir}/subworkflows/local/signature_deconvolution/main"
 
 workflow TUMOUREVO {
 
@@ -71,13 +71,14 @@ workflow TUMOUREVO {
             }
     vcf_rds = rds_input.concat(out_lifter)
 
-    cds = []
-    annotation = DRIVER_ANNOTATION(vcf_rds, drivers_table, cds, fasta)
+    //cds = []
+    //annotation = DRIVER_ANNOTATION(vcf_rds, drivers_table, cds, fasta)
     
+    annotation = vcf_rds
     cna_out = FORMATTER_CNA.out
 
     in_cnaqc = cna_out.join(annotation)
     QC(in_cnaqc)
-    //SUBCLONAL_DECONVOLUTION(QC.out.rds_join)
+    SUBCLONAL_DECONVOLUTION(QC.out.rds_join)
     //SIGNATURE_DECONVOLUTION(QC.out.rds_join)
 }

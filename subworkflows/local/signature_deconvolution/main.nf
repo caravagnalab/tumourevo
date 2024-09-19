@@ -4,11 +4,13 @@
 
 include { FORMATTER as FORMATTER_RDS} from "../../../subworkflows/local/formatter/main"
 include { SPARSE_SIGNATURES } from "../../../modules/local/SparseSignatures/main"
+include { DOWNLOAD_GENOME_SIGPROFILER } from "../../modules/local/SigProfiler/download/main"
 include { SIGPROFILER } from "../../modules/local/SigProfiler/SigProfiler/main"
 
 
 workflow SIGNATURE_DECONVOLUTION {
-    take: 
+    take:
+    meta 
     joint_table
 
     main:
@@ -17,11 +19,13 @@ workflow SIGNATURE_DECONVOLUTION {
     signatures_nmfOut = null 
     bestConf = null
     sign_cv = null
+    genome_path = null
+    Sigprofiler_out = null
 
 
     if (params.tools && params.tools.split(',').contains('sparsesignatures')) {
-        out = FORMATTER_RDS(joint_table, "rds")
-        SPARSE_SIGNATURES(out.groupTuple(by: 0)) // run SparseSignatures
+        out_sparse = FORMATTER_RDS(joint_table, "rds")
+        SPARSE_SIGNATURES(out_sparse.groupTuple(by: 0)) // run SparseSignatures
         
         plot_pdf = SPARSE_SIGNATURES.out.signatures_plot_pdf
         plot_rds = SPARSE_SIGNATURES.out.signatures_plot_rds
@@ -29,18 +33,37 @@ workflow SIGNATURE_DECONVOLUTION {
         bestConf = SPARSE_SIGNATURES.out.signatures_bestConf_rds
         sign_cv = SPARSE_SIGNATURES.out.signatures_cv_rds
     } 
+  
+
+    if (params.tools && params.tools.split(',').contains('sigprofiler')) {
+        // Check if we should download SigProfiler genome
+        if (params.download_sigprofiler_genome) {
+            
+            genome_path = DOWNLOAD_GENOME_SIGPROFILER(meta).genome
+        
+        } else if (params.genome_installed_path) {
+        // Use the installed genome path from params
+        genome_path = $genome_installed_path
+           
+        } else {
+
+            error "The pre-installed genome path ${params.genome_installed_path} does not exist! Installing the genome..."
+            genome_path = DOWNLOAD_GENOME_SIGPROFILER(meta).genome
+        }
+        
+    }
+            
+        out_sigprof = FORMATTER_RDS(joint_table, "rds")
+        Sigprofiler_out = SIGPROFILER(out_sigprof, genome_path) // run SigProfiler
+        
+    }
+
     emit:
     plot_pdf
     plot_rds
     signatures_nmfOut
     bestConf
     sign_cv
-
-    if (params.tools && params.tools.split(',').contains('sigprofiler')) {
-        out = FORMATTER_RDS(joint_table, "rds")
-        SigProfiler_out = SIGPROFILER(out) // run SigProfiler
-      
-        emit:
-        SigProfiler_out
-    }
+    Sigprofiler_out
+    
 }

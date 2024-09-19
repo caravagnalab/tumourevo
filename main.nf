@@ -49,7 +49,7 @@ input = params.input ? Channel.fromList(samplesheetToList(params.input, "assets/
 
     main:
     fasta = params.fasta ? Channel.fromPath(params.fasta).map{ it -> [ [id:it.baseName], it ] }.collect() : Channel.empty()
-    drivers_table =  params.fasta ? Channel.fromPath(params.drivers_table).map{ it -> [ it ] }.collect() : Channel.empty()
+    drivers_table =  params.drivers_table ? Channel.fromPath(params.drivers_table).map{ it -> [ it ] }.collect() : Channel.empty()
 
     if (params.download_cache_vep) {
         ensemblvep_info = Channel.of([ [ id:"${params.vep_cache_version}_${params.vep_genome}" ], params.vep_genome, params.vep_species, params.vep_cache_version ])
