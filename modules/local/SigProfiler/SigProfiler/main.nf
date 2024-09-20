@@ -1,15 +1,16 @@
 process SIGPROFILER {
     tag "$meta.id"
     container = 'docker://katiad/sigprofiler:latest'
-    //container = 'docker://katiad/sigprofiler:dev1'
+    // container = 'docker://katiad/sigprofiler:dev1'
 
     input:
-       //tuple val(datasetID), val(patientID), val(sampleID), path(joint_table) //from formatter output
+       // tuple val(datasetID), val(patientID), val(sampleID), path(joint_table) //from formatter output
        tuple val(meta), path(joint_table)
        path(genome_path)
 
     output:
-       tuple val(meta.datasetID), path("signature_deconvolution/Sigprofiler/$meta.datasetID/*"), emit: sigprofiler_results 
+       // tuple val(meta.datasetID), path("signature_deconvolution/Sigprofiler/$meta.datasetID/*"), emit: sigprofiler_results 
+       tuple val(meta.datasetID), path("*"), emit: sigprofiler_results
       
     script:
     
@@ -51,21 +52,18 @@ process SIGPROFILER {
       from SigProfilerExtractor import sigpro as sig
       from SigProfilerMatrixGenerator.scripts import SigProfilerMatrixGeneratorFunc as matGen
       
-  
-      
-      if __name__ == '__main__':    
+      if __name__ == '__main__':
           
           input_path = os.path.join(meta.datasetID)
 
           if not os.path.exists(input_path):
               os.mkdir(input_path, exist_ok=True)
       
-
           output_path = os.path.join("output", "SBS", f"{meta.datasetID}.SBS96.all")
          
           input_data = pd.read_csv("$joint_table", sep = "\\t")
      
-          #input data preprocessing
+          # input data preprocessing
           def input_processing(data):
              new_columns = {'Project': "$meta.datasetID", 'Genome': '$reference_genome', 'Type': "SOMATIC", 'mut_type': "SNP"}
              df = data.assign(**new_columns)
@@ -77,18 +75,15 @@ process SIGPROFILER {
     
           input_data = input_processing(input_data)
 
-          #saving input matrix to txt
+          # saving input matrix to txt
           input_data.to_csv(f"{input_path}/input_data.txt", sep="\\t", index=False, header=True)
 
-
-          #mutation's counts matrix generation
-    
+          # mutation's counts matrix generation
           input_matrix = matGen.SigProfilerMatrixGeneratorFunc(
                   project = "$meta.datasetID", 
                   reference_genome = "$reference_genome", 
                   path_to_input_files = input_path,
                   volume = "$genome_path")
-             
 
           # Perform model fitting
           sig.sigProfilerExtractor(input_type = "$input_type", 
@@ -116,13 +111,10 @@ process SIGPROFILER {
                                    collapse_to_SBS96 = bool("$collapse_to_SBS96"), 
                                    get_all_signature_matrices = bool("$get_all_signature_matrices"),
                                    export_probabilities = bool("$export_probabilities"))
-          
-         
-           
-          #save the output results
+
+          # save the output results
           dest_dir = "signature_deconvolution/Sigprofiler/$meta.datasetID/"
           source_dir = "results/"
           shutil.copytree(source_dir, dest_dir, dirs_exist_ok=True)
-
    """
 }
