@@ -26,3 +26,7 @@ nextflow_process {
     }
   }
 }
+
+/** Infos:
+*   test not working due to failed to pull singularity image tucano/dndscv:latest
+*/

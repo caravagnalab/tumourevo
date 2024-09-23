@@ -1,8 +1,8 @@
 nextflow_process {
 
-    name "Test Process GET_POSITIONS"
+    name "Test Process GET_POSITIONS_ALL"
     script "modules/local/get_positions/main.nf"
-    process "GET_POSITIONS"
+    process "GET_POSITIONS_ALL"
 
     test("Should run without failures") {
 
@@ -23,7 +23,7 @@ nextflow_process {
                 ]
                 rds_list = file(params.local_testdata_base_path + "/from_vcf2CNAqc/MSeq_Set06_Set6_42_snv.rds", checkIfExists: true)
                 sample_list = "Set6_42"
-                input[0] = tuple(meta, rds_list, sample_list)
+                input[0] = tuple(meta, rds_list)
                 """
             }
         }
