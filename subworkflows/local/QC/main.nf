@@ -14,10 +14,10 @@ workflow QC {
     main:
         TINC(input)
 
-        contamination = Channel.of(TINC.out.tinc_csv)
+        contamination = TINC.out.tinc_csv
             .splitCsv( header: true )
             .view( cont -> "${cont.normal_contamination}" )
-    
+        contamination.view()
         // input.map {meta, normal_contamination -> [ meta + ] }
 
         CNAQC(input)
@@ -38,6 +38,7 @@ workflow QC {
         plot_rds_tinc = TINC.out.plot_rds
         rds_tinc = TINC.out.rds
         pdf_tinc = TINC.out.plot_pdf
+        csv_tinc = TINC.out.tinc_csv
 
         rds_join = JOIN_CNAQC.out.rds
 }

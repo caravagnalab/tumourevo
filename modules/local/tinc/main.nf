@@ -12,7 +12,7 @@ process TINC {
     tuple val(meta), path("*_fit.rds"), emit: rds 
     tuple val(meta), path("*_plot.rds"), emit: plot_rds
     tuple val(meta), path("*.pdf"), emit: plot_pdf
-    
+    tuple val(meta), path("*_qc.csv"), emit: tinc_csv
 
   script:
 
@@ -23,7 +23,7 @@ process TINC {
     def cutoff_lv_assignment                = args!='' && args.cutoff_lv_assignment                 ?  "$args.cutoff_lv_assignment"  : ""
     def N                                   = args!='' && args.N                                    ?  "$args.N"  : ""
     def fast                                = args!='' && args.fast                                 ?  "$args.fast" : ""
-    
+    def normal_contamination_level          = args!='' && args.normal_contamination_level           ?  "$args.normal_contamination_level" : ""
 
     """
     #!/usr/bin/env Rscript
@@ -73,8 +73,23 @@ process TINC {
                     
     tinc_plot = plot(TINC_fit)
     
+    qc_res = TINC:::classification_normal(TINC_fit\$TIN) 
+
+    if (qc_res[["level"]] >= eval(parse(text="$normal_contamination_level"))) {
+      sample_contamination = tibble(
+        sample = tumor_sample, 
+        normal_contamination = 1
+      )
+    } else {
+      sample_contamination = tibble(sample = tumor_sample, 
+      normal_contamination = 0
+      )
+    }
+
+    write.table(file = paste0("${prefix}", "_qc.csv"), sep = ",", x = sample_contamination, col.names = T, row.names = F, quote = F)
+
     saveRDS(file = paste0("${prefix}", "_plot.rds"), object = tinc_plot)
-    ggplot2::ggsave(plot = tinc_plot, filename = paste("${prefix}", "_plot.pdf"), width = 210, height = 297, units="mm", dpi = 200)
+    ggplot2::ggsave(plot = tinc_plot, filename = paste0("${prefix}", "_plot.pdf"), width = 210, height = 297, units="mm", dpi = 200)
     saveRDS(file = paste0("${prefix}", "_fit.rds"), object = TINC_fit)
 
     """
