@@ -8,10 +8,10 @@ process SIGPROFILER {
        path(genome_path)
 
     output:
-       // tuple val(meta.datasetID), path("signature_deconvolution/Sigprofiler/$meta.datasetID/*"), emit: sigprofiler_results 
+       // tuple val(meta.datasetID), path("signature_deconvolution/Sigprofiler/*"), emit: sigprofiler_results 
        tuple val(meta.datasetID), path("*"), emit: sigprofiler_results
       
-    script:
+    script
     
       def args                              = task.ext.args                                 ?: ''
       def prefix                            = task.ext.prefix                               ?: "${meta.id}"
@@ -113,7 +113,7 @@ process SIGPROFILER {
                                    export_probabilities = bool("$export_probabilities"))
 
           # save the output results
-          #dest_dir = "signature_deconvolution/Sigprofiler/$meta.datasetID/"
+          #dest_dir = "signature_deconvolution/Sigprofiler/"
           dest_dir = "$prefix/"
           source_dir = "results/"
           shutil.copytree(source_dir, dest_dir, dirs_exist_ok=True)
