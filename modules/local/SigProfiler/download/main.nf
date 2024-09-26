@@ -4,16 +4,16 @@ process DOWNLOAD_GENOME_SIGPROFILER {
    
 
     input:
-       //tuple val(datasetID), val(patientID), val(sampleID)
        tuple val(meta)
 
     output:
-       tuple val(meta.datasetID), path("signature_deconvolution/Sigprofiler/genome/"), emit: genome 
+       tuple val(meta.datasetID), path("*"), emit: genome 
      
       
     script:
     
       def args                              = task.ext.args                                 ?: ''
+      def prefix                            = task.ext.prefix                               ?: "${meta.id}"
       def reference_genome                  = args!='' && args.reference_genome             ? "$args.reference_genome" : ""
       def sigprofiler_genome_path = "$meta.datasetID/signature_deconvolution/Sigprofiler/genome/"
 
@@ -29,12 +29,6 @@ process DOWNLOAD_GENOME_SIGPROFILER {
       
   
       SigProfilerMatrixGenerator install $reference_genome -v $sigprofiler_genome_path
-
-      
-      if [ $? -ne 0 ]; then
-          echo "Error installing SigProfilerMatrixGenerator genome."
-          exit 1
-      fi
       
 
       """

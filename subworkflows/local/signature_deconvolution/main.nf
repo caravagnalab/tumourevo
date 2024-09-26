@@ -2,16 +2,16 @@
 // MUTATIONAL SIGNATURES DECONVOLUTION WORKFLOW
 //
 
-include { FORMATTER as FORMATTER_RDS} from "../../../subworkflows/local/formatter/main"
+include { FORMATTER } from "../../../subworkflows/local/formatter/main"
 include { SPARSE_SIGNATURES } from "../../../modules/local/SparseSignatures/main"
-include { DOWNLOAD_GENOME_SIGPROFILER } from "../../modules/local/SigProfiler/download/main"
-include { SIGPROFILER } from "../../modules/local/SigProfiler/SigProfiler/main"
+include { DOWNLOAD_GENOME_SIGPROFILER } from "../../../modules/local/SigProfiler/download/main"
+include { SIGPROFILER } from "../../../modules/local/SigProfiler/SigProfiler/main"
 
 
 workflow SIGNATURE_DECONVOLUTION {
     take:
     meta 
-    joint_table
+    rds_join // tuple val(meta), path("*.rds"), val(tumour_samples)
 
     main:
     plot_pdf = null
@@ -24,7 +24,7 @@ workflow SIGNATURE_DECONVOLUTION {
 
 
     if (params.tools && params.tools.split(',').contains('sparsesignatures')) {
-        out_sparse = FORMATTER_RDS(joint_table, "rds")
+        out_sparse = FORMATTER(rds_join, "rds")
         SPARSE_SIGNATURES(out_sparse.groupTuple(by: 0)) // run SparseSignatures
         
         plot_pdf = SPARSE_SIGNATURES.out.signatures_plot_pdf
@@ -47,7 +47,7 @@ workflow SIGNATURE_DECONVOLUTION {
            
         }
             
-        out_sigprof = FORMATTER_RDS(joint_table, "rds")
+        out_sigprof = FORMATTER(rds_join, "rds")
         Sigprofiler_out = SIGPROFILER(out_sigprof, genome_path) // run SigProfiler
         
     }
