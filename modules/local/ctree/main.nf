@@ -8,11 +8,11 @@ process CTREE {
     //tuple val(datasetID), val(patientID), val(sampleID), path(ctree_input)
 
   output:
-    tuple val(meta), path("ctree_{VIBER,MOBSTERh,pyclonevi}.rds"), emit: ctree_rds, optional: true
-    tuple val(meta), path("ctree_{VIBER,MOBSTERh,pyclonevi}_plots.rds"), emit: ctree_plots_rds, optional: true
-    tuple val(meta), path("REPORT_plots_ctree_{VIBER,MOBSTERh,pyclonevi}.rds"), emit: ctree_report_rds, optional: true
-    tuple val(meta), path("REPORT_plots_ctree_{VIBER,MOBSTERh,pyclonevi}.pdf"), emit: ctree_report_pdf, optional: true
-    tuple val(meta), path("REPORT_plots_ctree_{VIBER,MOBSTERh,pyclonevi}.png"), emit: ctree_report_png, optional: true
+    tuple val(meta), path("*ctree_{VIBER,MOBSTERh,pyclonevi}.rds"), emit: ctree_rds, optional: true
+    tuple val(meta), path("*ctree_{VIBER,MOBSTERh,pyclonevi}_plots.rds"), emit: ctree_plots_rds, optional: true
+    tuple val(meta), path("*REPORT_plots_ctree_{VIBER,MOBSTERh,pyclonevi}.rds"), emit: ctree_report_rds, optional: true
+    tuple val(meta), path("*REPORT_plots_ctree_{VIBER,MOBSTERh,pyclonevi}.pdf"), emit: ctree_report_pdf, optional: true
+    tuple val(meta), path("*REPORT_plots_ctree_{VIBER,MOBSTERh,pyclonevi}.png"), emit: ctree_report_png, optional: true
 
   script:
 
@@ -135,8 +135,8 @@ process CTREE {
       plot_tree = plot(trees[[1]])
 
       # save rds and plots
-      saveRDS(object=trees, file=paste0("$prefix/", ctree_output, ".rds"))
-      saveRDS(object=plot_tree, file=paste0("$prefix/", ctree_output, "_plots.rds"))
+      saveRDS(object=trees, file=paste0("$prefix","_", ctree_output, ".rds"))
+      saveRDS(object=plot_tree, file=paste0("$prefix","_", ctree_output, "_plots.rds"))
 
       # Save report plot
       top_phylo = plot(trees[[1]])
@@ -152,9 +152,9 @@ process CTREE {
       #report_fig = patchwork::wrap_plots(ccf, info_transfer, top_phylo, clone_size, phylos, design="A#BBD#CCEEEE")
       report_fig = ggpubr::ggarrange(plotlist = list(ccf, info_transfer, top_phylo, clone_size, phylos), nrow = 3, ncol = 2)
 
-      saveRDS(object=report_fig, file=paste0("$prefix/REPORT_plots_", ctree_output, ".rds"))
-      ggplot2::ggsave(plot=report_fig, filename=paste0("$prefix/REPORT_plots_", ctree_output, ".pdf"), height=297, width=210, units="mm", dpi = 200)
-      ggplot2::ggsave(plot=report_fig, filename=paste0("$prefix/REPORT_plots_", ctree_output, ".png"), height=297, width=210, units="mm", dpi = 200)
+      saveRDS(object=report_fig, file=paste0("$prefix","_REPORT_plots_", ctree_output, ".rds"))
+      ggplot2::ggsave(plot=report_fig, filename=paste0("$prefix","_REPORT_plots_", ctree_output, ".pdf"), height=297, width=210, units="mm", dpi = 200)
+      ggplot2::ggsave(plot=report_fig, filename=paste0("$prefix","_REPORT_plots_", ctree_output, ".png"), height=297, width=210, units="mm", dpi = 200)
     }
 
     """

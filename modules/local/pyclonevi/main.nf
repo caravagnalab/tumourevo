@@ -7,13 +7,13 @@ process PYCLONEVI {
 
     output:
       tuple val(meta), path("*_cluster_table.csv"), emit: ctree_input
-      tuple val(meta), path("*.tsv")
+      tuple val(meta), path("*.tsv"), emit: pyclone_input
       tuple val(meta), path("*_all_fits.h5"), emit: pyclone_all_fits
       tuple val(meta), path("*_best_fit.txt"), emit: pyclone_best_fit
 
     script:
       def args = task.ext.args ?: ''
-      def prefix = task.ext.prefix ?:"${meta.id}" 
+      def prefix = task.ext.prefix ?:"${meta.id}_remove_tail_$args.remove_tail" 
       def n_cluster_arg = args.n_cluster ? "$args.n_cluster" : ""
       def density_arg = args.density ? "$args.density" : ""
       def n_grid_point_arg = args.n_grid_point ? "$args.n_grid_point" : ""

@@ -4,7 +4,8 @@ include { MOBSTERh } from "../../../modules/local/mobsterh/main"
 include { JOINT_FIT } from "../../../modules/local/joint_fit/main"
 include { VIBER } from "../../../modules/local/viber/main"
 include { PYCLONEVI } from "../../../modules/local/pyclonevi/main"
-include { FORMATTER } from "../../../subworkflows/local/formatter/main"
+// include { FORMATTER } from "../../../subworkflows/local/formatter/main"
+include { RDS_PROCESSING } from '../../../modules/local/CNAqc2tsv/main'
 include { CTREE as CTREE_MOBSTERh } from "../../../modules/local/ctree/main"
 include { CTREE as CTREE_PYCLONEVI } from "../../../modules/local/ctree/main"
 include { CTREE as CTREE_VIBER } from "../../../modules/local/ctree/main"
@@ -22,7 +23,8 @@ workflow SUBCLONAL_DECONVOLUTION {
     pyclone_best = null
     pyclone_table = null
     ctree_pyclone_pdf = null
-
+    
+	
     if (params.tools && params.tools.split(",").contains("mobster")) {
         joinCNAqc = rds_join.transpose().map{ meta, rds, sample -> 
             meta = meta + ["tumour_sample": sample, "id":"${meta.dataset}_${meta.patient}_${sample}"]
@@ -36,18 +38,16 @@ workflow SUBCLONAL_DECONVOLUTION {
         input_joint_fit = rds_join.map{meta, rds, sample-> [meta, rds]}
         input_joint_fit.join(in_join).view()
         rds_join = JOINT_FIT(input_joint_fit.join(in_join))
-        rds_join.view()
 
         CTREE_MOBSTERh(MOBSTERh.out.mobster_best_rds)
 
         mobster_pdf = MOBSTERh.out.mobster_report_pdf
         ctree_mobster_pdf = CTREE_MOBSTERh.out.ctree_report_pdf
 
-    } else {
-        if (params.remove_tail && !params.remove_tail.contains("never")){
-            error "None method for tail deconvolution specified"
-        }
+    } else if (params.remove_tail && !params.remove_tail.contains("never")){
+        error "None method for tail deconvolution specified"
     }
+    // rds_join.view()
 
     if (params.tools && params.tools.split(",").contains("viber")) {
         VIBER(rds_join)
@@ -58,13 +58,16 @@ workflow SUBCLONAL_DECONVOLUTION {
     }
 
     if (params.tools && params.tools.split(",").contains("pyclone-vi")) {
-        FORMATTER(rds_join, "rds")
-        PYCLONEVI(FORMATTER.out)
+        //FORMATTER(rds_join, "rds")
+        RDS_PROCESSING(rds_join)
+        PYCLONEVI(RDS_PROCESSING.out.tsv)
         CTREE_PYCLONEVI(PYCLONEVI.out.ctree_input)
-
+        //FORMATTER.out.out
+        RDS_PROCESSING.out.tsv
         pyclone_fits = PYCLONEVI.out.pyclone_all_fits
         pyclone_best = PYCLONEVI.out.pyclone_best_fit
-        pyclone_table = FORMATTER.out.out
+        //pyclone_table = FORMATTER.out.out
+        pyclone_table = RDS_PROCESSING.out.tsv
         ctree_pyclone_pdf = CTREE_PYCLONEVI.out.ctree_report_pdf
     }
 
