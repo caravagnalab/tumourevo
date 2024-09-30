@@ -4,17 +4,17 @@ process SIGPROFILER {
     // container = 'docker://katiad/sigprofiler:dev1'
 
     input:
-       // tuple val(datasetID), val(patientID), val(sampleID), path(joint_table) //from formatter output
-       tuple val(meta), path(joint_table)
+       tuple val(meta), path(rds_join)
        path(genome_path)
 
     output:
-       // tuple val(meta.datasetID), path("signature_deconvolution/Sigprofiler/$meta.datasetID/*"), emit: sigprofiler_results 
+       // tuple val(meta.datasetID), path("signature_deconvolution/Sigprofiler/*"), emit: sigprofiler_results 
        tuple val(meta.datasetID), path("*"), emit: sigprofiler_results
       
-    script:
+    script
     
       def args                              = task.ext.args                                 ?: ''
+      def prefix                            = task.ext.prefix                               ?: "${meta.id}"
       def reference_genome                  = args!='' && args.reference_genome             ? "$args.reference_genome" : ""
       def exome                             = args!='' && args.exome                        ? "$args.exome" : ""
       def volume                            = args!='' && args.volume                       ? "$args.volume" : ""
@@ -61,7 +61,7 @@ process SIGPROFILER {
       
           output_path = os.path.join("output", "SBS", f"{meta.datasetID}.SBS96.all")
          
-          input_data = pd.read_csv("$joint_table", sep = "\\t")
+          input_data = pd.read_csv("$rds_join", sep = "\\t")
      
           # input data preprocessing
           def input_processing(data):
@@ -113,7 +113,8 @@ process SIGPROFILER {
                                    export_probabilities = bool("$export_probabilities"))
 
           # save the output results
-          dest_dir = "signature_deconvolution/Sigprofiler/$meta.datasetID/"
+          #dest_dir = "signature_deconvolution/Sigprofiler/"
+          dest_dir = "$prefix/"
           source_dir = "results/"
           shutil.copytree(source_dir, dest_dir, dirs_exist_ok=True)
    """

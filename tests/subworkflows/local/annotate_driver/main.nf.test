@@ -30,6 +30,7 @@ nextflow_workflow {
                 input[1] = Channel.from(driver_list)
                 input[2] = cds_table
                 input[3] = genome_fasta
+                """
             }
         }
 

@@ -5,19 +5,20 @@ process SPARSE_SIGNATURES {
 
   input:
 
-    tuple val(meta), path(joint_table,  stageAs: '*.tsv')
+    tuple val(meta), path(rds_join,  stageAs: '*.tsv')
 
   output:
  
-    tuple val(meta), path("signature_deconvolution/SparseSig/$datasetID/cv_means_mse.rds"), emit: signatures_cv_rds
-    tuple val(meta), path("signature_deconvolution/SparseSig/$datasetID/best_params_config.rds"), emit: signatures_bestConf_rds
-    tuple val(meta), path("signature_deconvolution/SparseSig/$datasetID/nmf_Lasso_out.rds"), emit: signatures_nmfOut_rds
-    tuple val(meta), path("signature_deconvolution/SparseSig/$datasetID/plot_all.rds"), emit: signatures_plot_rds
-    tuple val(meta), path("signature_deconvolution/SparseSig/$datasetID/plot_all.pdf"), emit: signatures_plot_pdf
+    tuple val(meta), path("*_cv_means_mse.rds"), emit: signatures_cv_rds
+    tuple val(meta), path("*_best_params_config.rds"), emit: signatures_bestConf_rds
+    tuple val(meta), path("*_nmf_Lasso_out.rds"), emit: signatures_nmfOut_rds
+    tuple val(meta), path("*_plot_all.rds"), emit: signatures_plot_rds
+    tuple val(meta), path("*_plot_all.pdf"), emit: signatures_plot_pdf
                             
   script:
 
     def args = task.ext.args ?: ""
+    def prefix = task.ext.prefix ?: "${meta.id}"
     def K = args!="" && args.K ? "$args.K" : ""
     def background_signature = args!="" && args.background_signature ? "$args.background_signature" : ""
     def beta = args!="" && args.beta ? "$args.beta" : ""
@@ -44,7 +45,9 @@ process SPARSE_SIGNATURES {
   library(patchwork)
   library(dplyr)
 
-  patients_rds = strsplit("$joint_table", " ")[[1]]
+  source("$moduleDir/getters.R")
+
+  patients_rds = strsplit("$rds_join", " ")[[1]]
   tables = lapply(patients_rds, FUN = function(p_table){
       read.delim(p_table, sep = "\\t", header=T) %>% 
         mutate(across(everything(), as.character)) 
@@ -52,8 +55,8 @@ process SPARSE_SIGNATURES {
   )
   multisample_table = dplyr::bind_rows(tables)
 
-  res_dir = paste0("signature_deconvolution/SparseSig/", "$datasetID", "/")
-  dir.create(res_dir, recursive = TRUE)
+  #res_dir = paste0("$prefix", "$meta.datasetID", "/")
+  #dir.create(res_dir, recursive = TRUE)
 
   #Extract input data information
   input_data <- multisample_table[,c("Indiv","chr","from","to","ref","alt")]
@@ -117,8 +120,8 @@ process SPARSE_SIGNATURES {
   min_K <- as.numeric(gsub("_Signatures", "", min_K))
   best_params_config <- data.frame(min_K, min_Lambda_beta)
 
-  saveRDS(object = cv_means_mse, file = paste0(res_dir, "cv_means_mse.rds"))
-  saveRDS(object = best_params_config, file = paste0(res_dir, "best_params_config.rds")) 
+  saveRDS(object = cv_means_mse, file = paste0("$prefix", "_cv_means_mse.rds"))
+  saveRDS(object = best_params_config, file = paste0("$prefix", "_best_params_config.rds")) 
 
   #Discovering the signatures within the dataset: NMF Lasso
   #Compute the signatures for the best configuration.
@@ -136,7 +139,7 @@ process SPARSE_SIGNATURES {
     verbose = as.logical("$verbose")
   )
 
-  saveRDS(object = nmf_Lasso_out, file =  paste0(res_dir, "nmf_Lasso_out.rds"))
+  saveRDS(object = nmf_Lasso_out, file =  paste0("$prefix", "_nmf_Lasso_out.rds"))
 
   #Signature visualization
   signatures = nmf_Lasso_out\$beta
@@ -154,9 +157,9 @@ process SPARSE_SIGNATURES {
           panel.background=element_blank(),
           axis.line=element_line(colour="black"))
 
-  plt_all = patchwork::wrap_plots(plot_exposure, plot_signatures, ncol=2) + patchwork::plot_annotation(title = "$datasetID")
-  ggplot2::ggsave(plot = plt_all, filename = paste0(res_dir, "plot_all.pdf"), width = 210, height = 297, units="mm", dpi = 200)
-  saveRDS(object = plt_all, file = paste0(res_dir, "plot_all.rds"))
+  plt_all = patchwork::wrap_plots(plot_exposure, plot_signatures, ncol=2) + patchwork::plot_annotation(title = "$meta.datasetID")
+  ggplot2::ggsave(plot = plt_all, filename = paste0("$prefix", "_plot_all.pdf"), width = 210, height = 297, units="mm", dpi = 200)
+  saveRDS(object = plt_all, file = paste0("$prefix", "_plot_all.rds"))
 
  """ 
  }
