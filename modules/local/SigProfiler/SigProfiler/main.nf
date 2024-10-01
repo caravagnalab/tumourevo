@@ -11,7 +11,7 @@ process SIGPROFILER {
        // tuple val(meta.datasetID), path("signature_deconvolution/Sigprofiler/*"), emit: sigprofiler_results 
        tuple val(meta.datasetID), path("*"), emit: sigprofiler_results
       
-    script
+    script:
     
       def args                              = task.ext.args                                 ?: ''
       def prefix                            = task.ext.prefix                               ?: "${meta.id}"
