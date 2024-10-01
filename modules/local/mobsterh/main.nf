@@ -1,6 +1,7 @@
 process MOBSTERh {
   tag "$meta.id"
-  container='file:///fast/cdslab/ebusca00/singularity/cdslab.sif'
+  // container='file:///fast/cdslab/ebusca00/singularity/cdslab.sif'
+  container = 'docker://elenabuscaroli/mobster:0.0.1'
 
 
   input:

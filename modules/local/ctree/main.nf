@@ -1,11 +1,11 @@
 process CTREE {
   tag "$meta.id"
-  container='file:///fast/cdslab/ebusca00/singularity/cdslab.sif'
+  // container='file:///fast/cdslab/ebusca00/singularity/cdslab.sif'
+  container = 'docker://elenabuscaroli/ctree:0.0.1'
 
   input:
 
     tuple val(meta), path(ctree_input)
-    //tuple val(datasetID), val(patientID), val(sampleID), path(ctree_input)
 
   output:
     tuple val(meta), path("*ctree_{VIBER,MOBSTERh,pyclonevi}.rds"), emit: ctree_rds, optional: true

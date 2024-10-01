@@ -1,6 +1,7 @@
 process VIBER {
   tag "$meta.id"
-  container='file:///fast/cdslab/ebusca00/singularity/cdslab.sif'
+  // container='file:///fast/cdslab/ebusca00/singularity/cdslab.sif'
+  container = 'docker://elenabuscaroli/viber:0.0.1'
 
   input:
     tuple val(meta), path(rds_join), val(tumour_samples) //rds from either JOIN_CNAQC or JOIN_FIT, should be always grouped
