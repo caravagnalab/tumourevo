@@ -82,7 +82,7 @@ process SIGPROFILER {
                   project = dataset_id, 
                   reference_genome = "$reference_genome", 
                   path_to_input_files = input_path,
-                  volume = "$volume")
+                  volume = "$genome_path")
 
           full_input_data_path = os.path.join(input_path, output_path)
 
