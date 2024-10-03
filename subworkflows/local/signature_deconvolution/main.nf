@@ -41,11 +41,11 @@ workflow SIGNATURE_DECONVOLUTION {
             genome_path = DOWNLOAD_GENOME_SIGPROFILER(params.download_genome_sigprofiler_reference_genome).genome_sigprofiler           
         } else {
         // Use the installed genome path from params
-        genome_path = params.genome_installed_path
+            genome_path = params.genome_installed_path
         }
         out_sigprof = FORMATTER_RDS_SIGPROFILER(rds_join, "rds")
-        //Sigprofiler_out =  SIGPROFILER(out_sigprof.groupTuple(by: 0), genome_path) // run Sigprofiler 
-        Sigprofiler_out =  SIGPROFILER(out_sigprof, genome_path)
+        //Sigprofiler_out = SIGPROFILER(out_sigprof.groupTuple(by: 0), genome_path) // run Sigprofiler 
+        Sigprofiler_out = SIGPROFILER(out_sigprof, genome_path)
     }
 
     emit:

@@ -15,7 +15,7 @@ process SIGPROFILER {
       def prefix                            = task.ext.prefix                               ?: "${meta.id}"
       def reference_genome                  = args!='' && args.reference_genome             ? "$args.reference_genome" : ""
       def exome                             = args!='' && args.exome                        ? "$args.exome" : ""
-      def volume                            = args!='' && args.volume                       ? "$args.volume" : ""
+      // def volume                            = args!='' && args.volume                       ? "$args.volume" : ""
       def input_type                        = args!='' && args.input_type                   ? "$args.input_type" : ""
       def context_type                      = args!='' && args.context_type                 ? "$args.context_type" : ""
       def minimum_signatures                = args!='' && args.minimum_signatures           ? "$args.minimum_signatures" : ""
@@ -83,7 +83,7 @@ process SIGPROFILER {
                   project = dataset_id, 
                   reference_genome = "$reference_genome", 
                   path_to_input_files = input_path,
-                  volume = "$volume")
+                  volume = "./")
 
           full_input_data_path = os.path.join(input_path, output_path)
 

@@ -1,5 +1,4 @@
 process DOWNLOAD_GENOME_SIGPROFILER {
-    
     container = 'docker://katiad/sigprofiler:latest'
 
     input:
@@ -11,7 +10,6 @@ process DOWNLOAD_GENOME_SIGPROFILER {
       
     script:
   
-
       """
 
       SigProfilerMatrixGenerator install $reference_genome -v .
