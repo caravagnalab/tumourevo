@@ -49,7 +49,8 @@ process SIGPROFILER {
       import multiprocessing
       from SigProfilerExtractor import sigpro as sig
       from SigProfilerMatrixGenerator.scripts import SigProfilerMatrixGeneratorFunc as matGen
-      
+      #from utils_sigprofiler import input_processing, process_tsv_join      
+
       if __name__ == '__main__':
           
           dataset_id = "$meta.id"
@@ -82,7 +83,7 @@ process SIGPROFILER {
                   project = dataset_id, 
                   reference_genome = "$reference_genome", 
                   path_to_input_files = input_path,
-                  volume = "$genome_path")
+                  volume = "$volume")
 
           full_input_data_path = os.path.join(input_path, output_path)
 
