@@ -1,7 +1,7 @@
 process CTREE {
   tag "$meta.id"
   // container='file:///fast/cdslab/ebusca00/singularity/cdslab.sif'
-  container = 'docker://elenabuscaroli/ctree:0.0.1'
+  container = 'docker://elenabuscaroli/ctree:latest'
 
   input:
 
