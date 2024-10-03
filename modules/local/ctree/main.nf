@@ -128,33 +128,30 @@ process CTREE {
                      store.max = as.integer("$store_max"))
     }
 
-    if (do_fit) {
+    if (do_fit & !is.null(trees)) {
       ctree_output = paste0("ctree_", subclonal_tool)
 
       # plot the best tree
-      plot_tree = plot(trees[[1]])
+      top_phylo = plot(trees[[1]])
 
       # save rds and plots
       saveRDS(object=trees, file=paste0("$prefix","_", ctree_output, ".rds"))
-      saveRDS(object=plot_tree, file=paste0("$prefix","_", ctree_output, "_plots.rds"))
+      saveRDS(object=top_phylo, file=paste0("$prefix","_", ctree_output, "_plots.rds"))
 
       # Save report plot
-      top_phylo = plot(trees[[1]])
       phylos = ggplot2::ggplot()
-      #if (length(trees) > 1) phylos = lapply(trees[2:min(length(trees), 3)], plot) %>% patchwork::wrap_plots(nrow=1)
       if (length(trees) > 1) phylos = lapply(trees[2:min(length(trees), 3)], plot)
-      phylos = ggpubr::ggarrange(plotlist = phylos)
+      phylos = ggpubr::ggarrange(plotlist=phylos)
 
       ccf = ctree::plot_CCF_clusters(trees[[1]])
       info_transfer = ctree::plot_information_transfer(trees[[1]])
       clone_size = ctree::plot_clone_size(trees[[1]])
 
-      #report_fig = patchwork::wrap_plots(ccf, info_transfer, top_phylo, clone_size, phylos, design="A#BBD#CCEEEE")
-      report_fig = ggpubr::ggarrange(plotlist = list(ccf, info_transfer, top_phylo, clone_size, phylos), nrow = 3, ncol = 2)
+      report_fig = ggpubr::ggarrange(plotlist=list(ccf, info_transfer, top_phylo, clone_size, phylos), nrow=3, ncol=2)
 
       saveRDS(object=report_fig, file=paste0("$prefix","_REPORT_plots_", ctree_output, ".rds"))
-      ggplot2::ggsave(plot=report_fig, filename=paste0("$prefix","_REPORT_plots_", ctree_output, ".pdf"), height=297, width=210, units="mm", dpi = 200)
-      ggplot2::ggsave(plot=report_fig, filename=paste0("$prefix","_REPORT_plots_", ctree_output, ".png"), height=297, width=210, units="mm", dpi = 200)
+      ggplot2::ggsave(plot=report_fig, filename=paste0("$prefix","_REPORT_plots_", ctree_output, ".pdf"), height=297, width=210, units="mm", dpi=200)
+      ggplot2::ggsave(plot=report_fig, filename=paste0("$prefix","_REPORT_plots_", ctree_output, ".png"), height=297, width=210, units="mm", dpi=200)
     }
 
     """
