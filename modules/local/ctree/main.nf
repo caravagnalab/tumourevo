@@ -46,7 +46,7 @@ process CTREE {
     }
 
     initialize_ctree_obj_pyclone = function(ctree_input) {
-      ctree_input = add_dummy_driver(ctree_input, variant_colname="variantID", is.driver_colname="is.driver")
+      ctree_input = add_dummy_driver(ctree_input, variant_colname="variantID", is_driver_colname="is.driver")
 
       driver_cluster = unique(ctree_input[which(ctree_input["is.driver"]==TRUE),c("cluster")])
       # the CCF table must report CCF values for each cluster and sample
@@ -102,7 +102,7 @@ process CTREE {
           do_fit = FALSE
         }
 
-        best_fit[["data"]] = add_dummy_driver(best_fit[["data"]], variant_colname="gene", is.driver_colname="driver")
+        best_fit[["data"]] = add_dummy_driver(best_fit[["data"]], variant_colname="gene", is_driver_colname="driver")
 
         # if (!"gene" %in% colnames(best_fit[["data"]]) | !"driver" %in% colnames(best_fit[["data"]])) {
         #   best_fit[["data"]] = best_fit[["data"]] %>% dplyr::mutate(driver=FALSE, gene=NA)
@@ -117,7 +117,7 @@ process CTREE {
         sample_id = unique(best_fit[["data"]][["sample_id"]])
         outdir = paste0(sample_id, "/", outdir)
 
-        best_fit[["data"]] = add_dummy_driver(best_fit[["data"]], variant_colname="driver_label", is.driver_colname="is_driver")
+        best_fit[["data"]] = add_dummy_driver(best_fit[["data"]], variant_colname="driver_label", is_driver_colname="is_driver")
         # if (!"driver_label" %in% colnames(best_fit[["data"]]) | !"is_driver" %in% colnames(best_fit[["data"]])) {
         #   idx = which(best_fit[["data"]][["cluster"]] != "Tail")[1]  # get first non Tail index to put the driver
         #   best_fit[["data"]] = best_fit[["data"]] %>% dplyr::mutate(is_driver=FALSE, driver_label=NA)
