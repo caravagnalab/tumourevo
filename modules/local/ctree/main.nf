@@ -31,6 +31,8 @@ process CTREE {
     library(mobster)
     library(ggplot2)
     
+    outdir = "$prefix"
+
     initialize_ctree_obj_pyclone = function(ctree_input) {
       if (!"variantID" %in% colnames(ctree_input) | !"is.driver" %in% colnames(ctree_input)) {
         ctree_input = ctree_input %>% dplyr::mutate(is.driver=FALSE, variantID=NA)
@@ -101,6 +103,8 @@ process CTREE {
       if (class(best_fit) == "dbpmm") {
         fn_name = mobster::get_clone_trees
         subclonal_tool = "MOBSTERh"
+        sample_id = unique(best_fit[["data"]][["sample_id"]])
+        outdir = paste0(sample_id, "/", outdir)
         if (!"driver_label" %in% colnames(best_fit[["data"]]) | !"is_driver" %in% colnames(best_fit[["data"]])) {
           idx = which(best_fit[["data"]][["cluster"]] != "Tail")[1]  # get first non Tail index to put the driver
           best_fit[["data"]] = best_fit[["data"]] %>% dplyr::mutate(is_driver=FALSE, driver_label=NA)
@@ -135,13 +139,14 @@ process CTREE {
 
     if (do_fit & !is.null(trees)) {
       ctree_output = paste0("ctree_", subclonal_tool)
+      if (!dir.exists(outdir)) dir.create(outdir, recursive=T)
 
       # plot the best tree
       top_phylo = plot(trees[[1]])
 
       # save rds and plots
-      saveRDS(object=trees, file=paste0("$prefix","_", ctree_output, ".rds"))
-      saveRDS(object=top_phylo, file=paste0("$prefix","_", ctree_output, "_plots.rds"))
+      saveRDS(object=trees, file=paste0(outdir, "_", ctree_output, ".rds"))
+      saveRDS(object=top_phylo, file=paste0(outdir, "_", ctree_output, "_plots.rds"))
 
       # Save report plot
       phylos = ggplot2::ggplot()
@@ -154,9 +159,9 @@ process CTREE {
 
       report_fig = ggpubr::ggarrange(plotlist=list(ccf, info_transfer, top_phylo, clone_size, phylos), nrow=3, ncol=2)
 
-      saveRDS(object=report_fig, file=paste0("$prefix","_REPORT_plots_", ctree_output, ".rds"))
-      ggplot2::ggsave(plot=report_fig, filename=paste0("$prefix","_REPORT_plots_", ctree_output, ".pdf"), height=297, width=210, units="mm", dpi=200)
-      ggplot2::ggsave(plot=report_fig, filename=paste0("$prefix","_REPORT_plots_", ctree_output, ".png"), height=297, width=210, units="mm", dpi=200)
+      saveRDS(object=report_fig, file=paste0(outdir, "_REPORT_plots_", ctree_output, ".rds"))
+      ggplot2::ggsave(plot=report_fig, filename=paste0(outdir, "_REPORT_plots_", ctree_output, ".pdf"), height=297, width=210, units="mm", dpi=200)
+      ggplot2::ggsave(plot=report_fig, filename=paste0(outdir, "_REPORT_plots_", ctree_output, ".png"), height=297, width=210, units="mm", dpi=200)
     }
 
     """
