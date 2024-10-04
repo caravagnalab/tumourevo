@@ -1,6 +1,7 @@
 process VIBER {
   tag "$meta.id"
-  container='file:///fast/cdslab/ebusca00/singularity/cdslab.sif'
+  // container='file:///fast/cdslab/ebusca00/singularity/cdslab.sif'
+  container = 'docker://elenabuscaroli/viber:latest'
 
   input:
     tuple val(meta), path(rds_join), val(tumour_samples) //rds from either JOIN_CNAQC or JOIN_FIT, should be always grouped
@@ -17,7 +18,7 @@ process VIBER {
   script:
     // viber fit params
     def args = task.ext.args ?: ""
-    def prefix = task.ext.prefix ?: "${meta.id}" 
+    def prefix = task.ext.prefix ?:"${meta.id}_remove_tail_$args.remove_tail"
     def K = args!="" && args.K ? "$args.K" : ""
     def alpha_0 = args!="" && args.alpha_0 ? "$args.alpha_0" : ""
     def a_0 = args!="" && args.a_0 ? "$args.a_0" : ""
@@ -43,18 +44,6 @@ process VIBER {
       plot2 = "viber_best_st_heuristic_fit_plots.rds"
     }
 
-    // if (mode == "singlesample") {
-      //sampleID_string = sampleID
-      //outDir = "subclonal_deconvolution/viber/$datasetID/$patientID/$sampleID/"
-      // plot1 = "viber_best_st_mixing_plots.rds"
-      // plot2 = "viber_best_st_heuristic_mixing_plots.rds"
-    // } else if (mode == "multisample"){
-      // sampleID_string = sampleID.join(" ")
-      // outDir = "subclonal_deconvolution/viber/$datasetID/$patientID/"
-      // plot1 = "viber_best_st_fit_plots.rds"
-      // plot2 = "viber_best_st_heuristic_fit_plots.rds"
-    // }
-
     """
     #!/usr/bin/env Rscript
 
@@ -64,6 +53,7 @@ process VIBER {
     library(dplyr)
     library(tidyverse)
     library(ggplot2)
+    library(CNAqc)
     source("$moduleDir/getters.R")
 
     patientID = "$meta.patient"
@@ -79,8 +69,11 @@ process VIBER {
         shared = input_obj %>% get_sample(sample=samples, which_obj="shared")
         joint_table = lapply(names(shared), 
                              function(sample_name) 
-                               CNAqc::Mutations(x=shared[[sample_name]]) %>% 
-                                 dplyr::mutate(sample_id=sample_name)
+                              shared[[sample_name]] %>% 
+                                  # keep only mutations on the diploid karyotype
+                                  CNAqc::subset_by_segment_karyotype("1:1") %>% 
+                                  CNAqc::Mutations() %>% 
+                                  dplyr::mutate(sample_id=sample_name)
                              ) %>% dplyr::bind_rows()
       } else {
         cli::cli_alert_warning("Object of class {class(input_obj)} not supported.")

@@ -2,7 +2,8 @@
 // MUTATIONAL SIGNATURES DECONVOLUTION WORKFLOW
 //
 
-include { FORMATTER as FORMATTER_RDS_PROCESSING } from "../../../subworkflows/local/formatter/main"
+include { FORMATTER as FORMATTER_RDS_SIGPROFILER } from "../../../subworkflows/local/formatter/main"
+include { FORMATTER as FORMATTER_RDS_SPARSESIGNATURES } from "../../../subworkflows/local/formatter/main"
 include { SPARSE_SIGNATURES } from "../../../modules/local/SparseSignatures/main"
 include { DOWNLOAD_GENOME_SIGPROFILER } from "../../../modules/local/SigProfiler/download/main"
 include { SIGPROFILER } from "../../../modules/local/SigProfiler/SigProfiler/main"
@@ -23,7 +24,7 @@ workflow SIGNATURE_DECONVOLUTION {
 
 
     if (params.tools && params.tools.split(',').contains('sparsesignatures')) {
-        out_sparse = FORMATTER_RDS_PROCESSING(rds_join, "rds")
+        out_sparse = FORMATTER_RDS_SPARSESIGNATURES(rds_join, "rds")
         SPARSE_SIGNATURES(out_sparse.groupTuple(by: 0)) // run SparseSignatures
         
         plot_pdf = SPARSE_SIGNATURES.out.signatures_plot_pdf
@@ -36,20 +37,15 @@ workflow SIGNATURE_DECONVOLUTION {
 
     if (params.tools && params.tools.split(',').contains('sigprofiler')) {
         // Check if we should download SigProfiler genome
-        if (params.download_sigprofiler_genome) {
-            
-            genome_path =  DOWNLOAD_GENOME_SIGPROFILER(params.download_genome_sigprofiler_reference_genome).genome
-           
-        
+        if (params.download_sigprofiler_genome) {    
+            genome_path = DOWNLOAD_GENOME_SIGPROFILER(params.download_genome_sigprofiler_reference_genome).genome_sigprofiler           
         } else {
         // Use the installed genome path from params
-        genome_path = params.genome_installed_path
-           
+            genome_path = params.genome_installed_path
         }
-            
-        out_sigprof = FORMATTER_RDS_PROCESSING(rds_join, "rds")
-        Sigprofiler_out = SIGPROFILER(out_sigprof, genome_path) // run SigProfiler
-        
+        out_sigprof = FORMATTER_RDS_SIGPROFILER(rds_join, "rds")
+        //Sigprofiler_out = SIGPROFILER(out_sigprof.groupTuple(by: 0), genome_path) // run Sigprofiler 
+        Sigprofiler_out = SIGPROFILER(out_sigprof, genome_path)
     }
 
     emit:

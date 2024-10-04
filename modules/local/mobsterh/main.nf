@@ -1,7 +1,7 @@
 process MOBSTERh {
   tag "$meta.id"
-  container='file:///fast/cdslab/ebusca00/singularity/cdslab.sif'
-
+  // container='file:///fast/cdslab/ebusca00/singularity/cdslab.sif'
+  container = 'docker://elenabuscaroli/mobster:latest'
 
   input:
     tuple val(meta), path(rds_join) // rds from JOIN_CNAQC 
@@ -52,7 +52,10 @@ process MOBSTERh {
        original = obj %>% get_sample(sample=samples, which_obj="original")
        input_table = lapply(names(original), 
                             function(sample_name) 
-                              CNAqc::Mutations(x=original[[sample_name]]) %>% 
+                              original[[sample_name]] %>% 
+                                # keep only mutations on the diploid karyotype
+                                CNAqc::subset_by_segment_karyotype("1:1") %>% 
+                                CNAqc::Mutations() %>% 
                                 dplyr::mutate(sample_id=sample_name)
                             ) %>% dplyr::bind_rows()
      } else {

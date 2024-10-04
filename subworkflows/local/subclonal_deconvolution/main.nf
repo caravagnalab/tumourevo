@@ -36,17 +36,14 @@ workflow SUBCLONAL_DECONVOLUTION {
         input_joint_fit = rds_join.map{meta, rds, sample-> [meta, rds]}
         input_joint_fit.join(in_join).view()
         rds_join = JOINT_FIT(input_joint_fit.join(in_join))
-        rds_join.view()
 
         CTREE_MOBSTERh(MOBSTERh.out.mobster_best_rds)
 
         mobster_pdf = MOBSTERh.out.mobster_report_pdf
         ctree_mobster_pdf = CTREE_MOBSTERh.out.ctree_report_pdf
 
-    } else {
-        if (params.remove_tail && !params.remove_tail.contains("never")){
-            error "None method for tail deconvolution specified"
-        }
+    } else if (params.remove_tail && !params.remove_tail.contains("never")){
+        error "None method for tail deconvolution specified"
     }
 
     if (params.tools && params.tools.split(",").contains("viber")) {
@@ -59,9 +56,8 @@ workflow SUBCLONAL_DECONVOLUTION {
 
     if (params.tools && params.tools.split(",").contains("pyclone-vi")) {
         FORMATTER(rds_join, "rds")
-        PYCLONEVI(FORMATTER.out)
+        PYCLONEVI(FORMATTER.out.out)
         CTREE_PYCLONEVI(PYCLONEVI.out.ctree_input)
-
         pyclone_fits = PYCLONEVI.out.pyclone_all_fits
         pyclone_best = PYCLONEVI.out.pyclone_best_fit
         pyclone_table = FORMATTER.out.out

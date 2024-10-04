@@ -1,23 +1,21 @@
 process SIGPROFILER {
     tag "$meta.id"
     container = 'docker://katiad/sigprofiler:latest'
-    // container = 'docker://katiad/sigprofiler:dev1'
-
+  
     input:
        tuple val(meta), path(rds_join)
        path(genome_path)
 
     output:
-       // tuple val(meta.datasetID), path("signature_deconvolution/Sigprofiler/*"), emit: sigprofiler_results 
-       tuple val(meta.datasetID), path("*"), emit: sigprofiler_results
+       tuple val(meta), path("*"), emit: sigprofiler_results
       
-    script
+    script:
     
       def args                              = task.ext.args                                 ?: ''
       def prefix                            = task.ext.prefix                               ?: "${meta.id}"
       def reference_genome                  = args!='' && args.reference_genome             ? "$args.reference_genome" : ""
       def exome                             = args!='' && args.exome                        ? "$args.exome" : ""
-      def volume                            = args!='' && args.volume                       ? "$args.volume" : ""
+      // def volume                            = args!='' && args.volume                       ? "$args.volume" : ""
       def input_type                        = args!='' && args.input_type                   ? "$args.input_type" : ""
       def context_type                      = args!='' && args.context_type                 ? "$args.context_type" : ""
       def minimum_signatures                = args!='' && args.minimum_signatures           ? "$args.minimum_signatures" : ""
@@ -51,21 +49,23 @@ process SIGPROFILER {
       import multiprocessing
       from SigProfilerExtractor import sigpro as sig
       from SigProfilerMatrixGenerator.scripts import SigProfilerMatrixGeneratorFunc as matGen
-      
+      #from utils_sigprofiler import input_processing, process_tsv_join      
+
       if __name__ == '__main__':
           
-          input_path = os.path.join(meta.datasetID)
+          dataset_id = "$meta.id"
+          input_path = os.path.join(dataset_id)
 
           if not os.path.exists(input_path):
-              os.mkdir(input_path, exist_ok=True)
+              os.mkdir(input_path)
       
-          output_path = os.path.join("output", "SBS", f"{meta.datasetID}.SBS96.all")
+          output_path = os.path.join("output", "SBS", f"{dataset_id}.SBS96.all")
          
           input_data = pd.read_csv("$rds_join", sep = "\\t")
      
           # input data preprocessing
           def input_processing(data):
-             new_columns = {'Project': "$meta.datasetID", 'Genome': '$reference_genome', 'Type': "SOMATIC", 'mut_type': "SNP"}
+             new_columns = {'Project': "dataset_id", 'Genome': '$reference_genome', 'Type': "SOMATIC", 'mut_type': "SNP"}
              df = data.assign(**new_columns)
              df['chr'] = df['chr'].astype(str).str[3:]
              df = df.rename(columns={'Indiv': 'Sample', 'chr': 'chrom', 'from': 'pos_start', 'to': 'pos_end'})
@@ -80,17 +80,19 @@ process SIGPROFILER {
 
           # mutation's counts matrix generation
           input_matrix = matGen.SigProfilerMatrixGeneratorFunc(
-                  project = "$meta.datasetID", 
+                  project = dataset_id, 
                   reference_genome = "$reference_genome", 
                   path_to_input_files = input_path,
-                  volume = "$genome_path")
+                  volume = "./")
+
+          full_input_data_path = os.path.join(input_path, output_path)
 
           # Perform model fitting
           sig.sigProfilerExtractor(input_type = "$input_type", 
                                    output = "results", 
-                                   input_data = input_path+output_path,  
+                                   input_data = full_input_data_path,  
                                    context_type = "$context_type",  
-                                   exome = "$exome",
+                                   exome = bool("$exome"),
                                    minimum_signatures = int("$minimum_signatures"),  
                                    maximum_signatures = int("$maximum_signatures"), 
                                    nmf_replicates = int("$nmf_replicates"),
