@@ -30,14 +30,23 @@ process CTREE {
     library(VIBER)
     library(mobster)
     library(ggplot2)
-    
+
     outdir = "$prefix"
 
-    initialize_ctree_obj_pyclone = function(ctree_input) {
-      if (!"variantID" %in% colnames(ctree_input) | !"is.driver" %in% colnames(ctree_input)) {
-        ctree_input = ctree_input %>% dplyr::mutate(is.driver=FALSE, variantID=NA)
-        ctree_input[1, "is.driver"] = TRUE; ctree_input[1, "variantID"] = ""
+    add_dummy_driver = function(input_table, variant_colname, is_driver_colname) {
+      if (!variant_colname %in% colnames(input_table) | !is_driver_colname %in% colnames(input_table)) {
+        idx = which(input_table[["cluster"]] != "Tail")[1]
+        input_table = input_table %>% dplyr::mutate(!!is_driver_colname:=FALSE, !!variant_colname:=NA)
+      } else if (all(input_table[[is_driver_colname]]==FALSE)) {
+        idx = which(input_table[["cluster"]] != "Tail")[1]
       }
+      input_table[idx, is_driver_colname] = TRUE
+      input_table[idx, variant_colname] = ""
+      return(input_table)
+    }
+
+    initialize_ctree_obj_pyclone = function(ctree_input) {
+      ctree_input = add_dummy_driver(ctree_input, variant_colname="variantID", is.driver_colname="is.driver")
 
       driver_cluster = unique(ctree_input[which(ctree_input["is.driver"]==TRUE),c("cluster")])
       # the CCF table must report CCF values for each cluster and sample
@@ -93,10 +102,12 @@ process CTREE {
           do_fit = FALSE
         }
 
-        if (!"gene" %in% colnames(best_fit[["data"]]) | !"driver" %in% colnames(best_fit[["data"]])) {
-          best_fit[["data"]] = best_fit[["data"]] %>% dplyr::mutate(driver=FALSE, gene=NA)
-          best_fit[["data"]][1, "driver"] = TRUE; best_fit[["data"]][1, "gene"] = ""
-        }
+        best_fit[["data"]] = add_dummy_driver(best_fit[["data"]], variant_colname="gene", is.driver_colname="driver")
+
+        # if (!"gene" %in% colnames(best_fit[["data"]]) | !"driver" %in% colnames(best_fit[["data"]])) {
+        #   best_fit[["data"]] = best_fit[["data"]] %>% dplyr::mutate(driver=FALSE, gene=NA)
+        #   best_fit[["data"]][1, "driver"] = TRUE; best_fit[["data"]][1, "gene"] = ""
+        # }
       }
 
       ## mobster
@@ -105,11 +116,13 @@ process CTREE {
         subclonal_tool = "MOBSTERh"
         sample_id = unique(best_fit[["data"]][["sample_id"]])
         outdir = paste0(sample_id, "/", outdir)
-        if (!"driver_label" %in% colnames(best_fit[["data"]]) | !"is_driver" %in% colnames(best_fit[["data"]])) {
-          idx = which(best_fit[["data"]][["cluster"]] != "Tail")[1]  # get first non Tail index to put the driver
-          best_fit[["data"]] = best_fit[["data"]] %>% dplyr::mutate(is_driver=FALSE, driver_label=NA)
-          best_fit[["data"]][idx, "is_driver"] = TRUE; best_fit[["data"]][idx, "driver_label"] = ""
-        }
+
+        best_fit[["data"]] = add_dummy_driver(best_fit[["data"]], variant_colname="driver_label", is.driver_colname="is_driver")
+        # if (!"driver_label" %in% colnames(best_fit[["data"]]) | !"is_driver" %in% colnames(best_fit[["data"]])) {
+        #   idx = which(best_fit[["data"]][["cluster"]] != "Tail")[1]  # get first non Tail index to put the driver
+        #   best_fit[["data"]] = best_fit[["data"]] %>% dplyr::mutate(is_driver=FALSE, driver_label=NA)
+        #   best_fit[["data"]][idx, "is_driver"] = TRUE; best_fit[["data"]][idx, "driver_label"] = ""
+        # }
       }
 
       if (class(best_fit) %in% c("vb_bmm", "dbpmm") & do_fit) {
