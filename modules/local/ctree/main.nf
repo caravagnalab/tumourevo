@@ -31,7 +31,7 @@ process CTREE {
     library(mobster)
     library(ggplot2)
     
-    initialize_ctree_obj = function(ctree_input) {
+    initialize_ctree_obj_pyclone = function(ctree_input) {
       if (!"variantID" %in% colnames(ctree_input) | !"is.driver" %in% colnames(ctree_input)) {
         ctree_input = ctree_input %>% dplyr::mutate(is.driver=FALSE, variantID=NA)
         ctree_input[1, "is.driver"] = TRUE; ctree_input[1, "variantID"] = ""
@@ -42,24 +42,28 @@ process CTREE {
       # cluster | nMuts | is.driver | is.clonal | sample1 | sample2 | ...
       CCF_table = ctree_input %>% 
         dplyr::select(sample_id, cluster, nMuts, is.driver, is.clonal, CCF) %>%
-        dplyr::filter(is.driver  != "") %>%
-        dplyr::filter(cluster != "Tail") %>%
-        mutate(cluster = as.character(cluster)) %>%
-        group_by(cluster) %>%
-        dplyr::filter(!(cluster %in% driver_cluster) | is.driver  == "TRUE") %>%
-        mutate(is.driver = as.logical(is.driver)) %>%
-        dplyr::ungroup() %>%
-        unique() %>%
-        tidyr::pivot_wider(names_from = "sample_id", values_from = "CCF", values_fill = 0)
+        
+        dplyr::mutate(is.driver=replace(is.driver, is.driver=="", "FALSE")) %>% 
+        dplyr::mutate(is.driver=as.logical(is.driver)) %>%
+        
+        # dplyr::filter(is.driver != "") %>%
+        dplyr::filter(cluster!="Tail") %>%
+        dplyr::mutate(cluster=as.character(cluster)) %>%
+        
+        dplyr::group_by(cluster) %>%
+        # dplyr::filter(!(cluster %in% driver_cluster) | is.driver) %>%
+        dplyr::mutate(is.driver=any(is.driver)) %>% 
+        dplyr::ungroup() %>% unique() %>%
+        tidyr::pivot_wider(names_from="sample_id", values_from="CCF", values_fill=0)
       
       # the driver table must contain patient and variant IDs and report clonality and driver status
       # patientID | variantID | is.driver | is.clonal | cluster | sample1 | sample2 | ...
       drivers_table = ctree_input %>% 
-         dplyr::select(patientID, sample_id, variantID, cluster, is.driver, is.clonal, CCF) %>%
-         dplyr::filter(is.driver==TRUE) %>%
-         mutate(is.driver = as.logical(is.driver)) %>%
-         dplyr::mutate(cluster = as.character(cluster)) %>%
-         tidyr::pivot_wider(names_from="sample_id", values_from="CCF",values_fill = 0)
+        dplyr::mutate(is.driver=as.logical(is.driver)) %>%
+        dplyr::mutate(cluster=as.character(cluster)) %>%
+        dplyr::select(patientID, sample_id, variantID, cluster, is.driver, is.clonal, CCF) %>%
+        dplyr::filter(is.driver==TRUE) %>%
+        tidyr::pivot_wider(names_from="sample_id", values_from="CCF", values_fill=0)
 
       samples = unique(ctree_input[["sample_id"]])  # if multisample, this is a list
       patient = unique(ctree_input[["patientID"]])
@@ -98,8 +102,9 @@ process CTREE {
         fn_name = mobster::get_clone_trees
         subclonal_tool = "MOBSTERh"
         if (!"driver_label" %in% colnames(best_fit[["data"]]) | !"is_driver" %in% colnames(best_fit[["data"]])) {
+          idx = which(best_fit[["data"]][["cluster"]] != "Tail")[1]  # get first non Tail index to put the driver
           best_fit[["data"]] = best_fit[["data"]] %>% dplyr::mutate(is_driver=FALSE, driver_label=NA)
-          best_fit[["data"]][1, "is_driver"] = TRUE; best_fit[["data"]][1, "driver_label"] = ""
+          best_fit[["data"]][idx, "is_driver"] = TRUE; best_fit[["data"]][idx, "driver_label"] = ""
         }
       }
 
@@ -118,7 +123,7 @@ process CTREE {
       do_fit = TRUE
       subclonal_tool = "pyclonevi"
       input_table = read.csv("$ctree_input", sep="\t")
-      data_ctree = initialize_ctree_obj(input_table)
+      data_ctree = initialize_ctree_obj_pyclone(input_table)
       trees = ctrees(CCF_clusters = data_ctree[["CCF_table"]],
                      drivers = data_ctree[["drivers_table"]],
                      samples = data_ctree[["samples"]],
