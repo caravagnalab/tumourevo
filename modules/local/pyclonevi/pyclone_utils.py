@@ -9,10 +9,10 @@ import argparse
 #     """Add two numbers."""
 #     return a + b
 
-
 #input data preprocessing
 def create_pyclone_input(input_data, patient_id,output_data):
     df = pd.read_csv(input_data, sep = '\t',header=0)
+    df = df.query('karyotype=="1:1"')
     df['normal_cn'] = 2
     df['patient_id'] = patient_id
     df['mutation_id'] = df.apply(lambda row: f"{patient_id}:{row['chr'][3:]}:{row['from']}:{row['alt']}", axis=1)
@@ -20,12 +20,8 @@ def create_pyclone_input(input_data, patient_id,output_data):
     df = df.drop(columns=['karyotype'])
     df = df.rename(columns={'Indiv': 'sample_id', 'NR': 'ref_counts', 'NV': 'alt_counts', 'purity': 'tumour_content'})
 
-
     column_names = ['mutation_id', 'patient_id','sample_id', 'ref_counts', 'alt_counts', 'normal_cn', 'major_cn','minor_cn','tumour_content','driver_label','is_driver']
     column_names_red = list(set(column_names) & set(df.columns))
-
-    # df = df.loc[:, ['mutation_id', 'patient_id','sample_id', 'ref_counts', 'alt_counts', 'normal_cn', 'major_cn','minor_cn','tumour_content','driver_label','is_driver']]
-    # column_names = ['mutation_id', 'patient_id','sample_id', 'ref_counts', 'alt_counts', 'normal_cn', 'major_cn','minor_cn','tumour_content','driver_label','is_driver']
 
     df = df.loc[:, column_names_red]
     df.to_csv(output_data, sep="\t",index=False, header=df.columns)
@@ -47,8 +43,6 @@ def main():
     parser_create_pyclone_input.add_argument('input_data', help='Joint table path')
     parser_create_pyclone_input.add_argument('patient_id', help='Patient identifier')
     parser_create_pyclone_input.add_argument('output_data', help='Output path for new table')
-
-
 
     # # Create sub-parser for the "divide" command
     # parser_divide = subparsers.add_parser('divide', help='Divide two numbers')

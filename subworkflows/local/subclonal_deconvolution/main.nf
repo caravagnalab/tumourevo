@@ -5,7 +5,6 @@ include { JOINT_FIT } from "../../../modules/local/joint_fit/main"
 include { VIBER } from "../../../modules/local/viber/main"
 include { PYCLONEVI } from "../../../modules/local/pyclonevi/main"
 include { FORMATTER } from "../../../subworkflows/local/formatter/main"
-// include { RDS_PROCESSING } from '../../../modules/local/CNAqc2tsv/main'
 include { CTREE as CTREE_MOBSTERh } from "../../../modules/local/ctree/main"
 include { CTREE as CTREE_PYCLONEVI } from "../../../modules/local/ctree/main"
 include { CTREE as CTREE_VIBER } from "../../../modules/local/ctree/main"
@@ -23,8 +22,7 @@ workflow SUBCLONAL_DECONVOLUTION {
     pyclone_best = null
     pyclone_table = null
     ctree_pyclone_pdf = null
-    
-	
+
     if (params.tools && params.tools.split(",").contains("mobster")) {
         joinCNAqc = rds_join.transpose().map{ meta, rds, sample -> 
             meta = meta + ["tumour_sample": sample, "id":"${meta.dataset}_${meta.patient}_${sample}"]
