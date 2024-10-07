@@ -3,7 +3,7 @@ process SIGPROFILER {
     container = 'docker://katiad/sigprofiler:latest'
   
     input:
-       tuple val(meta), path(rds_join)
+       tuple val(meta), path(tsv_list, stageAs: '*.tsv')
        path(genome_path)
 
     output:
@@ -53,7 +53,7 @@ process SIGPROFILER {
 
       if __name__ == '__main__':
           
-          dataset_id = "$meta.id"
+          dataset_id = "$meta.dataset"
           input_path = os.path.join(dataset_id)
 
           if not os.path.exists(input_path):
@@ -65,8 +65,8 @@ process SIGPROFILER {
      
           # input data preprocessing
 
-           def process_tsv_join(rds_join):
-             patients_tsv = rds_join.split()
+           def process_tsv_join(tsv_list):
+             patients_tsv = tsv_list.split()
              # Read each file into a pandas DataFrame and ensure all columns are of type 'string'
              tables = []
              for p_table in patients_tsv:
@@ -84,7 +84,7 @@ process SIGPROFILER {
              df = df.loc[:, ['Project', 'Sample', 'ID', 'Genome', 'mut_type', 'chrom', 'pos_start', 'pos_end', 'ref', 'alt', 'Type']]
              return df
     
-          input_tsv_join = process_tsv_join("$rds_join")
+          input_tsv_join = process_tsv_join("$tsv_list")
 
           input_data = input_processing(input_tsv_join, dataset_id, "$reference_genome")
 
