@@ -83,9 +83,10 @@ workflow TUMOUREVO {
     pass_qc = QC.out.rds_join.map{  meta, rds, sample -> 
                 [meta, rds, sample] }
                 .branch { meta, rds, sample -> 
-                        pass: meta.normal_contamination == 0
-                        not_pass: meta.normal_contamination == 1
+                        pass: meta.normal_contamination == '0'
+                        not_pass: meta.normal_contamination == '1'
                 }
+    
     SUBCLONAL_DECONVOLUTION(pass_qc.pass)
-    SIGNATURE_DECONVOLUTION(pass_qc.pass)
+    //SIGNATURE_DECONVOLUTION(pass_qc.pass)
 }
