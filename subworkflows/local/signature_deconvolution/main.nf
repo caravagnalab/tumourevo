@@ -25,7 +25,8 @@ workflow SIGNATURE_DECONVOLUTION {
 
     if (params.tools && params.tools.split(',').contains('sparsesignatures')) {
         out_sparse = FORMATTER_RDS_SPARSESIGNATURES(rds_join, "rds")
-        SPARSE_SIGNATURES(out_sparse.groupTuple(by: 0)) // run SparseSignatures
+        input_sparsesig = out_sparse | map { meta, rds -> [meta.subMap('dataset'), meta.patient] } | groupTuple
+        SPARSE_SIGNATURES(input_sparsesig) // run SparseSignatures
         
         plot_pdf = SPARSE_SIGNATURES.out.signatures_plot_pdf
         plot_rds = SPARSE_SIGNATURES.out.signatures_plot_rds
@@ -44,8 +45,8 @@ workflow SIGNATURE_DECONVOLUTION {
             genome_path = params.genome_installed_path
         }
         out_sigprof = FORMATTER_RDS_SIGPROFILER(rds_join, "rds")
-        //Sigprofiler_out = SIGPROFILER(out_sigprof.groupTuple(by: 0), genome_path) // run Sigprofiler 
-        Sigprofiler_out = SIGPROFILER(out_sigprof, genome_path)
+        input_sigprofiler = out_sigprof | map { meta, rds -> [meta.subMap('dataset'), meta.patient] } | groupTuple
+        Sigprofiler_out = SIGPROFILER(input_sigprofiler, genome_path)
     }
 
     emit:

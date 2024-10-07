@@ -61,9 +61,20 @@ process SIGPROFILER {
       
           output_path = os.path.join("output", "SBS", f"{dataset_id}.SBS96.all")
          
-          input_data = pd.read_csv("$rds_join", sep = "\\t")
+          #input_data = pd.read_csv("$rds_join", sep = "\\t")
      
           # input data preprocessing
+
+           def process_tsv_join(rds_join):
+             patients_tsv = rds_join.split()
+             # Read each file into a pandas DataFrame and ensure all columns are of type 'string'
+             tables = []
+             for p_table in patients_tsv:
+             df = pd.read_csv(p_table, sep='\\t', dtype=str)
+             tables.append(df)
+             multisample_table = pd.concat(tables, ignore_index=True)
+             return multisample_table
+
           def input_processing(data):
              new_columns = {'Project': "dataset_id", 'Genome': '$reference_genome', 'Type': "SOMATIC", 'mut_type': "SNP"}
              df = data.assign(**new_columns)
@@ -73,7 +84,9 @@ process SIGPROFILER {
              df = df.loc[:, ['Project', 'Sample', 'ID', 'Genome', 'mut_type', 'chrom', 'pos_start', 'pos_end', 'ref', 'alt', 'Type']]
              return df
     
-          input_data = input_processing(input_data)
+          input_tsv_join = process_tsv_join("$rds_join")
+
+          input_data = input_processing(input_tsv_join, dataset_id, "$reference_genome")
 
           # saving input matrix to txt
           input_data.to_csv(f"{input_path}/input_data.txt", sep="\\t", index=False, header=True)
