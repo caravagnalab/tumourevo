@@ -5,7 +5,7 @@ process SPARSE_SIGNATURES {
 
   input:
 
-    tuple val(meta), path(rds_join,  stageAs: '*.tsv')
+    tuple val(meta), path(tsv_join,  stageAs: '*.tsv')
 
   output:
  
@@ -47,7 +47,7 @@ process SPARSE_SIGNATURES {
 
   source("$moduleDir/getters.R")
 
-  patients_rds = strsplit("$rds_join", " ")[[1]]
+  patients_tsv = strsplit("$tsv_join", " ")[[1]]
   tables = lapply(patients_rds, FUN = function(p_table){
       read.delim(p_table, sep = "\\t", header=T) %>% 
         mutate(across(everything(), as.character)) 
