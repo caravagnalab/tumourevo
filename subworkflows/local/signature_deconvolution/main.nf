@@ -24,13 +24,11 @@ workflow SIGNATURE_DECONVOLUTION {
 
 
     if (params.tools && params.tools.split(',').contains('sparsesignatures')) {
-        out_sparse = FORMATTER_RDS_SPARSESIGNATURES(rds_join, "rds")
-        input_sparsesig = out_sparse.out.tsv
-            .map { meta, tsv -> 
-                meta = meta + [id: "${meta.dataset}"] + [normal_contamination: "${normal_contamination}"]
-                patient = meta.patient
-                [meta.subMap('dataset'), tsv, patient] }
-                | groupTuple
+        FORMATTER_RDS_SPARSESIGNATURES(rds_join, "rds")
+        input_sparsesig = FORMATTER_RDS_SPARSESIGNATURES.out.map { meta, tsv, sample ->
+            meta = meta + [id: "${meta.dataset}"] 
+            [meta.subMap('dataset', 'id'), tsv] }
+            | groupTuple
   
         SPARSE_SIGNATURES(input_sparsesig) // run SparseSignatures
         
@@ -51,17 +49,13 @@ workflow SIGNATURE_DECONVOLUTION {
             genome_path = params.genome_installed_path
         }
         
-        out_sigprof = FORMATTER_RDS_SIGPROFILER(rds_join, "rds")
+        FORMATTER_RDS_SIGPROFILER(rds_join, "rds")
 
-        input_sigprofiler = out_sigprof.out
-            .map { meta, tsv ->
-                meta = meta + [id: "${meta.dataset}"] + [normal_contamination: "${normal_contamination}"]
-                patient = meta.patient
-                [meta.subMap('dataset'), tsv, patient]
-            }
+        input_sigprofiler = FORMATTER_RDS_SIGPROFILER.out.map { meta, tsv, sample ->
+            meta = meta + [id: "${meta.dataset}"] 
+            [meta.subMap('dataset', 'id'), tsv]}
             | groupTuple  
   
-       
         Sigprofiler_out = SIGPROFILER(input_sigprofiler, genome_path)
     }
 
