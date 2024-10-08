@@ -61,21 +61,20 @@ process SIGPROFILER {
       
           output_path = os.path.join("output", "SBS", f"{dataset_id}.SBS96.all")
          
-          #input_data = pd.read_csv("$rds_join", sep = "\\t")
-     
+          
           # input data preprocessing
 
-           def process_tsv_join(tsv_list):
+          def process_tsv_join(tsv_list):
              patients_tsv = tsv_list.split()
              # Read each file into a pandas DataFrame and ensure all columns are of type 'string'
              tables = []
              for p_table in patients_tsv:
-             df = pd.read_csv(p_table, sep='\\t', dtype=str)
-             tables.append(df)
+                 df = pd.read_csv(p_table, sep='\\t', dtype=str)
+                 tables.append(df)
              multisample_table = pd.concat(tables, ignore_index=True)
              return multisample_table
 
-          def input_processing(data):
+          def input_processing(data, dataset_id, genome_versionn):
              new_columns = {'Project': "dataset_id", 'Genome': '$reference_genome', 'Type': "SOMATIC", 'mut_type': "SNP"}
              df = data.assign(**new_columns)
              df['chr'] = df['chr'].astype(str).str[3:]
