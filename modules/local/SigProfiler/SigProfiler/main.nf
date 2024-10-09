@@ -3,11 +3,11 @@ process SIGPROFILER {
     container = 'docker://katiad/sigprofiler:latest'
   
     input:
-       tuple val(meta), path(rds_join)
+       tuple val(meta), path(tsv_list, stageAs: '*.tsv')
        path(genome_path)
 
     output:
-       tuple val(meta), path("*"), emit: sigprofiler_results
+       tuple val(meta), path("results/*"), emit: sigprofiler_results
       
     script:
     
@@ -15,7 +15,6 @@ process SIGPROFILER {
       def prefix                            = task.ext.prefix                               ?: "${meta.id}"
       def reference_genome                  = args!='' && args.reference_genome             ? "$args.reference_genome" : ""
       def exome                             = args!='' && args.exome                        ? "$args.exome" : ""
-      // def volume                            = args!='' && args.volume                       ? "$args.volume" : ""
       def input_type                        = args!='' && args.input_type                   ? "$args.input_type" : ""
       def context_type                      = args!='' && args.context_type                 ? "$args.context_type" : ""
       def minimum_signatures                = args!='' && args.minimum_signatures           ? "$args.minimum_signatures" : ""
@@ -53,7 +52,7 @@ process SIGPROFILER {
 
       if __name__ == '__main__':
           
-          dataset_id = "$meta.id"
+          dataset_id = "$meta.dataset"
           input_path = os.path.join(dataset_id)
 
           if not os.path.exists(input_path):
@@ -61,10 +60,20 @@ process SIGPROFILER {
       
           output_path = os.path.join("output", "SBS", f"{dataset_id}.SBS96.all")
          
-          input_data = pd.read_csv("$rds_join", sep = "\\t")
-     
+          
           # input data preprocessing
-          def input_processing(data):
+
+          def process_tsv_join(tsv_list):
+             patients_tsv = tsv_list.split()
+             # Read each file into a pandas DataFrame and ensure all columns are of type 'string'
+             tables = []
+             for p_table in patients_tsv:
+                 df = pd.read_csv(p_table, sep='\\t', dtype=str)
+                 tables.append(df)
+             multisample_table = pd.concat(tables, ignore_index=True)
+             return multisample_table
+
+          def input_processing(data, dataset_id, genome_versionn):
              new_columns = {'Project': "dataset_id", 'Genome': '$reference_genome', 'Type': "SOMATIC", 'mut_type': "SNP"}
              df = data.assign(**new_columns)
              df['chr'] = df['chr'].astype(str).str[3:]
@@ -73,7 +82,9 @@ process SIGPROFILER {
              df = df.loc[:, ['Project', 'Sample', 'ID', 'Genome', 'mut_type', 'chrom', 'pos_start', 'pos_end', 'ref', 'alt', 'Type']]
              return df
     
-          input_data = input_processing(input_data)
+          input_tsv_join = process_tsv_join("$tsv_list")
+
+          input_data = input_processing(input_tsv_join, dataset_id, "$reference_genome")
 
           # saving input matrix to txt
           input_data.to_csv(f"{input_path}/input_data.txt", sep="\\t", index=False, header=True)
@@ -115,7 +126,6 @@ process SIGPROFILER {
                                    export_probabilities = bool("$export_probabilities"))
 
           # save the output results
-          #dest_dir = "signature_deconvolution/Sigprofiler/"
           dest_dir = "$prefix/"
           source_dir = "results/"
           shutil.copytree(source_dir, dest_dir, dirs_exist_ok=True)

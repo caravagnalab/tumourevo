@@ -57,7 +57,8 @@ process JOIN_POSITIONS {
    
     pileup_mutations = dplyr::bind_cols(fix_field, gt_field)  %>%
                 dplyr::select(chr, from, to, ref, NV, DP, VAF, dplyr::everything(), -alt, -ChromKey) %>%
-                dplyr::mutate(from = from+1, to = to+1)
+                dplyr::mutate(from = from+1, to = to+1)  %>%
+                dplyr::mutate(NV = 0)
 
     bind = inner_join(pileup_mutations, all_positions, by = join_by(chr, from, to, ref))
 

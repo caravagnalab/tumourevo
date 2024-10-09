@@ -24,8 +24,13 @@ workflow SIGNATURE_DECONVOLUTION {
 
 
     if (params.tools && params.tools.split(',').contains('sparsesignatures')) {
-        out_sparse = FORMATTER_RDS_SPARSESIGNATURES(rds_join, "rds")
-        SPARSE_SIGNATURES(out_sparse.groupTuple(by: 0)) // run SparseSignatures
+        FORMATTER_RDS_SPARSESIGNATURES(rds_join, "rds")
+        input_sparsesig = FORMATTER_RDS_SPARSESIGNATURES.out.map { meta, tsv, sample ->
+            meta = meta + [id: "${meta.dataset}"] 
+            [meta.subMap('dataset', 'id'), tsv] }
+            | groupTuple
+  
+        SPARSE_SIGNATURES(input_sparsesig) // run SparseSignatures
         
         plot_pdf = SPARSE_SIGNATURES.out.signatures_plot_pdf
         plot_rds = SPARSE_SIGNATURES.out.signatures_plot_rds
@@ -36,16 +41,22 @@ workflow SIGNATURE_DECONVOLUTION {
   
 
     if (params.tools && params.tools.split(',').contains('sigprofiler')) {
-        // Check if we should download SigProfiler genome
+      
         if (params.download_sigprofiler_genome) {    
             genome_path = DOWNLOAD_GENOME_SIGPROFILER(params.download_genome_sigprofiler_reference_genome).genome_sigprofiler           
         } else {
-        // Use the installed genome path from params
+       
             genome_path = params.genome_installed_path
         }
-        out_sigprof = FORMATTER_RDS_SIGPROFILER(rds_join, "rds")
-        //Sigprofiler_out = SIGPROFILER(out_sigprof.groupTuple(by: 0), genome_path) // run Sigprofiler 
-        Sigprofiler_out = SIGPROFILER(out_sigprof, genome_path)
+        
+        FORMATTER_RDS_SIGPROFILER(rds_join, "rds")
+
+        input_sigprofiler = FORMATTER_RDS_SIGPROFILER.out.map { meta, tsv, sample ->
+            meta = meta + [id: "${meta.dataset}"] 
+            [meta.subMap('dataset', 'id'), tsv]}
+            | groupTuple  
+  
+        Sigprofiler_out = SIGPROFILER(input_sigprofiler, genome_path)
     }
 
     emit:

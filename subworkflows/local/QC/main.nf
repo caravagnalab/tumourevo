@@ -16,9 +16,11 @@ workflow QC {
 
         contamination = TINC.out.tinc_csv
             .splitCsv( header: true )
-            .view( cont -> "${cont.normal_contamination}" )
-        contamination.view()
-        // input.map {meta, normal_contamination -> [ meta + ] }
+            .map{ meta, csv -> 
+            meta = meta + [id: "${meta.dataset}_${meta.patient}"] 
+            normal_contamination = csv.normal_contamination
+            [meta.subMap('dataset', 'patient', 'id'), normal_contamination ]}
+            .unique()
 
         CNAQC(input)
 
@@ -27,7 +29,15 @@ workflow QC {
             sample = meta.tumour_sample
             [meta.subMap('dataset', 'patient', 'id'), rds, sample]}
             | groupTuple
-        JOIN_CNAQC(in_join)
+        
+        join_cnaqc_out = JOIN_CNAQC(in_join)
+
+        rds_join = join_cnaqc_out.join(contamination).map{
+            meta, rds, sample, normal_contamination -> 
+                meta = meta + [normal_contamination: "${normal_contamination}"]
+                [meta, rds, sample]
+        }
+
     
     emit:
         rds_cnaqc = CNAQC.out.qc_rds
@@ -40,5 +50,5 @@ workflow QC {
         pdf_tinc = TINC.out.plot_pdf
         csv_tinc = TINC.out.tinc_csv
 
-        rds_join = JOIN_CNAQC.out.rds
+        rds_join
 }
