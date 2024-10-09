@@ -88,5 +88,5 @@ workflow TUMOUREVO {
                 }
     
     SUBCLONAL_DECONVOLUTION(pass_qc.pass)
-    //SIGNATURE_DECONVOLUTION(pass_qc.pass)
+    SIGNATURE_DECONVOLUTION(pass_qc.pass)
 }
