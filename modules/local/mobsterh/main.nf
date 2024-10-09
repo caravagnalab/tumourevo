@@ -70,7 +70,8 @@ process MOBSTERh {
      # get input table for the single patient
      inp_tb = joint_table %>%
        dplyr::filter(VAF < 1) %>%
-       dplyr::mutate(VAF=replace(VAF, VAF==0, 1e-7)) %>%
+       # dplyr::mutate(VAF=replace(VAF, VAF==0, 1e-7)) %>%
+       dplyr::filter(VAF!=0) %>%
        dplyr::filter(karyotype=="1:1")
        # dplyr::rename(variantID=gene) %>%
        # dplyr::rename(is.driver=is_driver) %>%
