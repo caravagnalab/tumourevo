@@ -7,7 +7,7 @@ process SIGPROFILER {
        path(genome_path)
 
     output:
-       tuple val(meta), path("*"), emit: sigprofiler_results
+       tuple val(meta), path("results/*"), emit: sigprofiler_results
       
     script:
     
@@ -15,7 +15,6 @@ process SIGPROFILER {
       def prefix                            = task.ext.prefix                               ?: "${meta.id}"
       def reference_genome                  = args!='' && args.reference_genome             ? "$args.reference_genome" : ""
       def exome                             = args!='' && args.exome                        ? "$args.exome" : ""
-      // def volume                            = args!='' && args.volume                       ? "$args.volume" : ""
       def input_type                        = args!='' && args.input_type                   ? "$args.input_type" : ""
       def context_type                      = args!='' && args.context_type                 ? "$args.context_type" : ""
       def minimum_signatures                = args!='' && args.minimum_signatures           ? "$args.minimum_signatures" : ""
@@ -127,7 +126,6 @@ process SIGPROFILER {
                                    export_probabilities = bool("$export_probabilities"))
 
           # save the output results
-          #dest_dir = "signature_deconvolution/Sigprofiler/"
           dest_dir = "$prefix/"
           source_dir = "results/"
           shutil.copytree(source_dir, dest_dir, dirs_exist_ok=True)
