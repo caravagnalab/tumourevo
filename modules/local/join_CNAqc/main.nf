@@ -4,11 +4,11 @@ process JOIN_CNAQC {
 
   input:
     
-    tuple val(meta), path(rds_list, stageAs: '*.rds'), val(tumour_samples)
+    tuple val(meta), path(rds_list, stageAs: '*.rds'), path(csv_list,  stageAs: '*.csv'), val(tumour_samples)
   
   output:
 
-    tuple val(meta), path("*.rds"), val(tumour_samples), emit: rds
+    tuple val(meta), path("*.rds"), val(tumour_samples), emit: rds, optional: true
 
   script:
 
@@ -22,23 +22,32 @@ process JOIN_CNAQC {
 
     library(tidyverse)
     library(CNAqc)
-    
+
     samples = substr("$tumour_samples", 2, nchar("$tumour_samples")-1)
     samples = strsplit(samples, ", ")[[1]]
 
-    result = lapply(strsplit("$rds_list", " ")[[1]], FUN = function(file){
-             readRDS(file)
-             }) 
-    names(result) = samples
+    csv = lapply(strsplit("$csv_list", " ")[[1]], FUN = function(file){
+          read_csv(file)
+          }) %>% bind_rows()
     
-    for (name in names(result)){
-      result[[name]]\$mutations = result[[name]]\$mutations %>% dplyr::rename(Indiv = sample)
+    # if there is at least one sample that is contaminated 
+    # (normal_contamination_flag = 1) then the patient is discarded
+    
+    if (!(1 %in% csv\$normal_contamination_flag)){
+      result = lapply(strsplit("$rds_list", " ")[[1]], FUN = function(file){
+              readRDS(file)
+              }) 
+      names(result) = samples
+      
+      for (name in names(result)){
+        result[[name]]\$mutations = result[[name]]\$mutations %>% dplyr::rename(Indiv = sample)
+      }
+      
+      out = CNAqc::multisample_init(result, 
+                              QC_filter = as.logical("$qc_filter"), 
+                              keep_original = as.logical("$keep_original"), 
+                              discard_private = FALSE)
+      saveRDS(object = out, file = paste0("$prefix", "_multi_cnaqc.rds"))
     }
-    
-    out = CNAqc::multisample_init(result, 
-                            QC_filter = as.logical("$qc_filter"), 
-                            keep_original = as.logical("$keep_original"), 
-                            discard_private = FALSE)
-    saveRDS(object = out, file = paste0("$prefix", "_multi_cnaqc.rds"))
     """
 }

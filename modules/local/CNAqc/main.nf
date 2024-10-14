@@ -68,8 +68,7 @@ process CNAQC {
       KDE = eval(parse(text = "$kde")),
       starting_state_subclonal_evolution = "$starting_state_subclonal_evolution",
       cluster_subclonal_CCF = as.logical("$cluster_subclonal_CCF"),
-      min_VAF = 0
-      )
+      min_VAF = 0)
 
     x = CNAqc::compute_CCF(
       x,

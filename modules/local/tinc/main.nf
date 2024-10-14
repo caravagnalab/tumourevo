@@ -78,11 +78,14 @@ process TINC {
     if (qc_res[["level"]] >= eval(parse(text="$normal_contamination_level"))) {
       sample_contamination = tibble(
         sample = tumor_sample, 
-        normal_contamination = 1
+        normal_contamination = qc_res[["level"]],
+        normal_contamination_flag = 1
+        
       )
     } else {
       sample_contamination = tibble(sample = tumor_sample, 
-      normal_contamination = 0
+      normal_contamination = qc_res[["level"]],
+      normal_contamination_flag = 0
       )
     }
 

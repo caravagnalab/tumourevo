@@ -13,30 +13,30 @@ workflow QC {
 
     main:
         TINC(input)
-
-        contamination = TINC.out.tinc_csv
-            .splitCsv( header: true )
-            .map{ meta, csv -> 
-            meta = meta + [id: "${meta.dataset}_${meta.patient}"] 
-            normal_contamination = csv.normal_contamination
-            [meta.subMap('dataset', 'patient', 'id'), normal_contamination ]}
-            .unique()
-
+        // contamination = TINC.out.tinc_csv
+        //     .splitCsv( header: true )
+        //     .map{ meta, csv -> 
+        //     meta = meta + [id: "${meta.dataset}_${meta.patient}"] 
+        //     normal_contamination = csv.normal_contamination
+        //     [meta.subMap('dataset', 'patient', 'id'), normal_contamination ]}
+        //     .unique()
         CNAQC(input)
 
-        in_join = CNAQC.out.qc_rds.map{ meta, rds -> 
+        in_cnaqc = CNAQC.out.qc_rds.join(TINC.out.tinc_csv)
+
+        in_join = in_cnaqc.map{ meta, rds, csv -> 
             meta = meta + [id: "${meta.dataset}_${meta.patient}"]
             sample = meta.tumour_sample
-            [meta.subMap('dataset', 'patient', 'id'), rds, sample]}
+            [meta.subMap('dataset', 'patient', 'id'), rds, csv, sample]}
             | groupTuple
         
         join_cnaqc_out = JOIN_CNAQC(in_join)
-
-        rds_join = join_cnaqc_out.join(contamination).map{
-            meta, rds, sample, normal_contamination -> 
-                meta = meta + [normal_contamination: "${normal_contamination}"]
-                [meta, rds, sample]
-        }
+        // rds_join = join_cnaqc_out.join(contamination).map{
+        //     meta, rds, sample, normal_contamination -> 
+        //         meta = meta + [normal_contamination: "${normal_contamination}"]
+        //         [meta, rds, sample]
+        // }
+        join_cnaqc_out
 
     
     emit:
@@ -50,5 +50,6 @@ workflow QC {
         pdf_tinc = TINC.out.plot_pdf
         csv_tinc = TINC.out.tinc_csv
 
-        rds_join
+        join_cnaqc_out
+        // rds_join
 }
