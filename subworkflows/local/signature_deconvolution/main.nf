@@ -11,7 +11,7 @@ include { SIGPROFILER } from "../../../modules/local/SigProfiler/SigProfiler/mai
 
 workflow SIGNATURE_DECONVOLUTION {
     take: 
-    rds_join // tuple val(meta), path("*.rds"), val(tumor_samples)
+    join_cnaqc_out // tuple val(meta), path("*.rds"), val(tumor_samples)
 
     main:
     plot_pdf = null
@@ -24,7 +24,7 @@ workflow SIGNATURE_DECONVOLUTION {
 
 
     if (params.tools && params.tools.split(',').contains('sparsesignatures')) {
-        FORMATTER_RDS_SPARSESIGNATURES(rds_join, "rds")
+        FORMATTER_RDS_SPARSESIGNATURES(join_cnaqc_out, "rds")
         input_sparsesig = FORMATTER_RDS_SPARSESIGNATURES.out.map { meta, tsv, sample ->
             meta = meta + [id: "${meta.dataset}"] 
             [meta.subMap('dataset', 'id'), tsv] }
@@ -43,13 +43,13 @@ workflow SIGNATURE_DECONVOLUTION {
     if (params.tools && params.tools.split(',').contains('sigprofiler')) {
       
         if (params.download_sigprofiler_genome) {    
-            genome_path = DOWNLOAD_GENOME_SIGPROFILER(params.download_genome_sigprofiler_reference_genome).genome_sigprofiler           
+            genome_path = DOWNLOAD_GENOME_SIGPROFILER(params.genome).genome_sigprofiler           
         } else {
        
             genome_path = params.genome_installed_path
         }
         
-        FORMATTER_RDS_SIGPROFILER(rds_join, "rds")
+        FORMATTER_RDS_SIGPROFILER(join_cnaqc_out, "rds")
 
         input_sigprofiler = FORMATTER_RDS_SIGPROFILER.out.map { meta, tsv, sample ->
             meta = meta + [id: "${meta.dataset}"] 

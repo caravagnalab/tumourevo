@@ -55,8 +55,6 @@ process SPARSE_SIGNATURES {
     ) 
     multisample_table = dplyr::bind_rows(tables)
 
-    #res_dir = paste0("$prefix", "$meta.datasetID", "/")
-    #dir.create(res_dir, recursive = TRUE)
 
     #Extract input data information
     input_data <- multisample_table[,c("Indiv","chr","from","to","ref","alt")]
@@ -69,7 +67,23 @@ process SPARSE_SIGNATURES {
     #Install a reference human-genome specification.
     #The user must select, among the available choices, the reference genome consistent with the mutation dataset.
 
-    bsg = BSgenome.Hsapiens.1000genomes.hs37d5::hs37d5
+    #load_genome <- function(genome) {
+      #if (genome == "GRCh37") {
+        #library(BSgenome.Hsapiens.1000genomes.hs37d5)
+        #bsg <- BSgenome.Hsapiens.1000genomes.hs37d5::hs37d5
+    
+      #} else(genome == "GRCh38") {
+        #library(BSgenome.Hsapiens.UCSC.hg38)
+        #bsg <- BSgenome.Hsapiens.UCSC.hg38::hg38
+      #}
+      #return(bsg)
+    #}
+
+    #bsg = load_genome("$genome") 
+
+    bsg = BSgenome.Hsapiens.1000genomes.hs37d5::hs37d5  # or BSgenome.Hsapiens.UCSC.hg38::hg38
+    
+    
     mut_counts = SparseSignatures::import.trinucleotides.counts(data=input_data, reference=bsg)
 
     #Load a reference SBS5 background signature from COSMIC
