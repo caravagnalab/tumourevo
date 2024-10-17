@@ -19,8 +19,8 @@ nextflow_workflow {
                     cancer_type: "PANCANCER" 
                 ]
                 
-                vcf = file("${projectDir}/results/variant_annotation/vep/MSeq/Set06/Set6_42/MSeq_Set06_Set6_42.vcf.gz", checkIfExists: true)
-                tbi = file("${projectDir}/results/variant_annotation/vep/MSeq/Set06/Set6_42/MSeq_Set06_Set6_42.vcf.gz.tbi", checkIfExists: true)
+                vcf = file(params.local_testdata_base_path + '/VCF/MSeq_Set06/Set6_42.WGS.filtered.vcf.gz', checkIfExists: true)
+                tbi = file(params.local_testdata_base_path + '/VCF/MSeq_Set06/Set6_42.WGS.filtered.vcf.gz.tbi', checkIfExists: true)
                 // Create a tuple with metadata and file path
                 input[0] = tuple(meta, vcf, tbi)
                 input[1] = "vcf"
@@ -36,35 +36,35 @@ nextflow_workflow {
     }
 
     //Second test on the same workflow
-    // test("Run without failures for cna") {
+    test("Run without failures for cna") {
 
-    //     when {
-    //         workflow {
-    //             """
-    //             meta = [
-    //                 id : "MSeq_Set06_Set6_42",
-    //                 dataset : "MSeq",
-    //                 patient : "Set06",
-    //                 tumour_sample: "Set6_42",
-    //                 cancer_type: "PANCANCER" ,
-    //                 cna_caller : "sequenza"
-    //             ]
-    //             cna_segs = file("${projectDir}/test_input/Set6_42.smoothedSegs_sequenza.txt", checkIfExists: true)
-    //             cna_extra = file("${projectDir}/test_input/Set6_42_confints_CP_sequenza.txt", checkIfExists: true)
+        when {
+            workflow {
+                """
+                meta = [
+                    id : "MSeq_Set06_Set6_42",
+                    dataset : "MSeq",
+                    patient : "Set06",
+                    tumour_sample: "Set6_42",
+                    cancer_type: "PANCANCER" ,
+                    cna_caller : "sequenza"
+                ]
+                cna_segs = file(params.local_testdata_base_path + '/CNA/MSeq_Set06/42/Set6_42.smoothedSegs.txt', checkIfExists: true)
+                cna_extra = file(params.local_testdata_base_path + '/CNA/MSeq_Set06/42/Set6_42_confints_CP.txt', checkIfExists: true)
 
-    //             input[0] = Channel.fromList([meta, [cna_segs, cna_extra]])
-    //             input[1] = "cna"
-    //             """
-    //         }
-    //     }
+                input[0] = Channel.fromList([meta, [cna_segs, cna_extra]])
+                input[1] = "cna"
+                """
+            }
+        }
 
-    //     then {
-    //         assert workflow.success
-    //         //assert snapshot(workflow.out).match()
-    //     }
+        then {
+            assert workflow.success
+            //assert snapshot(workflow.out).match()
+        }
 
 
-    // }
+    }
 
     //Third test on the same workflow
     test("Run without failures for rds") {
@@ -80,8 +80,8 @@ nextflow_workflow {
                     normal_sample: "54_N",
                     cancer_type: "PANCANCER" 
                 ]
-                joinCNAqc_rds = file("${projectDir}/results/QC/join_CNAqc/MSeq/Set06/MSeq_Set06_multi_cnaqc.rds", checkIfExists: true)
-                tumor_samples = "Set6_42"
+                joinCNAqc_rds = file(params.local_testdata_base_path + "/from_joinCNAqc/MSeq_Set06_multi_cnaqc.rds", checkIfExists: true)
+                tumor_samples = meta.tumour_sample // "Set6_42"
                 input[0] = tuple(meta, joinCNAqc_rds, tumor_samples)
                 input[1] = "rds"
                 """
