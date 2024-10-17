@@ -67,21 +67,21 @@ process SPARSE_SIGNATURES {
     #Install a reference human-genome specification.
     #The user must select, among the available choices, the reference genome consistent with the mutation dataset.
 
-    #load_genome <- function(genome) {
-      #if (genome == "GRCh37") {
-        #library(BSgenome.Hsapiens.1000genomes.hs37d5)
-        #bsg <- BSgenome.Hsapiens.1000genomes.hs37d5::hs37d5
+    load_genome <- function(genome) {
+      if (genome == "GRCh37") {
+        library(BSgenome.Hsapiens.1000genomes.hs37d5)
+        bsg <- BSgenome.Hsapiens.1000genomes.hs37d5::hs37d5
     
-      #} else(genome == "GRCh38") {
-        #library(BSgenome.Hsapiens.UCSC.hg38)
-        #bsg <- BSgenome.Hsapiens.UCSC.hg38::hg38
-      #}
-      #return(bsg)
-    #}
+      } else(genome == "GRCh38") {
+        library(BSgenome.Hsapiens.UCSC.hg38)
+        bsg <- BSgenome.Hsapiens.UCSC.hg38::hg38
+      }
+      return(bsg)
+    }
 
-    #bsg = load_genome("$genome") 
+    bsg = load_genome("$params.genome") 
 
-    bsg = BSgenome.Hsapiens.1000genomes.hs37d5::hs37d5  # or BSgenome.Hsapiens.UCSC.hg38::hg38
+    #bsg = BSgenome.Hsapiens.1000genomes.hs37d5::hs37d5  # or BSgenome.Hsapiens.UCSC.hg38::hg38
     
     
     mut_counts = SparseSignatures::import.trinucleotides.counts(data=input_data, reference=bsg)
