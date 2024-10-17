@@ -72,7 +72,7 @@ process SPARSE_SIGNATURES {
         library(BSgenome.Hsapiens.1000genomes.hs37d5)
         bsg <- BSgenome.Hsapiens.1000genomes.hs37d5::hs37d5
     
-      } else(genome == "GRCh38") {
+      } else if (genome == "GRCh38") {
         library(BSgenome.Hsapiens.UCSC.hg38)
         bsg <- BSgenome.Hsapiens.UCSC.hg38::hg38
       }
