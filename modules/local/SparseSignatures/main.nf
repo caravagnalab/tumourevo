@@ -74,14 +74,14 @@ process SPARSE_SIGNATURES {
     
       } else if (genome == "GRCh38") {
         library(BSgenome.Hsapiens.UCSC.hg38)
-        bsg <- BSgenome.Hsapiens.UCSC.hg38::hg38
+        bsg <- BSgenome.Hsapiens.UCSC.hg38
       }
       return(bsg)
     }
 
     bsg = load_genome("$params.genome") 
 
-    #bsg = BSgenome.Hsapiens.1000genomes.hs37d5::hs37d5  # or BSgenome.Hsapiens.UCSC.hg38::hg38
+    #bsg = BSgenome.Hsapiens.1000genomes.hs37d5::hs37d5  # or BSgenome.Hsapiens.UCSC.hg38
     
     
     mut_counts = SparseSignatures::import.trinucleotides.counts(data=input_data, reference=bsg)
