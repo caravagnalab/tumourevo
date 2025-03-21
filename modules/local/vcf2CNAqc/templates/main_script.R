@@ -73,7 +73,7 @@ parse_FreeBayes = function(vcf, tumour_id, normal_id, filter_mutations = FALSE) 
                 to = from + nchar(alt)) %>%
             dplyr::ungroup() %>%
             dplyr::select(chr, from, to, ref, alt, CSQ, dplyr::everything(),  -ChromKey, -DP) %>%
-            tidyr::separate(CSQ, vep_field, sep = "|") %>%
+            tidyr::separate(CSQ, vep_field, sep = "\\|") %>%
             dplyr::select(chr, from, to, ref, alt, IMPACT, SYMBOL, Gene, dplyr::everything())
         print(fix_field)
 
@@ -167,7 +167,7 @@ parse_Mutect = function(vcf, tumour_id, normal_id, filter_mutations = FALSE){
                 to = from + nchar(alt)) %>%
             dplyr::ungroup() %>%
             dplyr::select(chr, from, to, ref, alt, CSQ, dplyr::everything()) %>%
-            tidyr::separate(CSQ, vep_field, sep = "|") %>%
+            tidyr::separate(CSQ, vep_field, sep = "\\|") %>%
             dplyr::select(chr, from, to, ref, alt, IMPACT, SYMBOL, Gene, dplyr::everything(), -DP) #can add other thing, CSQ, HGSP
         print(fix_field)
 
@@ -264,7 +264,7 @@ parse_Strelka = function(vcf, tumour_id, normal_id, filter_mutations = FALSE){
             to = from + nchar(alt)) %>%
         dplyr::ungroup() %>%
         dplyr::select(chr, from, to, ref, alt, CSQ, dplyr::everything(), -ChromKey) %>%
-        tidyr::separate(CSQ, vep_field, sep = "|") %>%
+        tidyr::separate(CSQ, vep_field, sep = "\\|") %>%
         dplyr::select(chr, from, to, ref, alt, IMPACT, SYMBOL, Gene, dplyr::everything()) #can add other thing, CSQ, HGSP
     print(fix_field)
 
@@ -364,7 +364,7 @@ parse_Platypus = function(vcf, tumour_id, normal_id, filter_mutations = FALSE){
             to = from + nchar(alt)) %>%
         dplyr::ungroup() %>%
         dplyr::select(chr, from, to, ref, alt, CSQ, dplyr::everything(),  -ChromKey) %>%
-        tidyr::separate(CSQ, vep_field, sep = "|") %>%
+        tidyr::separate(CSQ, vep_field, sep = "\\|") %>%
         dplyr::select(chr, from, to, ref, alt, IMPACT, SYMBOL, Gene, dplyr::everything())
     print(fix_field)
 
