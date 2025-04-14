@@ -24,7 +24,7 @@ opt = list(
 )
 args_opt = parse_args('$task.ext.args')
 for ( ao in names(args_opt)) opt[[ao]] = args_opt[[ao]]
-
+print(opt)
 
 # Auxiliary functions #####
 
@@ -146,9 +146,10 @@ dplyr::select(dplyr::starts_with("NV")) %>%
 dplyr::mutate(dplyr::across(.cols=dplyr::everything(),
                             .fns=function(x) replace(x, is.na(x), 0))) %>%
 dplyr::rename_all(function(x) stringr::str_remove_all(x,"NV."))
-
+print(opt[["K"]])
 # Standard fit
 viber_K = eval(parse(text=opt[["K"]]))
+print(viber_K)
 viber_K[which.min(viber_K)] = 2
 st_fit = VIBER::variational_fit(nv, dp,
                                 K=viber_K,
@@ -186,7 +187,8 @@ saveRDS(best_fit, file=paste0(opt[["prefix"]], "_viber_best_st_fit.rds"))
 saveRDS(best_fit_heuristic, file = paste0(opt[["prefix"]], "_viber_best_st_heuristic_fit.rds"))
 
 # Save plots
-if ("$n_samples" >1) { #mutlisample mode on
+n_samples = ncol(best_fit[["x"]]) - 1
+if (n_samples >1) { #mutlisample mode on
 print("multisample mode on")
 plot_fit = plot(best_fit)
 plot_fit_heuristic = plot(best_fit_heuristic)
