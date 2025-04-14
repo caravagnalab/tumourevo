@@ -131,24 +131,6 @@ run_mobster_fit = function(joint_table, descr) {
         # dplyr::rename(is_driver=is.driver)
         # dplyr::rename(is_driver=is.driver, driver_label=variantID)
 
-# mobster_fit(x = inp_tb,
-#             K = eval(parse(text="$K")),
-#             samples = as.integer("$samples"),
-#             init = "$init",
-#             tail = eval(parse(text="$tail")),
-#             epsilon = as.numeric("$epsilon"),
-#             maxIter = as.integer("$maxIter"),
-#             fit.type = "$fit_type",
-#             seed = as.integer("$seed"),
-#             model.selection = "$model_selection",
-#             trace = as.logical("$trace"),
-#             parallel = as.logical("$parallel"),
-#             pi_cutoff = as.numeric("$pi_cutoff"),
-#             N_cutoff = as.integer("$n_cutoff"),
-#             auto_setup = eval(parse(text="$auto_setup")),
-#             silent = as.logical("$silent"),
-#             description = descr)
-# }
 
 mobster_fit(x = inp_tb,
             K = eval(parse(text=opt[["K"]])),
