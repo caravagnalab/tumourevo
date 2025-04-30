@@ -76,7 +76,7 @@ For more details about the output files and reports, please refer to the
 
 ## Credits
 
-nf-core/tumourevo was originally written by Nicola Calonaci, Elena Buscaroli, Katsiaryna Davydzenka, Giorgia Gandolfi, Virginia Gazziero, Brandon Hastings, Asad Sadr, Rodolfo Tolloi, Lucrezia Valeriani and Giulio Caravagna.
+nf-core/tumourevo was originally written by Nicola Calonaci, Elena Buscaroli, Katsiaryna Davydzenka, Giorgia Gandolfi, Virginia Gazziero, Brandon Hastings, Davide Rambaldi, Rodolfo Tolloi, Lucrezia Valeriani and Giulio Caravagna.
 
 We thank the following people for their extensive assistance in the development of this pipeline:
 
