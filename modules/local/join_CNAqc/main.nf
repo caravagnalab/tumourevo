@@ -1,6 +1,7 @@
 process JOIN_CNAQC {
     tag "$meta.id"
     label "process_low"
+    label "error_retry"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'docker://lvaleriani/cnaqc:version1.0' :
         'docker.io/lvaleriani/cnaqc:version1.0' }"
@@ -42,11 +43,12 @@ process JOIN_CNAQC {
                             keep_original = as.logical("$keep_original"),
                             discard_private = FALSE)
 
-    out_PASS = CNAqc::multisample_init(result,
-                            QC_filter = TRUE,
-                            keep_original = as.logical("$keep_original"),
-                            discard_private = FALSE)
+    #out_PASS = CNAqc::multisample_init(result,
+    #                        QC_filter = TRUE,
+    #                        keep_original = as.logical("$keep_original"),
+    #                        discard_private = FALSE)
 
+    out_PASS = tibble()
     saveRDS(object = out_all, file = paste0("$prefix", "_multi_cnaqc_ALL.rds"))
     saveRDS(object = out_PASS, file = paste0("$prefix", "_multi_cnaqc_PASS.rds"))
 

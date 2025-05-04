@@ -1,6 +1,7 @@
 process MOBSTERh {
     tag "$meta.id"
-    label "process_single"
+    label "process_high"
+    label "error_retry"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'docker://elenabuscaroli/mobster:version1.0' :
         'docker.io/elenabuscaroli/mobster:version1.0' }"

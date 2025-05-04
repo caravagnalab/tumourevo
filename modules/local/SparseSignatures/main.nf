@@ -1,6 +1,7 @@
 process SPARSE_SIGNATURES {
     tag "$meta.id"
     label "process_low_long"
+    label "error_retry"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'docker://lvaleriani/sparsesignature:version1.0' :
         'docker.io/lvaleriani/sparsesignature:version1.0' }"

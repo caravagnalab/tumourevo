@@ -1,6 +1,7 @@
 process VIBER {
     tag "$meta.id"
     label "process_single"
+    label "error_ignore"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'docker://elenabuscaroli/viber:version0.1' :
         'docker.io/elenabuscaroli/viber:version0.1' }"

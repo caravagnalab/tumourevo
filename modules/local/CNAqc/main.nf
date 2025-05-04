@@ -1,6 +1,7 @@
 process CNAQC {
     tag "$meta.id"
     label "process_low"
+    label "error_retry"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'docker://lvaleriani/cnaqc:version1.0' :
         'docker.io/lvaleriani/cnaqc:version1.0' }"

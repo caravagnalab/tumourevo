@@ -1,6 +1,7 @@
 process TINC {
     tag "$meta.id"
     label "process_single"
+    label "error_retry"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'docker://vvvirgy/tinc:v2' :
         'docker.io/vvvirgy/tinc:v2' }"

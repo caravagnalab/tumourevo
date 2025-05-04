@@ -1,6 +1,7 @@
 process SIGPROFILER {
     tag "$meta.id"
     label "process_high"
+    label "error_retry"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'docker://katiad/sigprofiler:version1.0' :
         'docker.io/katiad/sigprofiler:version1.0' }"

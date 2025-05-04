@@ -1,5 +1,6 @@
 process DOWNLOAD_GENOME_SIGPROFILER {
     label "process_single"
+    label "error_retry"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'docker://katiad/sigprofiler:version1.0' :
         'docker.io/katiad/sigprofiler:version1.0' }"

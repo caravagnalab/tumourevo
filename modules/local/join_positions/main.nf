@@ -1,6 +1,7 @@
 process JOIN_POSITIONS {
     tag "$meta.id"
     label "process_single"
+    label "error_retry"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'docker://lvaleriani/cnaqc:version1.0' :
         'docker.io/lvaleriani/cnaqc:version1.0' }"
