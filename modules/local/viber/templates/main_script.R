@@ -146,26 +146,30 @@ dplyr::select(dplyr::starts_with("NV")) %>%
 dplyr::mutate(dplyr::across(.cols=dplyr::everything(),
                             .fns=function(x) replace(x, is.na(x), 0))) %>%
 dplyr::rename_all(function(x) stringr::str_remove_all(x,"NV."))
-print(opt[["K"]])
+
 # Standard fit
 viber_K = eval(parse(text=opt[["K"]]))
-print(viber_K)
 viber_K[which.min(viber_K)] = 2
+alpha0=as.numeric(opt[["alpha_0"]])
+a0=as.integer(opt[["a_0"]])
+b0=as.integer(opt[["b_0"]])
+maxiter=as.integer(opt[["maxIter"]])
+epsilon=as.numeric(opt[["epsilon_conv"]])
+sampls=as.integer(opt[["samples"]])
+qinit=opt[["q_init"]]
+
 st_fit = VIBER::variational_fit(nv, dp,
                                 K=viber_K,
                                 data=reads_data,
-                                # %>% dplyr::filter(mutation_id %in% non_tail)
-                                alpha_0=as.numeric(opt[["alpha_0"]]),
-                                a_0=as.integer(opt[["a_0"]]),
-                                b_0=as.integer(opt[["b_0"]]),
-                                max_iter=as.integer(opt[["maxIter"]]),
-                                epsilon_conv=as.numeric(opt[["epsilon_conv"]]),
-                                samples=as.integer(opt[["samples"]]),
-                                q_init=opt[["q_init"]],
-                                trace=as.logical(opt[["trace"]]),
+                                alpha_0=alpha0,
+                                a_0=a0,
+                                b_0=b0,
+                                max_iter=maxiter,
+                                epsilon_conv=epsilon,
+                                samples=sampls,
+                                q_init=qinit,
                                 description=""
                                 )
-
 best_fit = best_fit_heuristic = st_fit
 
 # If all clusters are removed -> keep the origianl best fit
