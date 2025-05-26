@@ -19,6 +19,7 @@ workflow SIGNATURE_DECONVOLUTION {
     signatures_nmfOut = null
     bestConf = null
     sign_cv = null
+    mut_counts = null
     genome_path = null
     Sigprofiler_out = null
 
@@ -37,6 +38,7 @@ workflow SIGNATURE_DECONVOLUTION {
         signatures_nmfOut = SPARSE_SIGNATURES.out.signatures_nmfOut_rds
         bestConf = SPARSE_SIGNATURES.out.signatures_bestConf_rds
         sign_cv = SPARSE_SIGNATURES.out.signatures_cv_rds
+        mut_counts = SPARSE_SIGNATURES.out.signatures_mutCounts_rds
     }
 
 
@@ -64,6 +66,7 @@ workflow SIGNATURE_DECONVOLUTION {
     signatures_nmfOut
     bestConf
     sign_cv
+    mut_counts
     Sigprofiler_out
 
 }

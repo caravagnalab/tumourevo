@@ -137,6 +137,8 @@ input_data = data_list[["input_data"]]
 
 mut_counts = SparseSignatures::import.trinucleotides.counts(data=input_data, reference=bsg)
 
+saveRDS(object = mut_counts, file = paste0(opt[["prefix"]], "_mut_counts.rds"))
+
 # Load a reference SBS5 background signature from COSMIC
 data(background)
 
