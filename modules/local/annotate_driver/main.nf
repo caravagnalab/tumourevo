@@ -29,45 +29,48 @@ process ANNOTATE_DRIVER {
 
     drivers_table = readr::read_tsv(file = "$driver_list")
 
-    if("$meta.cancer_type" %in% drivers_table\$CANCER_TYPE){
+    tumour_type = "$meta.cancer_type"
+    if(tumour_type %in% drivers_table\$TUMOUR_TYPE){
         drivers_table = drivers_table %>%
             dplyr::group_by(SYMBOL) %>%
-            dplyr::reframe(CGC_CANCER_GENE = any(CGC_CANCER_GENE), dplyr::across(dplyr::everything())) %>%
-            dplyr::filter(CGC_CANCER_GENE) %>%
-            dplyr::filter(CANCER_TYPE == "$meta.cancer_type")
+            dplyr::reframe(TUMOUR_GENE = any(TUMOUR_GENE), dplyr::across(dplyr::everything())) %>%
+            dplyr::filter(TUMOUR_GENE) %>%
+            dplyr::filter(TUMOUR_TYPE == tumour_type)
     } else {
         drivers_table = drivers_table %>%
             dplyr::group_by(SYMBOL) %>%
-            dplyr::reframe(CGC_CANCER_GENE = any(CGC_CANCER_GENE), dplyr::across(dplyr::everything())) %>%
-            dplyr::filter(CGC_CANCER_GENE) %>%
-            dplyr::mutate(CANCER_TYPE = "PANCANCER")
+            dplyr::reframe(TUMOUR_GENE = any(TUMOUR_GENE), dplyr::across(dplyr::everything())) %>%
+            dplyr::filter(TUMOUR_GENE) %>%
+            dplyr::mutate(TUMOUR_TYPE = "PANCANCER")
+        tumour_type = 'PANCANCER'
     }
 
     drivers_table = drivers_table %>%
-        dplyr::select(SYMBOL, CANCER_TYPE, CGC_CANCER_GENE) %>%
+        dplyr::select(SYMBOL, TUMOUR_TYPE, TUMOUR_GENE) %>%
         unique()
 
-    cancer_type = "$meta.cancer_type"
-    if (!(cancer_type) %in% drivers_table\$CANCER_TYPE ){
-        cancer_type = 'PANCANCER'
-    }
-
     x = SNV %>%
-        dplyr::mutate(CANCER_TYPE = cancer_type) %>%
+        dplyr::mutate(TUMOUR_TYPE = tumour_type) %>%
         dplyr::left_join(
             drivers_table,
-            by = c('SYMBOL', 'CANCER_TYPE')
+            by = c('SYMBOL', 'TUMOUR_TYPE')
         ) %>%
         tidyr::separate(HGVSp, ':', into = c('s1', 's2'), remove=F) %>%
         dplyr::mutate(tmp_s2 = ifelse(is.na(s2), '', paste0('_', s2))) %>%
         dplyr::mutate(
-            is_driver = (CGC_CANCER_GENE & IMPACT %in% c('MODERATE', 'HIGH')),
+            is_driver = (TUMOUR_GENE & IMPACT %in% c('MODERATE', 'HIGH')),
             driver_label = paste0(SYMBOL, tmp_s2)
         ) %>%
         select(-tmp_s2) %>%
         mutate(is_driver = ifelse(is.na(is_driver), FALSE, is_driver))
 
-    data[["$meta.tumour_sample"]]\$mutations = x
+    filter_x = x %>%
+        distinct(chr, from, to, ref,  alt,  IMPACT, SYMBOL, Gene, is_driver, driver_label, .keep_all = T) %>%
+        mutate(priority = ifelse(is_driver == TRUE, 1, 0)) %>%
+        arrange(chr, from, to, desc(priority)) %>%
+        distinct(chr, from, to, .keep_all = TRUE)
+
+    data[["$meta.tumour_sample"]]\$mutations = filter_x
     saveRDS(object = data, file = paste0("$prefix", "_driver.rds"))
 
     # version export

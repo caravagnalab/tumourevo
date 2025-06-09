@@ -1,39 +1,11 @@
 #!/usr/bin/env Rscript
 
-parse_args = function(x) {
-    x = gsub("\\\\[","",x)
-    x = gsub("\\\\]","",x)
-    # giving errors when we have lists like c(xxx, xxx) since it will separate it
-    # args_list = unlist(strsplit(x, ', ')[[1]])
-    args_list = unlist(strsplit(x, ", (?=[^)]*(?:\\\\(|\$))", perl=TRUE))
-    # args_vals = lapply(args_list, function(x) strsplit(x, split=":")[[1]])
-    args_vals = lapply(args_list, function(x) {
-        x_splt = strsplit(x, split=":")[[1]]
-        c(x_splt[1],  paste(x_splt[2:length(x_splt)], collapse=":"))
-    })
-
-    # Ensure the option vectors are length 2 (key/ value) to catch empty ones
-    args_vals = lapply(args_vals, function(z){ length(z) = 2; z})
-
-    parsed_args = structure(lapply(args_vals, function(x) x[2]), names = lapply(args_vals, function(x) x[1]))
-    parsed_args[! is.na(parsed_args)]
-}
-
 opt = list(
     prefix = ifelse('$task.ext.prefix' == 'null', '$meta.id', '$task.ext.prefix')
 )
-args_opt = parse_args('$task.ext.args')
-for ( ao in names(args_opt)) opt[[ao]] = args_opt[[ao]]
-
-print("\n\n\n")
-print(opt)
-print("\n\n\n")
-print("$task.ext.args")
-print("\n\n\n")
 
 # Auxiliriaty functions ####
-
-parse_FreeBayes = function(vcf, tumour_id, normal_id, filter_mutations = FALSE) {
+parse_FreeBayes = function(vcf, tumour_id, normal_id) {
     tb = vcfR::vcfR2tidy(vcf)
 
     gt_field = tb[["gt"]] %>%
@@ -45,65 +17,25 @@ parse_FreeBayes = function(vcf, tumour_id, normal_id, filter_mutations = FALSE) 
             VAF = NV/DP) %>%
         dplyr::rename(sample = Indiv)
 
-    samples_list = gt_field[["sample"]] %>% unique
-
-    if ("CSQ" %in% tb[["meta"]][["ID"]]){
-    # VEP specific field extraction
-    # Take CSQ field names and split by |
-
-        vep_field = tb[["meta"]] %>%
-                dplyr::filter(ID == "CSQ") %>%
-                dplyr::select(Description) %>%
-                dplyr::pull()
-
-        vep_field = strsplit(vep_field, split = "|", fixed = TRUE)[[1]]
-        print(vep_field)
-        vep_field = vep_field[2:length(vep_field)-1]
-
-    # Tranform the fix field by splittig the CSQ and select the columns needed
-        fix_field = tb[["fix"]] %>%
-            dplyr::rename(
-                chr = CHROM,
-                from = POS,
-                ref = REF,
-                alt = ALT) %>%
-            dplyr::rowwise() %>%
-            dplyr::mutate(
-                from = as.numeric(from),
-                to = from + nchar(alt)) %>%
-            dplyr::ungroup() %>%
-            dplyr::select(chr, from, to, ref, alt, CSQ, dplyr::everything(),  -ChromKey, -DP) %>%
-            tidyr::separate(CSQ, vep_field, sep = "\\\\|") %>%
-            dplyr::select(chr, from, to, ref, alt, IMPACT, SYMBOL, Gene, dplyr::everything())
-        print(fix_field)
-
-    } else {
-        fix_field = tb[["fix"]] %>%
-            dplyr::rename(
+    fix_field = tb[['fix']] %>%
+        dplyr::rename(
             chr = CHROM,
             from = POS,
             ref = REF,
-            alt = ALT
-            ) %>%
-            dplyr::rowwise() %>%
-            dplyr::mutate(
+            alt = ALT) %>%
+        dplyr::rowwise() %>%
+        dplyr::mutate(
             from = as.numeric(from),
             to = from + nchar(alt)) %>%
-            dplyr::ungroup() %>%
-            dplyr::select(chr, from, to, ref, alt, dplyr::everything(), -ChromKey, -DP)
-    }
+        dplyr::ungroup() %>%
+        dplyr::select(chr, from, to, ref, alt, dplyr::everything(), -ChromKey, -DP)
 
-    # if have to filter mutations
-    if (filter_mutations){
-        filter = c('PASS')
-    } else {
-        filter = fix_field[["FILTER"]] %>% unique()
-    }
+    samples_list = gt_field[["sample"]] %>% unique
 
     calls = lapply(
         samples_list,
         function(s){
-        gt_field_s = gt_field %>% dplyr::filter(sample == s)
+            gt_field_s = gt_field %>% dplyr::filter(sample == s)
 
         if(nrow(fix_field) != nrow(gt_field_s))
             stop("Mismatch between the VCF fixed fields and the genotypes, will not process this file.")
@@ -111,19 +43,40 @@ parse_FreeBayes = function(vcf, tumour_id, normal_id, filter_mutations = FALSE) 
         fits = list()
         fits[["sample"]] = s
         fits[["mutations"]] = dplyr::bind_cols(fix_field, gt_field_s) %>%
-            dplyr::select(chr, from, to, ref, alt, NV, DP, VAF, dplyr::everything()) %>%
-            dplyr::filter(FILTER %in% filter)
+            dplyr::select(chr, from, to, ref, alt, NV, DP, VAF, dplyr::everything())
         fits
-        })
+    })
 
     names(calls) = samples_list
     samples = c(tumour_id, normal_id)
     calls = calls[samples]
+
+    # check if VCF is annotated with VEP
+    if ("CSQ" %in% tb[["meta"]][["ID"]]){
+        # VEP specific field extraction
+        # Take CSQ field names and split by |
+
+        vep_field = tb[["meta"]] %>%
+            dplyr::filter(ID == "CSQ") %>%
+            dplyr::select(Description) %>%
+            dplyr::pull()
+
+        tmp_vep_field = strsplit(vep_field, split = "|", fixed = TRUE) %>% unlist()
+        vep_field = tmp_vep_field[1:length(tmp_vep_field)-1]
+
+        # Tranform the fix field by splittig the CSQ and select the columns needed
+        calls[[tumour_id]][['mutations']] = calls[[tumour_id]][['mutations']] %>%
+            dplyr::mutate(CSQ = strsplit(CSQ, ",")) %>%
+            tidyr::unnest(CSQ) %>%
+            tidyr::separate(CSQ, vep_field, sep = "\\\\|") %>%
+            dplyr::select(chr, from, to, ref, alt, IMPACT, SYMBOL, Gene, dplyr::everything())  #can add other thing, CSQ, HGSP
+
+        calls[[normal_id]][['mutations']] = calls[[normal_id]][['mutations']] %>% dplyr::select(-CSQ) %>% dplyr::distinct()
+    }
     return(calls)
 }
 
-
-parse_Mutect = function(vcf, tumour_id, normal_id, filter_mutations = FALSE){
+parse_Mutect = function(vcf, tumour_id, normal_id){
     # Transform vcf to tidy
     tb = vcfR::vcfR2tidy(vcf)
 
@@ -137,66 +90,25 @@ parse_Mutect = function(vcf, tumour_id, normal_id, filter_mutations = FALSE){
             VAF = NV/DP) %>%
         dplyr::rename(sample = Indiv)
 
+    fix_field = tb[["fix"]] %>%
+        dplyr::rename(
+            chr = CHROM,
+            from = POS,
+            ref = REF,
+            alt = ALT) %>%
+        dplyr::rowwise() %>%
+        dplyr::mutate(
+            from = as.numeric(from),
+            to = from + nchar(alt)) %>%
+        dplyr::ungroup() %>%
+        dplyr::select(chr, from, to, ref, alt, dplyr::everything(), -ChromKey, -DP)
+
     # Extract sample names
     samples_list = gt_field[["sample"]] %>% unique
 
-    # check if VCF is annotated with VEP
-    if ("CSQ" %in% tb[["meta"]][["ID"]]){
-    # VEP specific field extraction
-    # Take CSQ field names and split by |
-
-        vep_field = tb[["meta"]] %>%
-                    dplyr::filter(ID == "CSQ") %>%
-                    dplyr::select(Description) %>%
-                    dplyr::pull()
-
-        vep_field = strsplit(vep_field, split = "|", fixed = TRUE)[[1]]
-        print(vep_field)
-        vep_field = vep_field[2:length(vep_field)-1]
-
-    # Tranform the fix field by splittig the CSQ and select the columns needed
-        fix_field = tb[["fix"]] %>%
-            dplyr::rename(
-                chr = CHROM,
-                from = POS,
-                ref = REF,
-                alt = ALT) %>%
-            dplyr::rowwise() %>%
-            dplyr::mutate(
-                from = as.numeric(from),
-                to = from + nchar(alt)) %>%
-            dplyr::ungroup() %>%
-            dplyr::select(chr, from, to, ref, alt, CSQ, dplyr::everything()) %>%
-            tidyr::separate(CSQ, vep_field, sep = "\\\\|") %>%
-            dplyr::select(chr, from, to, ref, alt, IMPACT, SYMBOL, Gene, dplyr::everything(), -DP) #can add other thing, CSQ, HGSP
-        print(fix_field)
-
-    } else {
-        # Take from fix field some columns
-        fix_field = tb[["fix"]] %>%
-            dplyr::rename(
-                chr = CHROM,
-                from = POS,
-                ref = REF,
-                alt = ALT) %>%
-            dplyr::rowwise() %>%
-            dplyr::mutate(
-                from = as.numeric(from),
-                to = from + nchar(alt)) %>%
-            dplyr::ungroup() %>%
-            dplyr::select(chr, from, to, ref, alt, dplyr::everything(), -ChromKey, -DP) #-DP
-    }
-
-    if (filter_mutations){
-        filter = c('PASS')
-    } else {
-        filter = fix_field[["FILTER"]] %>% unique()
-    }
-
-    # For each sample create the table of mutations
     calls = lapply(
-            samples_list,
-            function(s){
+        samples_list,
+        function(s){
             gt_field_s = gt_field %>% dplyr::filter(sample == s)
 
             if(nrow(fix_field) != nrow(gt_field_s))
@@ -205,14 +117,36 @@ parse_Mutect = function(vcf, tumour_id, normal_id, filter_mutations = FALSE){
             fits = list()
             fits[["sample"]] = s
             fits[["mutations"]] = dplyr::bind_cols(fix_field, gt_field_s) %>%
-                dplyr::select(chr, from, to, ref, alt, NV, DP, VAF, dplyr::everything()) %>%
-                dplyr::filter(FILTER %in% filter)
-            fits
-            })
+                dplyr::select(chr, from, to, ref, alt, NV, DP, VAF, dplyr::everything())
+        fits
+    })
 
     names(calls) = samples_list
     samples = c(tumour_id, normal_id)
     calls = calls[samples]
+
+    # check if VCF is annotated with VEP
+    if ("CSQ" %in% tb[["meta"]][["ID"]]){
+    # VEP specific field extraction
+    # Take CSQ field names and split by |
+
+        vep_field = tb[['meta']] %>%
+            dplyr::filter(ID == "CSQ") %>%
+            dplyr::select(Description) %>%
+            dplyr::pull()
+
+        tmp_vep_field = strsplit(vep_field, split = "|", fixed = TRUE) %>% unlist()
+        vep_field = tmp_vep_field[1:length(tmp_vep_field)-1]
+
+        # Tranform the fix field by splittig the CSQ and select the columns needed
+        calls[[tumour_id]][['mutations']] = calls[[tumour_id]][['mutations']] %>%
+            dplyr::mutate(CSQ = strsplit(CSQ, ",")) %>%
+            tidyr::unnest(CSQ) %>%
+            tidyr::separate(CSQ, vep_field, sep = "\\\\|") %>%
+            dplyr::select(chr, from, to, ref, alt, IMPACT, SYMBOL, Gene, dplyr::everything())  #can add other thing, CSQ, HGSP
+
+        calls[[normal_id]][['mutations']] = calls[[normal_id]][['mutations']] %>% dplyr::select(-CSQ) %>% dplyr::distinct()
+    }
     return(calls)
 }
 
@@ -233,25 +167,10 @@ retrieve_ref_alt = function(row){
     ref_alt
 }
 
-parse_Strelka = function(vcf, tumour_id, normal_id, filter_mutations = FALSE){
+parse_Strelka = function(vcf, tumour_id, normal_id){
     tb = vcfR::vcfR2tidy(vcf)
     gt_field = tb[["gt"]] %>% rename(sample = Indiv)
-    samples_list = gt_field[["sample"]] %>% unique
 
-    if ("CSQ" %in% tb[["meta"]][["ID"]]){
-    # VEP specific field extraction
-    # Take CSQ field names and split by |
-
-        vep_field = tb[["meta"]] %>%
-                dplyr::filter(ID == "CSQ") %>%
-                dplyr::select(Description) %>%
-                dplyr::pull()
-
-    vep_field = strsplit(vep_field, split = "|", fixed = TRUE)[[1]]
-    print(vep_field)
-    vep_field = vep_field[2:length(vep_field)-1]
-
-    # Tranform the fix field by splittig the CSQ and select the columns needed
     fix_field = tb[["fix"]] %>%
         dplyr::rename(
             chr = CHROM,
@@ -263,32 +182,9 @@ parse_Strelka = function(vcf, tumour_id, normal_id, filter_mutations = FALSE){
             from = as.numeric(from),
             to = from + nchar(alt)) %>%
         dplyr::ungroup() %>%
-        dplyr::select(chr, from, to, ref, alt, CSQ, dplyr::everything(), -ChromKey) %>%
-        tidyr::separate(CSQ, vep_field, sep = "\\\\|") %>%
-        dplyr::select(chr, from, to, ref, alt, IMPACT, SYMBOL, Gene, dplyr::everything()) #can add other thing, CSQ, HGSP
-    print(fix_field)
+        dplyr::select(chr, from, to, ref, alt, dplyr::everything(), -ChromKey)
 
-    } else {
-        # Take from fix field some columns
-        fix_field = tb[["fix"]] %>%
-            dplyr::rename(
-                chr = CHROM,
-                from = POS,
-                ref = REF,
-                alt = ALT) %>%
-            dplyr::rowwise() %>%
-            dplyr::mutate(
-                from = as.numeric(from),
-                to = from + nchar(alt)) %>%
-            dplyr::ungroup() %>%
-            dplyr::select(chr, from, to, ref, alt, dplyr::everything(), -ChromKey) #-DP
-    }
-
-    if (filter_mutations){
-        filter = c('PASS')
-    } else {
-        filter = fix_field[["FILTER"]] %>% unique()
-    }
+    samples_list = gt_field[["sample"]] %>% unique
 
     calls = lapply(
         samples_list,
@@ -297,34 +193,53 @@ parse_Strelka = function(vcf, tumour_id, normal_id, filter_mutations = FALSE){
 
             fits = list()
             fits[["sample"]] = s
-            mutations = dplyr::bind_cols(fix_field, gt_field_s)
+            fits[["mutations"]] = dplyr::bind_cols(fix_field, gt_field_s)
+            mutations = fits[["mutations"]]
             ref_alt = lapply(1:nrow(mutations), function(r){
                 retrieve_ref_alt(mutations[r,])
-        })
+            })
 
-        ref_alt = ref_alt %>% unlist()
-        mutations[["ref_alt"]] = ref_alt
-        mutations = mutations %>%
-            tidyr::separate(ref_alt, into = c('NR', 'NV')) %>%
-            dplyr::mutate(NR = as.integer(NR),
-                        NV = as.integer(NV)) %>%
-            dplyr::mutate(DP = NR+NV) %>%
-            dplyr::mutate(VAF = NV/DP) %>%
-            dplyr::select(chr, from, to, ref, alt, NV, DP, VAF, everything()) %>%
-            dplyr::filter(FILTER %in% filter)
+            ref_alt = ref_alt %>% unlist()
+            mutations[["ref_alt"]] = ref_alt
+            mutations = mutations %>%
+                tidyr::separate(ref_alt, into = c('NR', 'NV')) %>%
+                dplyr::mutate(NR = as.integer(NR), NV = as.integer(NV)) %>%
+                dplyr::mutate(DP = NR+NV) %>%
+                dplyr::mutate(VAF = NV/DP) %>%
+                dplyr::select(chr, from, to, ref, alt, NV, DP, VAF, everything())
 
-        fits[["mutations"]] = mutations
-        fits
-        })
+            fits[["mutations"]] = mutations
+            fits
+    })
 
-    names(calls) = samples_list
-    samples = c(tumour_id, normal_id)
-    calls = calls[samples]
+    samples = c(normal_id, tumour_id)
+    names(calls) = samples
+
+    if ("CSQ" %in% tb[['meta']][['ID']]){
+    # VEP specific field extraction
+    # Take CSQ field names and split by |
+
+        vep_field = tb[['meta']] %>%
+            dplyr::filter(ID == "CSQ") %>%
+            dplyr::select(Description) %>%
+            dplyr::pull()
+
+        tmp_vep_field = strsplit(vep_field, split = "|", fixed = TRUE) %>% unlist()
+        vep_field = tmp_vep_field[1:length(tmp_vep_field)-1]
+
+        # Tranform the fix field by splittig the CSQ and select the columns needed
+        calls[[tumour_id]][['mutations']] = calls[[tumour_id]][['mutations']] %>%
+            dplyr::mutate(CSQ = strsplit(CSQ, ",")) %>%
+            tidyr::unnest(CSQ) %>%
+            tidyr::separate(CSQ, vep_field, sep = "\\\\|") %>%
+            dplyr::select(chr, from, to, ref, alt, IMPACT, SYMBOL, Gene, dplyr::everything())  #can add other thing, CSQ, HGSP
+
+        calls[[normal_id]][['mutations']] = calls[[normal_id]][['mutations']] %>% dplyr::select(-CSQ) %>% dplyr::distinct()
+    }
     return(calls)
 }
 
-
-parse_Platypus = function(vcf, tumour_id, normal_id, filter_mutations = FALSE){
+parse_Platypus = function(vcf, tumour_id, normal_id){
     tb = vcfR::vcfR2tidy(vcf)
 
     gt_field = tb[["gt"]] %>%
@@ -334,24 +249,6 @@ parse_Platypus = function(vcf, tumour_id, normal_id, filter_mutations = FALSE){
             VAF = NV/DP) %>%
         dplyr::rename(sample = Indiv)
 
-    # Extract each sample
-    samples_list = gt_field[["sample"]] %>% unique
-
-    # check if VCF is annotated with VEP
-    if ("CSQ" %in% tb[["meta"]][["ID"]]){
-    # VEP specific field extraction
-    # Take CSQ field names and split by |
-
-        vep_field = tb[["meta"]] %>%
-                dplyr::filter(ID == "CSQ") %>%
-                dplyr::select(Description) %>%
-                dplyr::pull()
-
-    vep_field = strsplit(vep_field, split = "|", fixed = TRUE)[[1]]
-    print(vep_field)
-    vep_field = vep_field[2:length(vep_field)-1]
-
-    # Tranform the fix field by splittig the CSQ and select the columns needed
     fix_field = tb[["fix"]] %>%
         dplyr::rename(
             chr = CHROM,
@@ -363,52 +260,53 @@ parse_Platypus = function(vcf, tumour_id, normal_id, filter_mutations = FALSE){
             from = as.numeric(from),
             to = from + nchar(alt)) %>%
         dplyr::ungroup() %>%
-        dplyr::select(chr, from, to, ref, alt, CSQ, dplyr::everything(),  -ChromKey) %>%
-        tidyr::separate(CSQ, vep_field, sep = "\\\\|") %>%
-        dplyr::select(chr, from, to, ref, alt, IMPACT, SYMBOL, Gene, dplyr::everything())
-    print(fix_field)
+        dplyr::select(chr, from, to, ref, alt, CSQ, dplyr::everything(), -ChromKey)
 
-    } else {
-        fix_field = tb[["fix"]] %>%
-            dplyr::rename(
-            chr = CHROM,
-            from = POS,
-            ref = REF,
-            alt = ALT) %>%
-            dplyr::rowwise() %>%
-            dplyr::mutate(
-            from = as.numeric(from),
-            to = from + nchar(alt)) %>%
-            dplyr::ungroup() %>%
-            dplyr::select(chr, from, to, ref, alt, dplyr::everything(), -ChromKey)
-    }
-
-    if (filter_mutations){
-        filter = c('PASS')
-    } else {
-        filter = fix_field[["FILTER"]] %>% unique()
-    }
+    # Extract each sample
+    samples_list = gt_field[["sample"]] %>% unique
 
     calls = lapply(
         samples_list,
         function(s){
-        gt_field_s = gt_field %>%
-            dplyr::filter(sample == s)
+            gt_field_s = gt_field %>%
+                dplyr::filter(sample == s)
 
-        if(nrow(fix_field) != nrow(gt_field_s))
-            stop("Mismatch between the VCF fixed fields and the genotypes, will not process this file.")
+            if(nrow(fix_field) != nrow(gt_field_s))
+                stop("Mismatch between the VCF fixed fields and the genotypes, will not process this file.")
 
-        fits = list()
-        fits[["sample"]] = s
-        fits[["mutations"]] = dplyr::bind_cols(fix_field, gt_field_s) %>%
-            dplyr::select(chr, from, to, ref, alt, NV, DP, VAF, dplyr::everything()) %>%
-            dplyr::filter(FILTER %in% filter)
-        fits
-        })
+            fits = list()
+            fits[["sample"]] = s
+            fits[["mutations"]] = dplyr::bind_cols(fix_field, gt_field_s) %>%
+                dplyr::select(chr, from, to, ref, alt, NV, DP, VAF, dplyr::everything())
+            fits
+        }
+    )
 
     names(calls) = samples_list
     samples = c(tumour_id, normal_id)
     calls = calls[samples]
+
+    if ("CSQ" %in% tb[['meta']][['ID']]){
+    # VEP specific field extraction
+    # Take CSQ field names and split by |
+
+        vep_field = tb[['meta']] %>%
+            dplyr::filter(ID == "CSQ") %>%
+            dplyr::select(Description) %>%
+            dplyr::pull()
+
+        tmp_vep_field = strsplit(vep_field, split = "|", fixed = TRUE) %>% unlist()
+        vep_field = tmp_vep_field[1:length(tmp_vep_field)-1]
+
+        # Tranform the fix field by splittig the CSQ and select the columns needed
+        calls[[tumour_id]][['mutations']] = calls[[tumour_id]][['mutations']] %>%
+            dplyr::mutate(CSQ = strsplit(CSQ, ",")) %>%
+            tidyr::unnest(CSQ) %>%
+            tidyr::separate(CSQ, vep_field, sep = "\\\\|") %>%
+            dplyr::select(chr, from, to, ref, alt, IMPACT, SYMBOL, Gene, dplyr::everything())  #can add other thing, CSQ, HGSP
+
+        calls[[normal_id]][['mutations']] = calls[[normal_id]][['mutations']] %>% dplyr::select(-CSQ) %>% dplyr::distinct()
+    }
     return(calls)
 }
 
@@ -425,16 +323,15 @@ vcf = vcfR::read.vcfR("$vcf")
 source = vcfR::queryMETA(vcf, element = 'source')[[1]]
 
 if (TRUE %in% grepl(pattern = 'Mutect', x = source)){
-    calls = parse_Mutect(vcf, tumour_id = "$meta.tumour_sample", normal_id = "$meta.normal_sample", filter_mutations = as.logical(opt[["filter_mutations"]]))
+    calls = parse_Mutect(vcf, tumour_id = "$meta.tumour_sample", normal_id = "$meta.normal_sample")
 
 } else if (TRUE %in% grepl(pattern = 'strelka', x = source)){
-    calls = parse_Strelka(vcf, tumour_id = "$meta.tumour_sample", normal_id = "$meta.normal_sample", filter_mutations = as.logical(opt[["filter_mutations"]]))
-
+    calls = parse_Strelka(vcf, tumour_id = "$meta.tumour_sample", normal_id = "$meta.normal_sample")
 } else if (TRUE %in% grepl(pattern = 'Platypus', x = source)){
-    calls = parse_Platypus(vcf, tumour_id = "$meta.tumour_sample", normal_id = "$meta.normal_sample", filter_mutations = as.logical(opt[["filter_mutations"]]))
+    calls = parse_Platypus(vcf, tumour_id = "$meta.tumour_sample", normal_id = "$meta.normal_sample")
 
 } else if (TRUE %in% grepl(pattern = 'freeBayes', x = source)){
-    calls = parse_FreeBayes(vcf, tumour_id = "$meta.tumour_sample", normal_id = "$meta.normal_sample", filter_mutations = as.logical(opt[["filter_mutations"]]))
+    calls = parse_FreeBayes(vcf, tumour_id = "$meta.tumour_sample", normal_id = "$meta.normal_sample")
 
 } else {
     stop('Variant Caller not supported.')

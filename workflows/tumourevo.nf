@@ -3,7 +3,8 @@
     IMPORT MODULES / SUBWORKFLOWS / FUNCTIONS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-include { VCF_ANNOTATE_ENSEMBLVEP } from '../subworkflows/nf-core/vcf_annotate_ensemblvep/main'
+include { BCFTOOLS_VIEW } from "${baseDir}/modules/nf-core/bcftools/view/main"
+include { VCF_ANNOTATE_ENSEMBLVEP } from "${baseDir}/subworkflows/nf-core/vcf_annotate_ensemblvep/main"
 include { FORMATTER as FORMATTER_CNA } from "${baseDir}/subworkflows/local/formatter/main"
 include { FORMATTER as FORMATTER_VCF} from "${baseDir}/subworkflows/local/formatter/main"
 include { LIFTER } from "${baseDir}/subworkflows/local/lifter/main"
@@ -58,7 +59,15 @@ main:
             }
 
     ch_extra_files = []
-    VCF_ANNOTATE_ENSEMBLVEP(input_vcf,
+
+    if (params.vcf_filter_mutations == true){
+        BCFTOOLS_VIEW(input_vcf)
+        vcf = BCFTOOLS_VIEW.out.vcf.join(BCFTOOLS_VIEW.out.tbi)
+    } else {
+        vcf = input_vcf
+    }
+
+    VCF_ANNOTATE_ENSEMBLVEP(vcf,
                             fasta,
                             params.vep_genome,
                             params.vep_species,

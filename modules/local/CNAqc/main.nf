@@ -54,7 +54,8 @@ process CNAQC {
         mutations = SNV,
         cna = CNA\$segments,
         purity = CNA\$purity ,
-        ref = "$params.genome")
+        ref = "$params.genome",
+        sample = "$meta.tumour_sample")
 
     x = CNAqc::analyze_peaks(x,
         matching_strategy = "$matching_strategy",
