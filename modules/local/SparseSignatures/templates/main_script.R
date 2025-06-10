@@ -1,5 +1,9 @@
 #!/usr/bin/env Rscript
 
+pkgs <- c("SparseSignatures", "dplyr", "tidyr", "tibble", "purrr", "stringr", "ggplot2", "patchwork")
+sapply(pkgs, require, character.only = TRUE)
+
+
 parse_args = function(x) {
     x = gsub("\\\\[","",x)
     x = gsub("\\\\]","",x)
@@ -25,69 +29,8 @@ opt = list(
 args_opt = parse_args('$task.ext.args')
 for ( ao in names(args_opt)) opt[[ao]] = args_opt[[ao]]
 
-# Auxiliary functions #####
-get_sample = function(m_cnaqc_obj, sample, which_obj) {
-    if (class(m_cnaqc_obj) != "m_cnaqc") {
-        wrong_class_all = class(m_cnaqc_obj)
-        cli::cli_abort(
-            c("cnaqc_objs must be a {.field m_cnaqc} object",
-            "x" = "{.var m_cnaqc_obj} is a {.cls {class(m_cnaqc_obj)}}")
-        )
-    }
 
-    consented_obj = c("shared", "original")
-    if ((which_obj %in% consented_obj) == FALSE) {
-        cli::cli_abort("{.var which_obj} must be one of {.val shared} or {.val original}")
-    }
-
-    # define the element names
-    if (which_obj == "original") {
-        type = "original_cnaqc_objc"
-        # check if the original cnaqc obj exist
-        check_or = any(names(m_cnaqc_obj) == type)
-        if (check_or == FALSE) {
-            cli::cli_abort(c("mCNAqc object was build without keeping original CNAqc objects"),
-                        "x" = "It is not possible to retrieve the required samples")
-        } else {
-            cli::cli_h1("Retrieving original {.cls CNAqc} objects")
-            cnaqc_samples = m_cnaqc_obj[[type]][sample]
-        }
-    } else {
-        type = "cnaqc_obj_new_segmentation"
-        cli::cli_h1("Retrieving {.cls CNAqc} objects with the new segmentation")
-        cnaqc_samples = m_cnaqc_obj[[type]][sample]
-    }
-    return(cnaqc_samples)
-}
-
-get_sample_name =function(x) {
-    if (class(x) == "m_cnaqc") {
-        lapply(x[["cnaqc_obj_new_segmentation"]], function(y) {
-            y[["sample"]]
-        }) %>% unlist() %>% unname()
-    } else if (class(x) == "cnaqc") {
-        x[["sample"]]
-    } else {
-        wrong_class_all = class(x)
-        cli::cli_abort(
-            c("must provide a {.field m_cnaqc} object",
-            "x" = "{.var x} is a {.cls {class(x)}}")
-        )
-    }
-}
-
-get_mCNAqc_stats = function(m_cnaqc_obj){
-    stats = m_cnaqc_obj[["m_cnaqc_stats"]]
-    return(stats)
-}
-
-# Script #####
-
-library(SparseSignatures)
-library(ggplot2)
-library(stringr)
-library(patchwork)
-library(dplyr)
+# Script 
 
 n_procs = parse(text=opt[["num_processes"]])
 if (n_procs == "all"){
@@ -156,7 +99,6 @@ cv_out = SparseSignatures::nmfLassoCV(
     K = eval(parse(text=opt[["K"]])),
     starting_beta = starting_betas,
     background_signature = background,
-    normalize_counts = as.logical(opt[["normalize_counts"]]),
     nmf_runs = as.integer(opt[["nmf_runs"]]),
     lambda_values_alpha = eval(parse(text=opt[["lambda_values_alpha"]])),
     lambda_values_beta = eval(parse(text=opt[["lambda_values_beta"]])),
@@ -204,14 +146,12 @@ print(paste("MIN K =", min_K))
 nmf_Lasso_out = SparseSignatures::nmfLasso(
     x = mut_counts,
     K = min_K,
-    beta = eval(parse(text=opt[["beta"]])),
     background_signature = background,
-    normalize_counts = as.logical(opt[["normalize_counts"]]),
     lambda_rate_alpha = eval(parse(text=opt[["lambda_rate_alpha"]])),
     lambda_rate_beta = min_Lambda_beta,
     iterations = as.integer(opt[["iterations"]]),
     max_iterations_lasso = as.integer(opt[["max_iterations_lasso"]]),
-    verbose = as.logical(opt[["verbose"]])
+    seed = as.integer(opt[["seed"]])
 )
 
 saveRDS(object = nmf_Lasso_out, file =  paste0(opt[["prefix"]], "_nmf_Lasso_out.rds"))
