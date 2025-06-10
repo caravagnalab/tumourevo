@@ -120,7 +120,7 @@
             "properties": {
                 "vcf_filter_mutations": {
                     "type": "boolean",
-                    "default": "true",
+                    "default": true,
                     "description": "Flag for filtering mutations from vcf."
                 }
             },
@@ -471,21 +471,6 @@
                     "default": "2:10",
                     "description": "The number of signatures (min. value = 2) to be fit to the dataset, including the background signature."
                 },
-                "sparsesignatures_background_signature": {
-                    "type": "string",
-                    "default": "NULL",
-                    "description": "A numeric vector of length 96 provided by the user. The parameter is ignored if beta is given instead. If NULL, it is estimated through NMF."
-                },
-                "sparsesignatures_beta": {
-                    "type": "string",
-                    "default": "NULL",
-                    "description": "The initial value of the signature matrix \u03b2. If NULL, it is estimated with a few runs of NMF. It must include the background signature as its first row."
-                },
-                "sparsesignatures_normalize_counts": {
-                    "type": "string",
-                    "default": "TRUE",
-                    "description": "If TRUE normalize the count matrix x row-wise before processing it. Useful for algorithm stability, when considerably different total counts of mutations are observed among the patients."
-                },
                 "sparsesignatures_iterations": {
                     "type": "integer",
                     "default": 30,
@@ -531,14 +516,9 @@
                     "default": 0,
                     "description": "The candidate values of the sparsity parameter for the exposure-matrix entries alpha whose goodness of fit is assessed by cross-validation."
                 },
-                "sparsesignatures_verbose": {
-                    "type": "string",
-                    "default": "TRUE",
-                    "description": "If TRUE, informative messages are printed on the R console over the execution."
-                },
                 "sparsesignatures_seed": {
                     "type": "integer",
-                    "default": 12345,
+                    "default": 42,
                     "description": "Seed for the random number generation. To be set for reproducibility."
                 },
                 "sparsesignatures_lambda_values_alpha": {
@@ -569,10 +549,6 @@
                     "type": "string",
                     "description": "Specify the path to the reference genome (if downloaded by the user), e.g. path/to/genome/tsb"
                 },
-                "sigprofiler_exome": {
-                    "type": "string",
-                    "description": "Downsamples mutational matrices to the exome regions of the genome."
-                },
                 "sigprofiler_input_type": {
                     "type": "string",
                     "default": "matrix",
@@ -598,21 +574,6 @@
                     "default": 100,
                     "description": "The number of iteration to be performed to extract each number signature."
                 },
-                "sigprofiler_resample": {
-                    "type": "string",
-                    "default": true,
-                    "description": "If True, add poisson noise to samples by resampling."
-                },
-                "sigprofiler_matrix_normalization": {
-                    "type": "string",
-                    "default": "gmm",
-                    "description": "Method of normalizing the genome matrix before it is analyzed by NMF. Options are, 'log2', 'custom' or 'none'."
-                },
-                "sigprofiler_nmf_init": {
-                    "type": "string",
-                    "default": "random",
-                    "description": "The initialization algorithm for W and H matrix of NMF. Options are 'random', 'nndsvd', 'nndsvda', 'nndsvdar' and 'nndsvd_min'."
-                },
                 "sigprofiler_min_nmf_iterations": {
                     "type": "integer",
                     "default": 10000,
@@ -632,100 +593,6 @@
                     "type": "string",
                     "default": "random",
                     "description": "Ensures reproducible NMF replicate resamples. Provide the path to the Seeds.txt file (found in the results folder from a previous analysis) to reproduce results."
-                },
-                "sigprofiler_stability": {
-                    "type": "number",
-                    "default": 0.8,
-                    "description": "The cutoff thresh-hold of the average stability (default: 0.8). Solutions with average stabilities below this thresh-hold will not be considered."
-                },
-                "sigprofiler_cpu": {
-                    "type": "integer",
-                    "default": -1,
-                    "description": "The number of processors to be used to extract the signatures (default: all processors)."
-                },
-                "sigprofiler_min_stability": {
-                    "type": "number",
-                    "default": 0.2,
-                    "description": "The cutoff thresh-hold of the minimum stability (default: 0.2). Solutions with minimum stabilities below this thresh-hold will not be considered."
-                },
-                "sigprofiler_combined_stability": {
-                    "type": "integer",
-                    "default": 1,
-                    "description": "The cutoff thresh-hold of the combined stability (sum of average and minimum stability) (default: 1.0). Solutions with combined stabilities below this thresh-hold will not be considered."
-                },
-                "sigprofiler_make_decomposition_plots": {
-                    "type": "string",
-                    "default": true,
-                    "description": "Generate de novo to COSMIC signature decomposition plots as part of the results (default: True). Set to False to skip generating these plots."
-                },
-                "sigprofiler_collapse_to_SBS96": {
-                    "type": "string",
-                    "default": true,
-                    "description": "If True, SBS288 and SBS1536 de novo signatures will be mapped to SBS96 reference signatures (default: True). If False, those will be mapped to reference signatures of the same context."
-                },
-                "sigprofiler_cosmic_version": {
-                    "type": "number",
-                    "default": 3.4,
-                    "description": "Defines the version of the COSMIC reference signatures (default: 3.4). Takes a positive float among 1, 2, 3, 3.1, 3.2, 3.3, and 3.4."
-                },
-                "sigprofiler_get_all_signature_matrices": {
-                    "type": "string",
-                    "default": true,
-                    "description": "Write to output Ws and Hs from all the NMF iterations."
-                },
-                "sigprofiler_export_probabilities": {
-                    "type": "string",
-                    "default": true,
-                    "description": "Create the probability matrix."
-                },
-                "sigprofiler_chrom_based": {
-                    "type": "string",
-                    "description": "Outputs chromosome-based matrices."
-                },
-                "sigprofiler_bed_file": {
-                    "type": "string",
-                    "default": "None",
-                    "description": "Downsamples mutational matrices to custom regions of the genome. Requires the full path to the BED file."
-                },
-                "sigprofiler_plot": {
-                    "type": "string",
-                    "description": "Integrates with SigProfilerPlotting to output all available visualizations for each matrix."
-                },
-                "sigprofiler_seqInfo": {
-                    "type": "string",
-                    "description": "Ouputs original mutations into a text file that contains the SigProfilerMatrixGenerator classificaiton for each mutation."
-                },
-                "sigprofiler_precision": {
-                    "type": "string",
-                    "default": "single",
-                    "description": "Values should be single or double."
-                },
-                "sigprofiler_cushion": {
-                    "type": "integer",
-                    "default": 100,
-                    "description": "Adds an Xbp cushion to the exome/bed_file ranges for downsampling the mutations."
-                },
-                "sigprofiler_gpu": {
-                    "type": "string",
-                    "description": "Defines if the GPU resource will used if available. If True, the GPU resources will be used in the computation. Note: All available CPU processors are used by default, which may cause a memory error. This error can be resolved by reducing the number of CPU processes through the cpu parameter."
-                },
-                "sigprofiler_tsb_stat": {
-                    "type": "string",
-                    "description": "Outputs the results of a transcriptional strand bias test for the respective matrices."
-                },
-                "sigprofiler_batch_size": {
-                    "type": "integer",
-                    "default": 1,
-                    "description": "Will be effective only if the GPU is used. Defines the number of NMF replicates to be performed by each CPU during the parallel processing. Note: For batch_size values greater than 1, each NMF replicate will update until max_nmf_iterations is reached."
-                },
-                "sigprofiler_allow_stability_drop": {
-                    "type": "string",
-                    "description": "Defines if solutions with a drop in stability with respect to the highest stable number of signatures will be considered."
-                },
-                "sigprofiler_nmf_tolerance": {
-                    "type": "number",
-                    "default": 1e-15,
-                    "description": "Value defines the tolerance to achieve to converge."
                 }
             },
             "fa_icon": "fas fa-briefcase"
