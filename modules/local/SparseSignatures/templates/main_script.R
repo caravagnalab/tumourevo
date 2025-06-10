@@ -30,7 +30,7 @@ args_opt = parse_args('$task.ext.args')
 for ( ao in names(args_opt)) opt[[ao]] = args_opt[[ao]]
 
 
-# Script 
+# Script
 
 n_procs = parse(text=opt[["num_processes"]])
 if (n_procs == "all"){
