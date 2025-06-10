@@ -327,6 +327,7 @@ if (TRUE %in% grepl(pattern = 'Mutect', x = source)){
 
 } else if (TRUE %in% grepl(pattern = 'strelka', x = source)){
     calls = parse_Strelka(vcf, tumour_id = "$meta.tumour_sample", normal_id = "$meta.normal_sample")
+
 } else if (TRUE %in% grepl(pattern = 'Platypus', x = source)){
     calls = parse_Platypus(vcf, tumour_id = "$meta.tumour_sample", normal_id = "$meta.normal_sample")
 

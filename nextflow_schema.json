@@ -119,8 +119,8 @@
             "default": "",
             "properties": {
                 "vcf_filter_mutations": {
-                    "type": "string",
-                    "default": "TRUE",
+                    "type": "boolean",
+                    "default": "true",
                     "description": "Flag for filtering mutations from vcf."
                 }
             },
