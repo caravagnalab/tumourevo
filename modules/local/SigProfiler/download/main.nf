@@ -9,8 +9,8 @@ process DOWNLOAD_GENOME_SIGPROFILER {
         val(reference_genome) // reference_genome : genome -> for example: GRCh37
 
     output:
-        path("*"), emit: genome_sigprofiler
-        path "versions.yml", emit: versions
+        path("*"),              emit: genome_sigprofiler
+        path "versions.yml",    emit: versions
 
     script:
     """
