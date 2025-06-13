@@ -84,18 +84,18 @@ process SIGPROFILER {
                 volume = "./")
 
         #full_input_data_path = os.path.join(input_path, output_path)
-        
+
         matrix_files = {
             "SBS96": os.path.join("output", "SBS", f"{dataset_id}.SBS96.all"),
             "DBS78": os.path.join("output", "DBS", f"{dataset_id}.DBS78.all"),
             "ID83": os.path.join("output", "ID", f"{dataset_id}.ID83.all")
-        } 
+        }
 
         context_types = {
             "SBS96": "96",
             "DBS78": "DINUC",
             "ID83": "ID"
-        } 
+        }
 
         # Run SigProfilerExtractor for each mutation type
 
