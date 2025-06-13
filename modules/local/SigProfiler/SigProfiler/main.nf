@@ -99,12 +99,12 @@ process SIGPROFILER {
 
         # Run SigProfilerExtractor for each mutation type
 
-        for context_type, matrix_path in matrix_files.items():
+        for key, matrix_path in matrix_files.items():
             sig.sigProfilerExtractor(input_type = "$input_type",
-                                    output = f"results/{context_type}",
+                                    output = f"results/{key}",
                                     input_data = matrix_path,
                                     reference_genome = "$params.genome",
-                                    context_type = context_type,
+                                    context_type = context_type[key],
                                     minimum_signatures = int("$minimum_signatures"),
                                     maximum_signatures = int("$maximum_signatures"),
                                     nmf_replicates = int("$nmf_replicates"),
