@@ -87,13 +87,11 @@ process SIGPROFILER {
 
         matrix_files = {
             "SBS96": os.path.join("output", "SBS", f"{dataset_id}.SBS96.all"),
-            "DBS78": os.path.join("output", "DBS", f"{dataset_id}.DBS78.all"),
             "ID83": os.path.join("output", "ID", f"{dataset_id}.ID83.all")
         }
 
         context_types = {
             "SBS96": "96",
-            "DBS78": "DINUC",
             "ID83": "ID"
         }
 
@@ -102,9 +100,9 @@ process SIGPROFILER {
         for key, matrix_path in matrix_files.items():
             sig.sigProfilerExtractor(input_type = "$input_type",
                                     output = f"results/{key}",
-                                    input_data = matrix_path,
+                                    input_data = f"{dataset_id}/{matrix_path}",
                                     reference_genome = "$params.genome",
-                                    context_type = context_type[key],
+                                    context_type = context_types[key],
                                     minimum_signatures = int("$minimum_signatures"),
                                     maximum_signatures = int("$maximum_signatures"),
                                     nmf_replicates = int("$nmf_replicates"),
