@@ -108,7 +108,6 @@ cv_out = SparseSignatures::nmfLassoCV(
     iterations = as.integer(opt[["iterations"]]),
     max_iterations_lasso = as.integer(opt[["max_iterations_lasso"]]),
     num_processes = n_procs,
-    verbose = as.logical(opt[["verbose"]]),
     seed = as.integer(opt[["seed"]])
 )
 
