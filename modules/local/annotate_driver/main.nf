@@ -32,22 +32,16 @@ process ANNOTATE_DRIVER {
     tumour_type = "$meta.cancer_type"
     if(tumour_type %in% drivers_table\$TUMOUR_TYPE){
         drivers_table = drivers_table %>%
-            dplyr::group_by(SYMBOL) %>%
-            dplyr::reframe(TUMOUR_GENE = any(TUMOUR_GENE), dplyr::across(dplyr::everything())) %>%
-            dplyr::filter(TUMOUR_GENE) %>%
             dplyr::filter(TUMOUR_TYPE == tumour_type)
     } else {
         drivers_table = drivers_table %>%
-            dplyr::group_by(SYMBOL) %>%
-            dplyr::reframe(TUMOUR_GENE = any(TUMOUR_GENE), dplyr::across(dplyr::everything())) %>%
-            dplyr::filter(TUMOUR_GENE) %>%
             dplyr::mutate(TUMOUR_TYPE = "PANCANCER")
         tumour_type = 'PANCANCER'
     }
 
     drivers_table = drivers_table %>%
-        dplyr::select(SYMBOL, TUMOUR_TYPE, TUMOUR_GENE) %>%
-        unique()
+        dplyr::select(SYMBOL, TUMOUR_TYPE) %>%
+        dplyr::distinct()
 
     x = SNV %>%
         dplyr::mutate(TUMOUR_TYPE = tumour_type) %>%
@@ -58,7 +52,7 @@ process ANNOTATE_DRIVER {
         tidyr::separate(HGVSp, ':', into = c('s1', 's2'), remove=F) %>%
         dplyr::mutate(tmp_s2 = ifelse(is.na(s2), '', paste0('_', s2))) %>%
         dplyr::mutate(
-            is_driver = (TUMOUR_GENE & IMPACT %in% c('MODERATE', 'HIGH')),
+            is_driver = (IMPACT %in% c('MODERATE', 'HIGH')),
             driver_label = paste0(SYMBOL, tmp_s2)
         ) %>%
         select(-tmp_s2) %>%
