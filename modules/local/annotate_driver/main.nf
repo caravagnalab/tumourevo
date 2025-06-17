@@ -44,15 +44,14 @@ process ANNOTATE_DRIVER {
         dplyr::distinct()
 
     x = SNV %>%
-        dplyr::mutate(TUMOUR_TYPE = tumour_type) %>%
         dplyr::left_join(
             drivers_table,
-            by = c('SYMBOL', 'TUMOUR_TYPE')
+            by = c('SYMBOL')
         ) %>%
         tidyr::separate(HGVSp, ':', into = c('s1', 's2'), remove=F) %>%
         dplyr::mutate(tmp_s2 = ifelse(is.na(s2), '', paste0('_', s2))) %>%
         dplyr::mutate(
-            is_driver = (IMPACT %in% c('MODERATE', 'HIGH')),
+            is_driver = (TUMOUR_TYPE != "" & SYMBOL != "" & IMPACT %in% c('MODERATE', 'HIGH')),
             driver_label = paste0(SYMBOL, tmp_s2)
         ) %>%
         select(-tmp_s2) %>%
