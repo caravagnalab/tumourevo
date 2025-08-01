@@ -58,7 +58,8 @@ process SIGPROFILER {
                 df = pd.read_csv(p_table, sep='\\t', dtype=str)
                 tables.append(df)
             multisample_table = pd.concat(tables, ignore_index=True)
-            return multisample_table
+            multisample_table_filtered = multisample_table[multisample_table['NV'] != '0']
+            return multisample_table_filtered
 
         def input_processing(data, dataset_id, genome = "$params.genome"):
             new_columns = {'Project': dataset_id, 'Genome': genome, 'Type': "SOMATIC", 'mut_type': "SNP"}
