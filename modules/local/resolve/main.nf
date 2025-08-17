@@ -11,9 +11,30 @@ process RESOLVE {
         tuple val(meta), path(tsv_join,  stageAs: '*.tsv')
 
     output:
-        
-        path "versions.yml",                                    emit: versions
+        tuple val(meta), path("*_mut_counts.rds")             , emit: signatures_mutCounts_rds
+        tuple val(meta), path("*_fit_results.rds")            , emit: signatures_fit_results  
+        path "versions.yml"                                   , emit: versions
+
+
+    when:
+    task.ext.when == null || task.ext.when
+
 
     script:
     template "main_script.R"
+
+    stub:
+    def prefix = task.ext.prefix ?: "${meta.id}"
+    """
+    touch ${prefix}_mut_counts.rds
+    touch ${prefix}_fit_results.rds
+  
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        bioconductor-resolve: \$(Rscript -e "library(RESOLVE); cat(as.character(packageVersion('RESOLVE')))")
+        bioconductor-bsgenome.hsapiens.1000genomes.hs37d5: \$(Rscript -e "library(BSgenome.Hsapiens.1000genomes.hs37d5); cat(as.character(packageVersion('BSgenome.Hsapiens.1000genomes.hs37d5')))")
+        bioconductor-bsgenome.hsapiens.ucsc.hg38: \$(Rscript -e "library(BSgenome.Hsapiens.UCSC.hg38); cat(as.character(packageVersion('BSgenome.Hsapiens.UCSC.hg38')))")
+    END_VERSIONS
+    """
 }
