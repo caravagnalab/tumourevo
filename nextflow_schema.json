@@ -301,7 +301,7 @@
                 },
                 "mobster_tail": {
                     "type": "string",
-                    "default": "c(TRUE,FALSE)",
+                    "default": "TRUE",
                     "description": "Boolean value whether to use or not tail mutations for subclonal deconvolution."
                 },
                 "mobster_epsilon": {
