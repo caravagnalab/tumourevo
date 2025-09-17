@@ -3,8 +3,8 @@ process JOIN_POSITIONS {
     label "process_single"
     label "error_retry"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'docker://lvaleriani/cnaqc:version1.0' :
-        'docker.io/lvaleriani/cnaqc:version1.0' }"
+        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/91/913112a2d9295d35fe97874caf5f500df5a98d6fef1cb5861fd64caa0223a047/data':
+        'community.wave.seqera.io/library/r-cnaqc_r-cli_r-dplyr_r-readr_pruned:0fc82bfd06afe6dc' }"
 
     input:
     tuple val(meta), path(rds), path(vcf_pileup), path(positions)

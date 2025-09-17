@@ -2,9 +2,9 @@
 // QC SUB-WORKFLOW
 //
 
-include { TINC } from '../../../modules/local/tinc/main'
-include { CNAQC } from '../../../modules/local/CNAqc/main'
-include { JOIN_CNAQC } from '../../../modules/local/join_CNAqc/main'
+include { TINC } from '../../../modules/nf-core/tinc/main'
+include { CNAQC } from '../../../modules/local/cnaqc/main'
+include { JOIN_CNAQC } from '../../../modules/local/join_cnaqc/main'
 
 
 workflow QC {

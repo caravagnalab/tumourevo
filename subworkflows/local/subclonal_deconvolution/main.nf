@@ -1,12 +1,12 @@
 // SUBCLONAL DECONVOLUTION WORKFLOW
 
-include { MOBSTERh } from "../../../modules/local/mobsterh/main"
+include { MOBSTER } from "../../../modules/nf-core/mobster/main"
 include { VIBER } from "../../../modules/local/viber/main"
 include { PYCLONEVI } from "../../../modules/local/pyclonevi/main"
 include { FORMATTER } from "../../../subworkflows/local/formatter/main"
-include { CTREE as CTREE_MOBSTERh } from "../../../modules/local/ctree/main"
-include { CTREE as CTREE_PYCLONEVI } from "../../../modules/local/ctree/main"
-include { CTREE as CTREE_VIBER } from "../../../modules/local/ctree/main"
+include { CTREE as CTREE_MOBSTERh } from "../../../modules/nf-core/ctree/main"
+include { CTREE as CTREE_PYCLONEVI } from "../../../modules/nf-core/ctree/main"
+include { CTREE as CTREE_VIBER } from "../../../modules/nf-core/ctree/main"
 
 workflow SUBCLONAL_DECONVOLUTION {
     take:
@@ -26,7 +26,7 @@ workflow SUBCLONAL_DECONVOLUTION {
         joinCNAqc = rds_join.transpose().map{ meta, rds, sample ->
             meta = meta + ["tumour_sample": sample, "id":"${meta.dataset}_${meta.patient}_${sample}"]
             [meta, rds]}
-        MOBSTERh(joinCNAqc)
+        MOBSTER(joinCNAqc)
         // in_join = MOBSTERh.out.mobster_best_rds.map{ meta, rds ->
         //     meta = meta + [id: "${meta.dataset}_${meta.patient}"]
         //     sample = meta.tumour_sample
@@ -36,9 +36,9 @@ workflow SUBCLONAL_DECONVOLUTION {
         // input_joint_fit.join(in_join).view()
         // rds_join = JOINT_FIT(input_joint_fit.join(in_join))
 
-        CTREE_MOBSTERh(MOBSTERh.out.mobster_best_rds)
+        CTREE_MOBSTERh(MOBSTER.out.mobster_best_rds)
 
-        mobster_pdf = MOBSTERh.out.mobster_report_pdf
+        mobster_pdf = MOBSTER.out.mobster_report_pdf
         ctree_mobster_pdf = CTREE_MOBSTERh.out.ctree_report_pdf
 
     } // else if (params.remove_tail && !params.remove_tail.contains("never")){

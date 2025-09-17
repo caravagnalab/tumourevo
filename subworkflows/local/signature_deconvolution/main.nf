@@ -4,9 +4,9 @@
 
 include { FORMATTER as FORMATTER_RDS_SIGPROFILER } from "../../../subworkflows/local/formatter/main"
 include { FORMATTER as FORMATTER_RDS_SPARSESIGNATURES } from "../../../subworkflows/local/formatter/main"
-include { SPARSE_SIGNATURES } from "../../../modules/local/SparseSignatures/main"
-include { DOWNLOAD_GENOME_SIGPROFILER } from "../../../modules/local/SigProfiler/download/main"
-include { SIGPROFILER } from "../../../modules/local/SigProfiler/SigProfiler/main"
+include { SPARSE_SIGNATURES } from "../../../modules/nf-core/sparsesignatures/main"
+include { DOWNLOAD_GENOME_SIGPROFILER } from "../../../modules/local/sigprofiler_download/main"
+include { SIGPROFILER } from "../../../modules/nf-core/sigprofiler/main"
 
 
 workflow SIGNATURE_DECONVOLUTION {
@@ -21,8 +21,7 @@ workflow SIGNATURE_DECONVOLUTION {
     sign_cv = null
     mut_counts = null
     genome_path = null
-    Sigprofiler_out = null
-
+    sigprofiler_out = null
 
     if (params.tools && params.tools.split(',').contains('sparsesignatures')) {
         FORMATTER_RDS_SPARSESIGNATURES(join_cnaqc_out, "rds")
@@ -31,7 +30,7 @@ workflow SIGNATURE_DECONVOLUTION {
             [meta.subMap('dataset', 'id'), tsv] }
             | groupTuple
 
-        SPARSE_SIGNATURES(input_sparsesig) // run SparseSignatures
+        SPARSE_SIGNATURES(input_sparsesig, params.genome) // run SparseSignatures
 
         plot_pdf = SPARSE_SIGNATURES.out.signatures_plot_pdf
         plot_rds = SPARSE_SIGNATURES.out.signatures_plot_rds
@@ -56,8 +55,8 @@ workflow SIGNATURE_DECONVOLUTION {
             [meta.subMap('dataset', 'id'), tsv]}
             | groupTuple
 
-        SIGPROFILER(input_sigprofiler, genome_path)
-        Sigprofiler_out = SIGPROFILER.out.sigprofiler_results
+        SIGPROFILER(input_sigprofiler, params.genome, genome_path)
+        sigprofiler_out = SIGPROFILER.out.results_sigprofiler
     }
 
     emit:
@@ -67,6 +66,6 @@ workflow SIGNATURE_DECONVOLUTION {
     bestConf
     sign_cv
     mut_counts
-    Sigprofiler_out
+    sigprofiler_out
 
 }
