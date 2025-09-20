@@ -36,12 +36,12 @@
                     },
                     "mobster": {
                         "branch": "master",
-                        "git_sha": "71e0a0535a95c5f1c92b252ed6a316fd87b93b7e",
+                        "git_sha": "276f61fafb9138cc9895cab9d4c9540b716ea908",
                         "installed_by": ["modules"]
                     },
                     "sigprofiler": {
                         "branch": "master",
-                        "git_sha": "71ca1bd2903d2361731915226e32400f05281ca8",
+                        "git_sha": "865b05493d0ae0b8cd50f91311912a8716551d69",
                         "installed_by": ["modules"]
                     },
                     "sparsesignatures": {
@@ -56,7 +56,7 @@
                     },
                     "tinc": {
                         "branch": "master",
-                        "git_sha": "3369ae4367efb6504216a38759285d3a81d6ac38",
+                        "git_sha": "7158a18b9eccd441bcca98199ad5d03be676925e",
                         "installed_by": ["modules"]
                     },
                     "untar": {

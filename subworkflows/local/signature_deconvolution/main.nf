@@ -5,7 +5,6 @@
 include { FORMATTER as FORMATTER_RDS_SIGPROFILER } from "../../../subworkflows/local/formatter/main"
 include { FORMATTER as FORMATTER_RDS_SPARSESIGNATURES } from "../../../subworkflows/local/formatter/main"
 include { SPARSE_SIGNATURES } from "../../../modules/nf-core/sparsesignatures/main"
-include { DOWNLOAD_GENOME_SIGPROFILER } from "../../../modules/local/sigprofiler_download/main"
 include { SIGPROFILER } from "../../../modules/nf-core/sigprofiler/main"
 
 
@@ -43,7 +42,7 @@ workflow SIGNATURE_DECONVOLUTION {
 
     if (params.tools && params.tools.split(',').contains('sigprofiler')) {
         if (params.download_sigprofiler_genome) {
-            genome_path = DOWNLOAD_GENOME_SIGPROFILER(params.genome).genome_sigprofiler
+            genome_path = channel.fromPath('opt/null')
         } else {
             genome_path = params.genome_installed_path
         }
