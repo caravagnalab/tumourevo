@@ -2,9 +2,11 @@ process JOIN_CNAQC {
     tag "$meta.id"
     label "process_low"
     label "error_retry"
+
+    conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'docker://lvaleriani/cnaqc:version1.0' :
-        'docker.io/lvaleriani/cnaqc:version1.0' }"
+        'https://depot.galaxyproject.org/singularity/r-cnaqc%3A1.1.2--r44hdfd78af_0':
+        'biocontainers/r-cnaqc:1.1.2--r44hdfd78af_0' }"
 
     input:
     tuple val(meta), path(rds_list, stageAs: '*.rds'), val(tumour_samples)
