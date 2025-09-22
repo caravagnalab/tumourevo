@@ -24,7 +24,7 @@ opt = list(
 )
 args_opt = parse_args('$task.ext.args')
 for ( ao in names(args_opt)) opt[[ao]] = args_opt[[ao]]
-
+print(opt)
 
 # Auxiliary functions #####
 
@@ -150,21 +150,26 @@ dplyr::rename_all(function(x) stringr::str_remove_all(x,"NV."))
 # Standard fit
 viber_K = eval(parse(text=opt[["K"]]))
 viber_K[which.min(viber_K)] = 2
+alpha0=as.numeric(opt[["alpha_0"]])
+a0=as.integer(opt[["a_0"]])
+b0=as.integer(opt[["b_0"]])
+maxiter=as.integer(opt[["maxIter"]])
+epsilon=as.numeric(opt[["epsilon_conv"]])
+sampls=as.integer(opt[["samples"]])
+qinit=opt[["q_init"]]
+
 st_fit = VIBER::variational_fit(nv, dp,
                                 K=viber_K,
                                 data=reads_data,
-                                # %>% dplyr::filter(mutation_id %in% non_tail)
-                                alpha_0=as.numeric(opt[["alpha_0"]]),
-                                a_0=as.integer(opt[["a_0"]]),
-                                b_0=as.integer(opt[["b_0"]]),
-                                max_iter=as.integer(opt[["maxIter"]]),
-                                epsilon_conv=as.numeric(opt[["epsilon_conv"]]),
-                                samples=as.integer(opt[["samples"]]),
-                                q_init=opt[["q_init"]],
-                                trace=as.logical(opt[["trace"]]),
+                                alpha_0=alpha0,
+                                a_0=a0,
+                                b_0=b0,
+                                max_iter=maxiter,
+                                epsilon_conv=epsilon,
+                                samples=sampls,
+                                q_init=qinit,
                                 description=""
                                 )
-
 best_fit = best_fit_heuristic = st_fit
 
 # If all clusters are removed -> keep the origianl best fit
@@ -186,7 +191,8 @@ saveRDS(best_fit, file=paste0(opt[["prefix"]], "_viber_best_st_fit.rds"))
 saveRDS(best_fit_heuristic, file = paste0(opt[["prefix"]], "_viber_best_st_heuristic_fit.rds"))
 
 # Save plots
-if ("$n_samples" >1) { #mutlisample mode on
+n_samples = ncol(best_fit[["x"]]) - 1
+if (n_samples >1) { #mutlisample mode on
 print("multisample mode on")
 plot_fit = plot(best_fit)
 plot_fit_heuristic = plot(best_fit_heuristic)

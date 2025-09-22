@@ -11,6 +11,17 @@
                         "installed_by": ["modules"],
                         "patch": "modules/nf-core/bcftools/mpileup/bcftools-mpileup.diff"
                     },
+                    "bcftools/view": {
+                        "branch": "master",
+                        "git_sha": "c9c3ef86c1892413b3c86fb38c4e39fd7288512f",
+                        "installed_by": ["modules"],
+                        "patch": "modules/nf-core/bcftools/view/bcftools-view.diff"
+                    },
+                    "ctree": {
+                        "branch": "master",
+                        "git_sha": "74465cf3d8ef52d88a594350c990b859e2537fdc",
+                        "installed_by": ["modules"]
+                    },
                     "ensemblvep/download": {
                         "branch": "master",
                         "git_sha": "6e3585d9ad20b41adc7d271009f8cb5e191ecab4",
@@ -23,10 +34,30 @@
                         "installed_by": ["modules", "vcf_annotate_ensemblvep"],
                         "patch": "modules/nf-core/ensemblvep/vep/ensemblvep-vep.diff"
                     },
+                    "mobster": {
+                        "branch": "master",
+                        "git_sha": "276f61fafb9138cc9895cab9d4c9540b716ea908",
+                        "installed_by": ["modules"]
+                    },
+                    "sigprofiler": {
+                        "branch": "master",
+                        "git_sha": "865b05493d0ae0b8cd50f91311912a8716551d69",
+                        "installed_by": ["modules"]
+                    },
+                    "sparsesignatures": {
+                        "branch": "master",
+                        "git_sha": "1b59feffa6a52917d2c12d8b9f1d360b9d269d82",
+                        "installed_by": ["modules"]
+                    },
                     "tabix/tabix": {
                         "branch": "master",
                         "git_sha": "9502adb23c0b97ed8e616bbbdfa73b4585aec9a1",
                         "installed_by": ["vcf_annotate_ensemblvep"]
+                    },
+                    "tinc": {
+                        "branch": "master",
+                        "git_sha": "7158a18b9eccd441bcca98199ad5d03be676925e",
+                        "installed_by": ["modules"]
                     },
                     "untar": {
                         "branch": "master",

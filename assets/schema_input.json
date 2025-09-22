@@ -85,6 +85,10 @@
                     {
                         "type": "string",
                         "pattern": "^ASCAT$"
+                    },
+                    {
+                        "type": "string",
+                        "pattern": "^Battenberg$"
                     }
                 ]
             },
@@ -153,7 +157,7 @@
                 "anyOf": [
                     {
                         "type": "string",
-                        "pattern": "Seg|segments"
+                        "pattern": "Seg|segments|subclones"
                     },
                     {
                         "type": "string",
@@ -168,7 +172,7 @@
                 "anyOf": [
                     {
                         "type": "string",
-                        "pattern": "confints_CP|purityploidy"
+                        "pattern": "confints_CP|purityploidy|rho_and_psi"
                     },
                     {
                         "type": "string",

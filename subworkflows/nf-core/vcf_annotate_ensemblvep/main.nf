@@ -27,7 +27,7 @@ workflow VCF_ANNOTATE_ENSEMBLVEP {
         ch_fasta,
         ch_extra_files
     )
-
+    
     TABIX_TABIX(ENSEMBLVEP_VEP.out.vcf)
 
     ch_vcf_tbi = ENSEMBLVEP_VEP.out.vcf.join(TABIX_TABIX.out.tbi, failOnDuplicate: true, failOnMismatch: true)

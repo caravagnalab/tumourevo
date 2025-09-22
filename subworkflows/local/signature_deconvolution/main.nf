@@ -4,9 +4,8 @@
 
 include { FORMATTER as FORMATTER_RDS_SIGPROFILER } from "../../../subworkflows/local/formatter/main"
 include { FORMATTER as FORMATTER_RDS_SPARSESIGNATURES } from "../../../subworkflows/local/formatter/main"
-include { SPARSE_SIGNATURES } from "../../../modules/local/SparseSignatures/main"
-include { DOWNLOAD_GENOME_SIGPROFILER } from "../../../modules/local/SigProfiler/download/main"
-include { SIGPROFILER } from "../../../modules/local/SigProfiler/SigProfiler/main"
+include { SPARSE_SIGNATURES } from "../../../modules/nf-core/sparsesignatures/main"
+include { SIGPROFILER } from "../../../modules/nf-core/sigprofiler/main"
 
 
 workflow SIGNATURE_DECONVOLUTION {
@@ -19,9 +18,9 @@ workflow SIGNATURE_DECONVOLUTION {
     signatures_nmfOut = null
     bestConf = null
     sign_cv = null
+    mut_counts = null
     genome_path = null
-    Sigprofiler_out = null
-
+    sigprofiler_out = null
 
     if (params.tools && params.tools.split(',').contains('sparsesignatures')) {
         FORMATTER_RDS_SPARSESIGNATURES(join_cnaqc_out, "rds")
@@ -30,19 +29,20 @@ workflow SIGNATURE_DECONVOLUTION {
             [meta.subMap('dataset', 'id'), tsv] }
             | groupTuple
 
-        SPARSE_SIGNATURES(input_sparsesig) // run SparseSignatures
+        SPARSE_SIGNATURES(input_sparsesig, params.genome) // run SparseSignatures
 
         plot_pdf = SPARSE_SIGNATURES.out.signatures_plot_pdf
         plot_rds = SPARSE_SIGNATURES.out.signatures_plot_rds
         signatures_nmfOut = SPARSE_SIGNATURES.out.signatures_nmfOut_rds
         bestConf = SPARSE_SIGNATURES.out.signatures_bestConf_rds
         sign_cv = SPARSE_SIGNATURES.out.signatures_cv_rds
+        mut_counts = SPARSE_SIGNATURES.out.signatures_mutCounts_rds
     }
 
 
     if (params.tools && params.tools.split(',').contains('sigprofiler')) {
         if (params.download_sigprofiler_genome) {
-            genome_path = DOWNLOAD_GENOME_SIGPROFILER(params.genome).genome_sigprofiler
+            genome_path = channel.fromPath('opt/null')
         } else {
             genome_path = params.genome_installed_path
         }
@@ -54,8 +54,8 @@ workflow SIGNATURE_DECONVOLUTION {
             [meta.subMap('dataset', 'id'), tsv]}
             | groupTuple
 
-        SIGPROFILER(input_sigprofiler, genome_path)
-        Sigprofiler_out = SIGPROFILER.out.sigprofiler_results
+        SIGPROFILER(input_sigprofiler, params.genome, genome_path)
+        sigprofiler_out = SIGPROFILER.out.results_sigprofiler
     }
 
     emit:
@@ -64,6 +64,7 @@ workflow SIGNATURE_DECONVOLUTION {
     signatures_nmfOut
     bestConf
     sign_cv
-    Sigprofiler_out
+    mut_counts
+    sigprofiler_out
 
 }

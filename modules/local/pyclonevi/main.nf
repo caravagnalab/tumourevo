@@ -1,6 +1,7 @@
 process PYCLONEVI {
     tag "$meta.id"
     label "process_low"
+    label "error_ignore"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/pyclone-vi%3A0.1.3--pyhca03a8a_0' :
         'docker.io/blcdsdockerregistry/pyclone-vi:0.1.2' }"

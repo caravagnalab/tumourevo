@@ -1,9 +1,10 @@
 process ANNOTATE_DRIVER {
     tag "$meta.id"
     label "process_single"
+    label "error_retry"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'docker://lvaleriani/cnaqc:version1.0' :
-        'docker.io/lvaleriani/cnaqc:version1.0' }"
+        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/91/913112a2d9295d35fe97874caf5f500df5a98d6fef1cb5861fd64caa0223a047/data':
+        'community.wave.seqera.io/library/r-cnaqc_r-cli_r-dplyr_r-readr_pruned:0fc82bfd06afe6dc' }"
 
     input:
     tuple val(meta), path(rds), path(driver_list)
@@ -28,45 +29,41 @@ process ANNOTATE_DRIVER {
 
     drivers_table = readr::read_tsv(file = "$driver_list")
 
-    if("$meta.cancer_type" %in% drivers_table\$CANCER_TYPE){
+    tumour_type = "$meta.cancer_type"
+    if(tumour_type %in% drivers_table\$TUMOUR_TYPE){
         drivers_table = drivers_table %>%
-            dplyr::group_by(SYMBOL) %>%
-            dplyr::reframe(CGC_CANCER_GENE = any(CGC_CANCER_GENE), dplyr::across(dplyr::everything())) %>%
-            dplyr::filter(CGC_CANCER_GENE) %>%
-            dplyr::filter(CANCER_TYPE == "$meta.cancer_type")
+            dplyr::filter(TUMOUR_TYPE == tumour_type)
     } else {
         drivers_table = drivers_table %>%
-            dplyr::group_by(SYMBOL) %>%
-            dplyr::reframe(CGC_CANCER_GENE = any(CGC_CANCER_GENE), dplyr::across(dplyr::everything())) %>%
-            dplyr::filter(CGC_CANCER_GENE) %>%
-            dplyr::mutate(CANCER_TYPE = "PANCANCER")
+            dplyr::mutate(TUMOUR_TYPE = "PANCANCER")
+        tumour_type = 'PANCANCER'
     }
 
     drivers_table = drivers_table %>%
-        dplyr::select(SYMBOL, CANCER_TYPE, CGC_CANCER_GENE) %>%
-        unique()
-
-    cancer_type = "$meta.cancer_type"
-    if (!(cancer_type) %in% drivers_table\$CANCER_TYPE ){
-        cancer_type = 'PANCANCER'
-    }
+        dplyr::select(SYMBOL, TUMOUR_TYPE) %>%
+        dplyr::distinct()
 
     x = SNV %>%
-        dplyr::mutate(CANCER_TYPE = cancer_type) %>%
         dplyr::left_join(
             drivers_table,
-            by = c('SYMBOL', 'CANCER_TYPE')
+            by = c('SYMBOL')
         ) %>%
         tidyr::separate(HGVSp, ':', into = c('s1', 's2'), remove=F) %>%
         dplyr::mutate(tmp_s2 = ifelse(is.na(s2), '', paste0('_', s2))) %>%
         dplyr::mutate(
-            is_driver = (CGC_CANCER_GENE & IMPACT %in% c('MODERATE', 'HIGH')),
+            is_driver = (TUMOUR_TYPE != "" & SYMBOL != "" & IMPACT %in% c('MODERATE', 'HIGH')),
             driver_label = paste0(SYMBOL, tmp_s2)
         ) %>%
         select(-tmp_s2) %>%
         mutate(is_driver = ifelse(is.na(is_driver), FALSE, is_driver))
 
-    data[["$meta.tumour_sample"]]\$mutations = x
+    filter_x = x %>%
+        distinct(chr, from, to, ref,  alt,  IMPACT, SYMBOL, Gene, is_driver, driver_label, .keep_all = T) %>%
+        mutate(priority = ifelse(is_driver == TRUE, 1, 0)) %>%
+        arrange(chr, from, to, desc(priority)) %>%
+        distinct(chr, from, to, .keep_all = TRUE)
+
+    data[["$meta.tumour_sample"]]\$mutations = filter_x
     saveRDS(object = data, file = paste0("$prefix", "_driver.rds"))
 
     # version export
