@@ -2,9 +2,11 @@ process CNAQC {
     tag "$meta.id"
     label "process_low"
     label "error_retry"
+
+    conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'docker://lvaleriani/cnaqc:version1.0' :
-        'docker.io/lvaleriani/cnaqc:version1.0' }"
+        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/24/248c147bffd3f4d2db412f807462a2506018c0a1c38224bcf003a2f23cc7c304/data' :
+        'community.wave.seqera.io/library/r-cnaqc_r-patchwork_r-tidyverse:9ee9736412ac6d56' }"
 
     input:
     tuple val(meta), path(cna_rds), path(snv_rds)
