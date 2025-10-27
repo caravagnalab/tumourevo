@@ -35,7 +35,7 @@ process ENSEMBLVEP_VEP {
     def prefix = task.ext.prefix ?: "${meta.id}"
     def dir_cache = cache ? "\${PWD}/${cache}" : "/.vep"
     def reference = fasta ? "--fasta ${fasta}" : ""
-    def create_index = file_extension == "vcf" ? "tabix ${args2} ${prefix}.${file_extension}.gz" : ""
+    def create_index = file_extension == "vcf" ? "tabix ${args2} ${prefix}.vep.${file_extension}.gz" : ""
 
     """
     vep \\
