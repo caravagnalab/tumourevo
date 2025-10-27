@@ -17,6 +17,11 @@
                         "installed_by": ["modules"],
                         "patch": "modules/nf-core/bcftools/view/bcftools-view.diff"
                     },
+                    "cnaqc": {
+                        "branch": "master",
+                        "git_sha": "a124b81d9294d6715928f23eecd04651e8fb727b",
+                        "installed_by": ["modules"]
+                    },
                     "ctree": {
                         "branch": "master",
                         "git_sha": "74465cf3d8ef52d88a594350c990b859e2537fdc",
@@ -38,6 +43,11 @@
                     "mobster": {
                         "branch": "master",
                         "git_sha": "276f61fafb9138cc9895cab9d4c9540b716ea908",
+                        "installed_by": ["modules"]
+                    },
+                    "pyclonevi": {
+                        "branch": "master",
+                        "git_sha": "3fa617bf5417c57fbd7e795acc76a33f2fe04e47",
                         "installed_by": ["modules"]
                     },
                     "sigprofiler": {
@@ -71,6 +81,11 @@
                         "git_sha": "3f5420aa22e00bd030a2556dfdffc9e164ec0ec5",
                         "installed_by": ["modules"],
                         "patch": "modules/nf-core/vcf2maf/vcf2maf.diff"
+                    },
+                    "viber": {
+                        "branch": "master",
+                        "git_sha": "4f2e2753082eb7804aa634e795c99f4f494cd3de",
+                        "installed_by": ["modules"]
                     }
                 }
             },

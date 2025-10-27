@@ -1,8 +1,8 @@
 // SUBCLONAL DECONVOLUTION WORKFLOW
 
 include { MOBSTER } from "../../../modules/nf-core/mobster/main"
-include { VIBER } from "../../../modules/local/viber/main"
-include { PYCLONEVI } from "../../../modules/local/pyclonevi/main"
+include { VIBER } from "../../../modules/nf-core/viber/main"
+include { PYCLONEVI } from "../../../modules/nf-core/pyclonevi/main"
 include { FORMATTER } from "../../../subworkflows/local/formatter/main"
 include { CTREE as CTREE_MOBSTERh } from "../../../modules/nf-core/ctree/main"
 include { CTREE as CTREE_PYCLONEVI } from "../../../modules/nf-core/ctree/main"
@@ -26,6 +26,7 @@ workflow SUBCLONAL_DECONVOLUTION {
         joinCNAqc = rds_join.transpose().map{ meta, rds, sample ->
             meta = meta + ["tumour_sample": sample, "id":"${meta.dataset}_${meta.patient}_${sample}"]
             [meta, rds]}
+
         MOBSTER(joinCNAqc)
         // in_join = MOBSTERh.out.mobster_best_rds.map{ meta, rds ->
         //     meta = meta + [id: "${meta.dataset}_${meta.patient}"]

@@ -45,12 +45,11 @@ process JOIN_CNAQC {
                             keep_original = as.logical("$keep_original"),
                             discard_private = FALSE)
 
-    #out_PASS = CNAqc::multisample_init(result,
-    #                        QC_filter = TRUE,
-    #                        keep_original = as.logical("$keep_original"),
-    #                        discard_private = FALSE)
+    out_PASS = CNAqc::multisample_init(result,
+                            QC_filter = TRUE,
+                            keep_original = as.logical("$keep_original"),
+                            discard_private = FALSE)
 
-    out_PASS = tibble()
     saveRDS(object = out_all, file = paste0("$prefix", "_multi_cnaqc_ALL.rds"))
     saveRDS(object = out_PASS, file = paste0("$prefix", "_multi_cnaqc_PASS.rds"))
 

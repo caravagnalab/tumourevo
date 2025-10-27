@@ -3,7 +3,7 @@
 //
 
 include { TINC } from '../../../modules/nf-core/tinc/main'
-include { CNAQC } from '../../../modules/local/cnaqc/main'
+include { CNAQC } from '../../../modules/nf-core/cnaqc/main'
 include { JOIN_CNAQC } from '../../../modules/local/join_cnaqc/main'
 
 
@@ -13,28 +13,31 @@ workflow QC {
 
     main:
         TINC(input)
-        contamination = TINC.out.tinc_csv
-            .splitCsv( header: true )
-            .map{ meta, csv ->
-            meta = meta + [id: "${meta.dataset}_${meta.patient}"]
-            normal_contamination = csv.normal_contamination_flag
-            [meta.subMap('dataset', 'patient', 'id'), normal_contamination ]}
-            .unique()
-            | groupTuple
-            | map{ meta, normal_contamination ->
-                normal_contamination = normal_contamination.max()
-                [ meta, normal_contamination]
-            }
+        // contamination = TINC.out.tinc_csv
+        //     .splitCsv( header: true )
+        //     .map{ meta, csv ->
+        //     meta = meta + [id: "${meta.dataset}_${meta.patient}"]
+        //     normal_contamination = csv.normal_contamination_flag
+        //     [meta.subMap('dataset', 'patient', 'id'), normal_contamination ]}
+        //     .unique()
+        //     | groupTuple
+        //     | map{ meta, normal_contamination ->
+        //         normal_contamination = normal_contamination.max()
+        //         [ meta, normal_contamination]
+        //     }
+        input_cnaqc = input.map{meta, cna, snv ->
+                def sample =  meta.tumour_sample
+                [meta, snv, cna, sample]
+        }
 
-        CNAQC(input)
+        CNAQC(input_cnaqc)
         in_join_cnaqc = CNAQC.out.qc_rds.map{ meta, rds ->
-            sample = meta.tumour_sample
+            def sample = meta.tumour_sample
             meta = meta + [id: "${meta.dataset}_${meta.patient}"]
             [meta.subMap('dataset', 'patient', 'id'), rds, sample]}
             | groupTuple
-            //| join(contamination)
 
-        //out_tinc = in_join_cnaqc.map{  meta, rds, sample, normal_contamination ->
+        // out_tinc = in_join_cnaqc.map{  meta, rds, sample, normal_contamination ->
         //    meta = meta + [nc: normal_contamination]
         //        [meta, rds, sample] }
         //        .branch { meta, rds, sample ->
@@ -45,7 +48,8 @@ workflow QC {
 
     emit:
         rds_cnaqc = CNAQC.out.qc_rds
-        plot_cnaqc_rds = CNAQC.out.plot_rds
+        plot_cnaqc_data_rds = CNAQC.out.data_plot_rds
+        plot_cnaqc_qc_rds = CNAQC.out.qc_plot_rds
         plot_cnaqc_data = CNAQC.out.plot_pdf_data
         plot_cnaqc_qc = CNAQC.out.plot_pdf_qc
 
