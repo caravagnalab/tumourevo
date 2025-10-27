@@ -22,6 +22,7 @@ import sys
 import pandas as pd
 import os
 import subprocess
+import numpy as np
 
 #input data preprocessing
 def create_pyclone_input(input_data, patient_id, output_data):
@@ -42,11 +43,6 @@ def create_pyclone_input(input_data, patient_id, output_data):
 
 
 def pyclone_ctree(joint, best_fit, ctree_input):
-    # parser = argparse.ArgumentParser(description='Process input and output files.')
-    # parser.add_argument('--joint', help='Joint table path')
-    # parser.add_argument('--best_fit', help='Pyclone-vi best fit path')
-    # parser.add_argument('--ctree_input', help='Table for ctree path')
-    # args = parser.parse_args()
 
     ## Read pyclone best fit table
     best_fit_file = best_fit
@@ -54,24 +50,28 @@ def pyclone_ctree(joint, best_fit, ctree_input):
 
     ## Read pyclone input table
     joint_table = joint
-    #df_input = pd.read_csv(sys.argv[1], sep = '\t')
     df_input = pd.read_csv(joint_table, sep = '\t')
     ## Caluclate number of mutations per cluster and add to the subset orginal df_output dataframe
 
     df_output_small = df_output[['mutation_id','sample_id','cluster_id','cellular_prevalence']]
+    df_output_small['cluster_id'] = 'C' + df_output_small['cluster_id'].astype(str)
     df_output_small['nMuts'] = df_output_small.groupby('cluster_id')['mutation_id'].transform('nunique')
 
+    ## Create cluster table
+    df_clusters =df_output_small[['sample_id','cellular_prevalence','cluster_id']].drop_duplicates().pivot(index='sample_id', columns='cluster_id', values='cellular_prevalence')
     ## Find the clonal cluster and add the colum 'is.clonal' to identify it
 
     samples = df_output_small['sample_id'].unique()
-    top_clusters = 0
+    top_clusters = []
     for s in samples:
-        ind = df_output_small[df_output_small['sample_id']==s]['cellular_prevalence'].idxmax()
-        top_cluster = df_output_small.loc[ind,'cluster_id']
-        if (top_clusters != top_cluster):
-            top_clusters = top_cluster
+       max_values=df_clusters.loc[s].max()
+       indexes = np.where(df_clusters.loc[s] == max_values)[0]
+       top_clusters.append(list(df_clusters.columns[indexes]))
+    top_clusters_all = [item for sublist in top_clusters for item in sublist]
 
-    i = df_output_small[df_output_small['cluster_id']==top_clusters].index
+    clonal_cluster=max(set(top_clusters_all), key=top_clusters_all.count)
+
+    i = df_output_small[df_output_small['cluster_id']==clonal_cluster].index
 
     df_output_small['is.clonal'] = "F"
     df_output_small.loc[i,'is.clonal'] = "T"
@@ -108,9 +108,7 @@ if __name__ == "__main__":
 
     # Run pyclone
     pyclonevi_run = "pyclone-vi fit -i " + opt["prefix"] + "_pyclone_input.tsv -o " + \
-                    opt["prefix"] + "_all_fits.h5 -c " + opt["n_cluster"] + " -d "+ \
-                    opt["density"] + " --num-grid-points " + opt["n_grid_point"] + \
-                    " --num-restarts " + opt["n_restarts"]
+                    opt["prefix"] + "_all_fits.h5 -c " + opt["n_cluster"]
     subprocess.run(pyclonevi_run, shell=True)
 
     pyclonevi_write = "pyclone-vi write-results-file -i " + opt["prefix"] + "_all_fits.h5 -o " + \
@@ -129,4 +127,3 @@ if __name__ == "__main__":
     f.write("$task.process:")
     f.write("    pyclone-vi: {}\\n".format(version))
     f.close()
-
