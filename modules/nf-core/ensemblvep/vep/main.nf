@@ -63,9 +63,9 @@ process ENSEMBLVEP_VEP {
     stub:
     def prefix = task.ext.prefix ?: "${meta.id}"
     def file_extension = args.contains("--vcf") ? 'vcf' : args.contains("--json") ? 'json' : args.contains("--tab") ? 'tab' : 'vcf'
-    def create_index = file_extension == "vcf" ? "touch ${prefix}.${file_extension}.gz.tbi" : ""
+    def create_index = file_extension == "vcf" ? "touch ${prefix}.vep.${file_extension}.gz.tbi" : ""
     """
-    echo "" | gzip > ${prefix}.${file_extension}.gz
+    echo "" | gzip > ${prefix}.vep.${file_extension}.gz
     ${create_index}
     touch ${prefix}_summary.html
 
