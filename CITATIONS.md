@@ -46,17 +46,13 @@
 
   > Gillis, S., Roth, A. PyClone-VI: scalable inference of clonal population structures using whole genome data. BMC Bioinformatics 21, 571 (2020). https://doi.org/10.1186/s12859-020-03919-2
 
-- [SigProfiler] (https://www.sciencedirect.com/science/article/pii/S2666979X22001240?via%3Dihub)
+- [SigProfiler](https://www.sciencedirect.com/science/article/pii/S2666979X22001240?via%3Dihub)
 
   > Islam SMA, Díaz-Gay M, Wu Y, Barnes M, Vangara R, Bergstrom EN, He Y, Vella M, Wang J, Teague JW, Clapham P, Moody S, Senkin S, Li YR, Riva L, Zhang T, Gruber AJ, Steele CD, Otlu B, Khandekar A, Abbasi A, Humphreys L, Syulyukina N, Brady SW, Alexandrov BS, Pillay N, Zhang J, Adams DJ, Martincorena I, Wedge DC, Landi MT, Brennan P, Stratton MR, Rozen SG, and Alexandrov LB (2022) Uncovering novel mutational signatures by de novo extraction with SigProfilerExtractor. Cell Genomics. doi: 10.1016/j.xgen.2022.100179.
 
-- [SparseSignatures] (https://www.sciencedirect.com/science/article/pii/S2666166722003938?via%3Dihub)
+- [SparseSignatures](https://www.sciencedirect.com/science/article/pii/S2666166722003938?via%3Dihub)
 
   > Mella L, Lal A, Angaroni F, Maspero D, Piazza R, Sidow A, Antoniotti M, Graudenzi A, Ramazzotti D. SparseSignatures: An R package using LASSO-regularized non-negative matrix factorization to identify mutational signatures from human tumor samples. STAR Protoc. 2022 Sep 16;3(3):101513. doi: 10.1016/j.xpro.2022.101513. Epub 2022 Jul 1. PMID: 35779264; PMCID: PMC9256827.
-
-- [SAMtools](https://pubmed.ncbi.nlm.nih.gov/19505943/)
-
-  > Li H, Handsaker B, Wysoker A, Fennell T, Ruan J, Homer N, Marth G, Abecasis G, Durbin R; 1000 Genome Project Data Processing Subgroup. The Sequence Alignment/Map format and SAMtools. Bioinformatics. 2009 Aug 15;25(16):2078-9. doi: 10.1093/bioinformatics/btp352. Epub 2009 Jun 8. PubMed PMID: 19505943; PubMed Central PMCID: PMC2723002.
 
 ## Software packaging/containerisation tools
 
