@@ -10,13 +10,53 @@
 
 ## Pipeline tools
 
-- [FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/)
+- [EnsemblVEP](https://pubmed.ncbi.nlm.nih.gov/27268795/)
 
-> Andrews, S. (2010). FastQC: A Quality Control Tool for High Throughput Sequence Data [Online].
+  > McLaren W, Gil L, Hunt SE, et al.: The Ensembl Variant Effect Predictor. Genome Biol. 2016 Jun 6;17(1):122. doi: 10.1186/s13059-016-0974-4. PubMed PMID: 27268795; PubMed Central PMCID: PMC4893825.
 
-- [MultiQC](https://pubmed.ncbi.nlm.nih.gov/27312411/)
+- [BCFTools](https://pubmed.ncbi.nlm.nih.gov/21903627/)
 
-> Ewels P, Magnusson M, Lundin S, Käller M. MultiQC: summarize analysis results for multiple tools and samples in a single report. Bioinformatics. 2016 Oct 1;32(19):3047-8. doi: 10.1093/bioinformatics/btw354. Epub 2016 Jun 16. PubMed PMID: 27312411; PubMed Central PMCID: PMC5039924.
+  > Li H: A statistical framework for SNP calling, mutation discovery, association mapping and population genetical parameter estimation from sequencing data. Bioinformatics. 2011 Nov 1;27(21):2987-93. doi: 10.1093/bioinformatics/btr509. PubMed PMID: 21903627; PubMed Central PMCID: PMC3198575.
+
+- [Tabix](https://academic.oup.com/bioinformatics/article/27/5/718/262743)
+
+  > Li H, Tabix: fast retrieval of sequence features from generic TAB-delimited files, Bioinformatics, Volume 27, Issue 5, 1 March 2011, Pages 718–719, doi: 10.1093/bioinformatics/btq671. PubMed PMID: 21208982. PubMed Central PMCID: PMC3042176.
+
+- [CNAqc](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-024-03170-5)
+
+  > Antonello, A., Bergamin, R., Calonaci, N. et al. Computational validation of clonal and subclonal copy number alterations from bulk tumor sequencing using CNAqc. Genome Biol 25, 38 (2024). https://doi.org/10.1186/s13059-024-03170-5
+
+- [TINC](https://www.nature.com/articles/s41467-023-44158-2)
+
+  > Mitchell, J., Milite, S., Bartram, J. et al. Clinical application of tumour-in-normal contamination assessment from whole genome sequencing. Nat Commun 15, 323 (2024). https://doi.org/10.1038/s41467-023-44158-2
+
+- [CTREE](https://www.nature.com/articles/s41592-018-0108-x)
+
+  > Caravagna, G., Giarratano, Y., Ramazzotti, D. et al. Detecting repeated cancer evolution from multi-region tumor sequencing data. Nat Methods 15, 707–714 (2018). https://doi.org/10.1038/s41592-018-0108-x
+
+- [mobster](https://www.nature.com/articles/s41588-020-0675-5)
+
+  > Caravagna, G., Heide, T., Williams, M.J. et al. Subclonal reconstruction of tumors by using machine learning and population genetics. Nat Genet 52, 898–907 (2020). https://doi.org/10.1038/s41588-020-0675-5
+
+- [VIBER](https://www.nature.com/articles/s41588-020-0675-5)
+
+  > Caravagna, G., Heide, T., Williams, M.J. et al. Subclonal reconstruction of tumors by using machine learning and population genetics. Nat Genet 52, 898–907 (2020). https://doi.org/10.1038/s41588-020-0675-5
+
+- [PyClone-VI](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-020-03919-2)
+
+  > Gillis, S., Roth, A. PyClone-VI: scalable inference of clonal population structures using whole genome data. BMC Bioinformatics 21, 571 (2020). https://doi.org/10.1186/s12859-020-03919-2
+
+- [SigProfiler] (https://www.sciencedirect.com/science/article/pii/S2666979X22001240?via%3Dihub)
+
+  > Islam SMA, Díaz-Gay M, Wu Y, Barnes M, Vangara R, Bergstrom EN, He Y, Vella M, Wang J, Teague JW, Clapham P, Moody S, Senkin S, Li YR, Riva L, Zhang T, Gruber AJ, Steele CD, Otlu B, Khandekar A, Abbasi A, Humphreys L, Syulyukina N, Brady SW, Alexandrov BS, Pillay N, Zhang J, Adams DJ, Martincorena I, Wedge DC, Landi MT, Brennan P, Stratton MR, Rozen SG, and Alexandrov LB (2022) Uncovering novel mutational signatures by de novo extraction with SigProfilerExtractor. Cell Genomics. doi: 10.1016/j.xgen.2022.100179.
+
+- [SparseSignatures] (https://www.sciencedirect.com/science/article/pii/S2666166722003938?via%3Dihub)
+
+  > Mella L, Lal A, Angaroni F, Maspero D, Piazza R, Sidow A, Antoniotti M, Graudenzi A, Ramazzotti D. SparseSignatures: An R package using LASSO-regularized non-negative matrix factorization to identify mutational signatures from human tumor samples. STAR Protoc. 2022 Sep 16;3(3):101513. doi: 10.1016/j.xpro.2022.101513. Epub 2022 Jul 1. PMID: 35779264; PMCID: PMC9256827.
+
+- [SAMtools](https://pubmed.ncbi.nlm.nih.gov/19505943/)
+
+  > Li H, Handsaker B, Wysoker A, Fennell T, Ruan J, Homer N, Marth G, Abecasis G, Durbin R; 1000 Genome Project Data Processing Subgroup. The Sequence Alignment/Map format and SAMtools. Bioinformatics. 2009 Aug 15;25(16):2078-9. doi: 10.1093/bioinformatics/btp352. Epub 2009 Jun 8. PubMed PMID: 19505943; PubMed Central PMCID: PMC2723002.
 
 ## Software packaging/containerisation tools
 
