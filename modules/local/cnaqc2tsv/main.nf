@@ -1,4 +1,4 @@
-process RDS_PROCESSING {
+process CNAQC2TSV {
     tag "$meta.id"
     label "process_single"
     label "error_retry"

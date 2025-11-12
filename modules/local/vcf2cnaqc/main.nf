@@ -1,4 +1,4 @@
-process VCF_PROCESSING {
+process VCF2CNAQC {
     tag "$meta.id"
     label "process_single"
     label "error_retry"
