@@ -345,7 +345,7 @@ VIBER and MOBSTER fits are already compatible for ctree analysis.
 
 ## Signature Deconvolution
 
-Mutational signatures are distinctive patterns of somatic mutations in cancer genomes that reveal the underlying mutational processes driving tumor evolution and progression. These signatures are identified by analyzing aggregated point-mutation counts from multiple samples. Validated mutations from the [join_CNAqc](#join_cnaqc) step are converted into a joint TSV table (see [cnaqc2tsv](#cnaqc2tsv)) and then input into the signature deconvolution subworkflow, which performs *de novo* extraction, inference, interpretation, or deconvolution of mutational counts.
+Mutational signatures are distinctive patterns of somatic mutations in cancer genomes that reveal the underlying mutational processes driving tumor evolution and progression. These signatures are identified by analyzing aggregated point-mutation counts from multiple samples. Validated mutations from the [join_CNAqc](#join_cnaqc) step are converted into a joint TSV table (see [cnaqc2tsv](#cnaqc2tsv)) and then input into the signature deconvolution subworkflow, which performs _de novo_ extraction, inference, interpretation, or deconvolution of mutational counts.
 
 The results of this step are collected in `{pubslish_dir}/signature_deconvolution/`. Two tools can be specified by using `--tools` parameter: [SparseSignatures](#sparsesignatures) and [SigProfiler](#sigprofiler).
 
@@ -371,7 +371,7 @@ The results of this step are collected in `{pubslish_dir}/signature_deconvolutio
 
 ### SigProfiler
 
-[SigProfiler](https://osf.io/t6j7u/wiki/home/) is a python framework that allows *de novo* extraction of mutational signatures from data generated in a matrix format. The tool identifies the number of operative mutational signatures, their activities in each sample, and the probability for each signature to cause a specific mutation type in a cancer sample. The tool makes use of `SigProfilerMatrixGenerator` and `SigProfilerExtractor`, seamlessly integrating with other `SigProfiler` tools.
+[SigProfiler](https://osf.io/t6j7u/wiki/home/) is a python framework that allows _de novo_ extraction of mutational signatures from data generated in a matrix format. The tool identifies the number of operative mutational signatures, their activities in each sample, and the probability for each signature to cause a specific mutation type in a cancer sample. The tool makes use of `SigProfilerMatrixGenerator` and `SigProfilerExtractor`, seamlessly integrating with other `SigProfiler` tools.
 
 <details markdown="1">
 <summary>Output files for all samples</summary>
