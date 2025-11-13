@@ -20,14 +20,13 @@ You will need to create a samplesheet with information about the samples you wou
 
 ### Full samplesheet
 
-The samplesheet can have as many columns as you desire, however, there is a strict requirement for the first 10 columns to
-match those defined in the table below.
+The samplesheet can have as many columns as you desire, however, there is a strict requirement for the first 10 columns to match those defined in the table below.
 
 It is recommended to use the absolute path of the files, but a relative path should also work.
 
 For the joint analysis of multiple samples, a tumour BAM/CRAM (with its corresponding BAI/CRAI) file is required for each sample, such that the number of reads of a private mutation can be retrieved for all the samples thorugh `mpileup`.
 
-Multiple samples from the same patient must be specified with the same `dataset` ID, `patient` ID, and a different `tumour_sample` ID. `normal_sample` columns is required.
+Multiple samples from the same patient must be specified with the same `dataset` ID, `patient` ID, and a different `tumour_sample` ID. `normal_sample` ID columns is required.
 
 Multiple patients from the same dataset must be specified with the same `dataset` ID, and a different `patient` ID.
 
@@ -60,11 +59,9 @@ dataset1,patient1,sample2,N1,patient1_sample2.vcf.gz,patient1_sample2.vcf.gz.tbi
 | `tumour_alignment` <br /> _Optional_       | Full path to the tumour bam/cram file.                                                                                                                                                                                  |
 | `tumour_alignment_index` <br /> _Optional_ | Full path to the tumour bam/cram index file.                                                                                                                                                                            |
 
-An [example samplesheet](../assets/samplesheet.csv) has been provided with the pipeline.
-
 ### Pipeline modalities
 
-The tumourevo pipeline supports variant annotation, driver annotation, quality control processes, subclonal deconvolution and signature deconvolution analysis through various tools. It can be used to analyse both single sample experiments and longitudinal/multi-region assays, in which multiple samples of the same patient are avaiable.
+The tumourevo pipeline supports variant annotation, driver annotation, quality control processes, subclonal deconvolution and signature deconvolution analysis through various tools. It can be used to analyse both single sample experiments and longitudinal/multi-region assays, in which multiple samples from the same patient are avaiable.
 As input, you must provide at least information on the samples, the VCF file from one of the supported callers and the output of one of the supported copy number callers. By default, if multiple samples from the same patient are provided, they will be analysed in a multivariate framework (which affects in particular the subclonal deconvolution steps) to retrieve information useful in the reconstruction of the evolutionary process. Depending on the variant calling strategy (single sample or multi sample) and the provided input files, different strategies will be applied.
 
 #### Variant calling
@@ -108,9 +105,6 @@ dataset1,patient1,sample2,N1,patient1_sample2.vcf.gz,patient1_sample2.vcf.gz.tbi
 
 If you can not include the alignment files in the input csv, the pipeline will run anyway, treating each sample as independent.
 
-<!-- You can use the `multisample` mode of tumourevo to analyse samples from multi-region and longitudinal assays. This allows you to track in space and time the existing tumour populations, and better understand its heterogeneity. This modality integrates data across multiple samples, thus improving the resolution of subclonal structures and providing insights into the evolutionary dynamics and progression of the tumour.
-Two of the avaiable tools for subclonal deconvolution, `pyclonevi` and `viber` can by-design be run in multi-sample mode, inferring the subclonal structure of samples. If you add `mobster` to the `--tool` parameter when running the pipeline in this modality, it will be run at first on each individual sample (since the tool does not support at the moment multi-sample analysis) in order to recognize neutral tail mutations and remove them. The mutations data manipulated in this way will then be processed by either `pyclone`, `viber` or both using the multivariate subclonal deconvolution as described before.  -->
-
 #### 3. Filtering data
 
 During the QC step, the pipeline will combine purity, copy number and mutation data to perform quality control on the copy number calls, by applying the [CNAqc algorithm](https://caravagnalab.github.io/CNAqc/). Each segment (for each sample) will be flagged as passing or not the QC, in the given combination of estimated purity and ploidy. According to CNAqc, a badly called segment should be recalled with a different purity estimation, in order to obtain more reliable results.
@@ -128,27 +122,25 @@ We report the different tools included in the pipeline.
 
 1. **Gene annotation**
 
-   - [EnsemblVEP]()
+   - [EnsemblVEP](https://www.ensembl.org/info/docs/tools/vep/index.html)
 
 2. **Driver annotation**
+
+   - Custom made algorithm
 
 3. **Quality control**
 
    - [TINC](https://caravagnalab.github.io/TINC/)
    - [CNAqc](https://caravagnalab.github.io/CNAqc/)
 
-  <!-- #### TINC
-
-  #### INCOMMON -->
-
-1. **Subclonal deconvolution**
+4. **Subclonal deconvolution**
 
    - [MOBSTER](https://caravagnalab.github.io/mobster/)
-   - [PyClone-VI](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-020-03919-2)
+   - [PyClone-VI](https://github.com/Roth-Lab/pyclone-vi)
    - [VIBER](https://caravagnalab.github.io/VIBER/index.html)
    - [Ctree](https://caravagnalab.github.io/ctree/)
 
-2. **Signature deconvolution**
+5. **Signature deconvolution**
 
    - [SparseSignatures](https://github.com/danro9685/SparseSignatures)
    - [SigProfiler](https://cancer.sanger.ac.uk/signatures/tools/)
@@ -168,13 +160,13 @@ nextflow run nf-core/tumourevo \
 
 `-r <VERSION>` is optional but strongly recommended for reproducibility and should match the latest version.
 
-`-profile <PROFILE>` is mandatory and should reflect either your own institutional profile or any pipeline profile specified in the [profile section](##-profile).
+`-profile <PROFILE>` is mandatory and should reflect either your own institutional profile or any pipeline profile specified in the [profile section](#-profile).
 
 This documentation imply that any `nextflow run nf-core/tumourevo` command is run with the appropriate `-r` and `-profile` commands.
 
-This will launch the pipeline and perform variant calling with the tools specified in `--tools`, see the [parameter section]([https://github.com/caravagnalab/nf-core-tumourevo/tree/dev]) for details on the available tools.
+This will launch the pipeline and perform variant calling with the tools specified in `--tools`, see the [parameter section](https://nf-co.re/tumourevo/dev/parameters/) for details on the available tools.
 
-Unless running with the `test` profile, the paths of input files must be provided within the `<INPUT CSV>` file specified in `--input`, see the [input section]([https://github.com/caravagnalab/nf-core-tumourevo/tree/dev]) for input requirements.
+Unless running with the `test` profile, the paths of input files must be provided within the `<INPUT CSV>` file specified in `--input`, see the [input section](#samplesheet-input) for input requirements.
 
 Note that the pipeline will create the following files in your working directory:
 
@@ -262,18 +254,8 @@ If `-profile` is not specified, the pipeline will run locally and expect all sof
   - A generic configuration profile to be used with [Docker](https://docker.com/)
 - `singularity`
   - A generic configuration profile to be used with [Singularity](https://sylabs.io/docs/)
-- `podman`
-  - A generic configuration profile to be used with [Podman](https://podman.io/)
-- `shifter`
-  - A generic configuration profile to be used with [Shifter](https://nersc.gitlab.io/development/shifter/how-to-use/)
-- `charliecloud`
-  - A generic configuration profile to be used with [Charliecloud](https://hpc.github.io/charliecloud/)
-- `apptainer`
-  - A generic configuration profile to be used with [Apptainer](https://apptainer.org/)
-- `wave`
-  - A generic configuration profile to enable [Wave](https://seqera.io/wave/) containers. Use together with one of the above (requires Nextflow ` 24.03.0-edge` or later).
 - `conda`
-  - A generic configuration profile to be used with [Conda](https://conda.io/docs/). Please only use Conda as a last resort i.e. when it's not possible to run the pipeline with Docker, Singularity, Podman, Shifter, Charliecloud, or Apptainer.
+  - A generic configuration profile to be used with [Conda](https://conda.io/docs/). Please only use Conda as a last resort i.e. when it's not possible to run the pipeline with Docker or Singularity.
 
 ### `-resume`
 
@@ -295,7 +277,7 @@ To change the resource requests, please see the [max resources](https://nf-co.re
 
 ### Custom Containers
 
-In some cases, you may wish to change the container or conda environment used by a pipeline steps for a particular tool. By default, nf-core pipelines use containers and software from the [biocontainers](https://biocontainers.pro/) or [bioconda](https://bioconda.github.io/) projects. However, in some cases the pipeline specified version maybe out of date.
+In some cases, you may wish to change the container or conda environment used by a pipeline steps for a particular tool. By default, nf-core pipelines use containers and software from the [seqera containers](https://seqera.io/containers/), [biocontainers](https://biocontainers.pro/) or [bioconda](https://bioconda.github.io/) projects. However, in some cases the pipeline specified version maybe out of date.
 
 To use a different container from the default container or conda environment specified in a pipeline, please see the [updating tool versions](https://nf-co.re/docs/usage/configuration#updating-tool-versions) section of the nf-core website.
 

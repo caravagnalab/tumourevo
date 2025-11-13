@@ -1,4 +1,4 @@
-process CNA_PROCESSING {
+process CNA2CNAQC {
     tag "$meta.id"
     label "process_single"
     label "error_retry"
