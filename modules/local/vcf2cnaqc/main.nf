@@ -21,4 +21,3 @@ process VCF2CNAQC {
     script:
     template "main_script.R"
 }
-

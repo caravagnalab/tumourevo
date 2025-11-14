@@ -33,4 +33,3 @@ workflow FORMATTER {
     emit:
         out
 }
-

@@ -91,4 +91,3 @@ writeLines(paste0('"', "$task.process", '"', ":"), f)
 writeLines(paste("    dplyr:", dplyr_version), f)
 writeLines(paste("    CNAqc:", cnaqc_version), f)
 close(f)
-

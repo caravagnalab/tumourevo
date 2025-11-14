@@ -121,27 +121,22 @@ Please note that the tumour types reported in the input file must correspond to 
 We report the different tools included in the pipeline.
 
 1. **Gene annotation**
-
    - [EnsemblVEP](https://www.ensembl.org/info/docs/tools/vep/index.html)
 
 2. **Driver annotation**
-
    - Custom made algorithm
 
 3. **Quality control**
-
    - [TINC](https://caravagnalab.github.io/TINC/)
    - [CNAqc](https://caravagnalab.github.io/CNAqc/)
 
 4. **Subclonal deconvolution**
-
    - [MOBSTER](https://caravagnalab.github.io/mobster/)
    - [PyClone-VI](https://github.com/Roth-Lab/pyclone-vi)
    - [VIBER](https://caravagnalab.github.io/VIBER/index.html)
    - [Ctree](https://caravagnalab.github.io/ctree/)
 
 5. **Signature deconvolution**
-
    - [SparseSignatures](https://github.com/danro9685/SparseSignatures)
    - [SigProfiler](https://cancer.sanger.ac.uk/signatures/tools/)
 
