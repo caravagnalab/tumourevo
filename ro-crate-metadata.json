@@ -44,6 +44,9 @@
                     "@id": "modules/"
                 },
                 {
+                    "@id": "modules/local/"
+                },
+                {
                     "@id": "modules/nf-core/"
                 },
                 {
@@ -121,7 +124,19 @@
         },
         {
             "@id": "main.nf",
-            "@type": ["File", "SoftwareSourceCode", "ComputationalWorkflow"],
+            "@type": [
+                "File",
+                "SoftwareSourceCode",
+                "ComputationalWorkflow"
+            ],
+            "creator": [
+                {
+                    "@id": "#valerianilucrezia11@gmail.com"
+                },
+                {
+                    "@id": "https://orcid.org/0000-0003-2721-4888"
+                }
+            ],
             "dateCreated": "",
             "dateModified": "2025-10-16T13:38:59Z",
             "dct:conformsTo": "https://bioschemas.org/profiles/ComputationalWorkflow/1.0-RELEASE/",
@@ -137,8 +152,17 @@
                 "subclonal-deconvolution",
                 "variant-annotation"
             ],
-            "license": ["MIT"],
-            "name": ["nf-core/tumourevo"],
+            "license": [
+                "MIT"
+            ],
+            "maintainer": [
+                {
+                    "@id": "https://orcid.org/0000-0003-2721-4888"
+                }
+            ],
+            "name": [
+                "nf-core/tumourevo"
+            ],
             "programmingLanguage": {
                 "@id": "https://w3id.org/workflowhub/workflow-ro-crate#nextflow"
             },
@@ -215,6 +239,11 @@
             "@id": "modules/",
             "@type": "Dataset",
             "description": "Modules used by the pipeline"
+        },
+        {
+            "@id": "modules/local/",
+            "@type": "Dataset",
+            "description": "Pipeline-specific modules"
         },
         {
             "@id": "modules/nf-core/",
@@ -301,6 +330,18 @@
             "@type": "Organization",
             "name": "nf-core",
             "url": "https://nf-co.re/"
+        },
+        {
+            "@id": "#valerianilucrezia11@gmail.com",
+            "@type": "Person",
+            "email": "valerianilucrezia11@gmail.com",
+            "name": "Lucrezia Valeriani"
+        },
+        {
+            "@id": "https://orcid.org/0000-0003-2721-4888",
+            "@type": "Person",
+            "email": "ncalonaci@thin005.hpc.rd.areasciencepark.it",
+            "name": "Nicola Calonaci"
         }
     ]
 }
