@@ -35,12 +35,11 @@ process ENSEMBLVEP_VEP {
     def prefix = task.ext.prefix ?: "${meta.id}"
     def dir_cache = cache ? "\${PWD}/${cache}" : "/.vep"
     def reference = fasta ? "--fasta ${fasta}" : ""
-    def create_index = file_extension == "vcf" ? "tabix ${args2} ${prefix}.vep.${file_extension}.gz" : ""
-
+    def create_index = file_extension == "vcf" ? "tabix ${args2} ${prefix}.${file_extension}.gz" : ""
     """
     vep \\
         -i ${vcf} \\
-        -o ${prefix}.vep.${file_extension}.gz \\
+        -o ${prefix}.${file_extension}.gz \\
         ${args} \\
         ${compress_cmd} \\
         ${reference} \\
@@ -63,9 +62,9 @@ process ENSEMBLVEP_VEP {
     stub:
     def prefix = task.ext.prefix ?: "${meta.id}"
     def file_extension = args.contains("--vcf") ? 'vcf' : args.contains("--json") ? 'json' : args.contains("--tab") ? 'tab' : 'vcf'
-    def create_index = file_extension == "vcf" ? "touch ${prefix}.vep.${file_extension}.gz.tbi" : ""
+    def create_index = file_extension == "vcf" ? "touch ${prefix}.${file_extension}.gz.tbi" : ""
     """
-    echo "" | gzip > ${prefix}.vep.${file_extension}.gz
+    echo "" | gzip > ${prefix}.${file_extension}.gz
     ${create_index}
     touch ${prefix}_summary.html
 

@@ -36,7 +36,7 @@
                     },
                     "ensemblvep/vep": {
                         "branch": "master",
-                        "git_sha": "b42fec6f7c6e5d0716685cabb825ef6bf6e386b5",
+                        "git_sha": "0567eee9276d4a358e5f9f01c810a149fbd241f8",
                         "installed_by": ["modules", "vcf_annotate_ensemblvep"],
                         "patch": "modules/nf-core/ensemblvep/vep/ensemblvep-vep.diff"
                     },
@@ -63,7 +63,7 @@
                     },
                     "tabix/tabix": {
                         "branch": "master",
-                        "git_sha": "9502adb23c0b97ed8e616bbbdfa73b4585aec9a1",
+                        "git_sha": "61846a0d757ff9c0682ba3e28ab0441afd95ad7e",
                         "installed_by": ["vcf_annotate_ensemblvep"]
                     },
                     "tinc": {
@@ -93,7 +93,7 @@
                 "nf-core": {
                     "vcf_annotate_ensemblvep": {
                         "branch": "master",
-                        "git_sha": "cfd937a668919d948f6fcbf4218e79de50c2f36f",
+                        "git_sha": "61846a0d757ff9c0682ba3e28ab0441afd95ad7e",
                         "installed_by": ["subworkflows"]
                     }
                 }
