@@ -1,4 +1,6 @@
 Changes in component 'nf-core/bcftools/view'
+'modules/nf-core/bcftools/view/environment.yml' is unchanged
+'modules/nf-core/bcftools/view/meta.yml' is unchanged
 Changes in 'bcftools/view/main.nf':
 --- modules/nf-core/bcftools/view/main.nf
 +++ modules/nf-core/bcftools/view/main.nf
@@ -43,12 +45,11 @@ Changes in 'bcftools/view/main.nf':
 +        // ${regions_file} \\
 +        // ${targets_file} \\
 +        // ${samples_file} \\
-'modules/nf-core/bcftools/view/environment.yml' is unchanged
-'modules/nf-core/bcftools/view/meta.yml' is unchanged
-'modules/nf-core/bcftools/view/tests/vcf_gz_index_csi.config' is unchanged
+
+'modules/nf-core/bcftools/view/tests/main.nf.test.snap' is unchanged
+'modules/nf-core/bcftools/view/tests/vcf_gz_index.config' is unchanged
 'modules/nf-core/bcftools/view/tests/vcf_gz_index_tbi.config' is unchanged
 'modules/nf-core/bcftools/view/tests/nextflow.config' is unchanged
-'modules/nf-core/bcftools/view/tests/vcf_gz_index.config' is unchanged
-'modules/nf-core/bcftools/view/tests/main.nf.test.snap' is unchanged
 'modules/nf-core/bcftools/view/tests/main.nf.test' is unchanged
+'modules/nf-core/bcftools/view/tests/vcf_gz_index_csi.config' is unchanged
 ************************************************************

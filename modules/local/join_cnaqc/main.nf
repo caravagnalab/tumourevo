@@ -1,5 +1,5 @@
 process JOIN_CNAQC {
-    tag "$meta.id"
+    tag "${meta.id}"
     label "process_low"
     label "error_retry"
 
