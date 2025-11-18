@@ -12,8 +12,8 @@ process CNAQC2TSV {
     tuple val(meta), path(rds_join), val(tumour_samples)
 
     output:
-    tuple val(meta), path("*_joint_table.tsv"), val(tumour_samples),    emit: tsv
-    path "versions.yml",                                                emit: versions
+    tuple val(meta), path("*_joint_table.tsv"), val(tumour_samples), emit: tsv
+    path "versions.yml",                                             emit: versions
 
     script:
     template "main_script.R"

@@ -12,15 +12,15 @@ process JOIN_CNAQC {
     tuple val(meta), path(rds_list, stageAs: '*.rds'), val(tumour_samples)
 
     output:
-    tuple val(meta), path("*ALL.rds"), val(tumour_samples),     emit: rds_all,  optional: true
-    tuple val(meta), path("*PASS.rds"), val(tumour_samples),    emit: rds_pass, optional: true
-    path "versions.yml",                                        emit: versions
+    tuple val(meta), path("*ALL.rds"), val(tumour_samples),  emit: rds_all,  optional: true
+    tuple val(meta), path("*PASS.rds"), val(tumour_samples), emit: rds_pass, optional: true
+    path "versions.yml",                                     emit: versions
 
     script:
-    def args                                = task.ext.args
-    def prefix                              = task.ext.prefix                                       ?: "${meta.id}"                                      ?: ''
-    def qc_filter                           = args!='' && args.qc_filter                            ?  "$args.qc_filter" : ""
-    def keep_original                       = args!='' && args.keep_original                        ?  "$args.keep_original" : ""
+    def args          = task.ext.args
+    def prefix        = task.ext.prefix                ?                       : "${meta.id}" ?: ""
+    def qc_filter     = args!='' && args.qc_filter     ? "$args.qc_filter"     : ""
+    def keep_original = args!='' && args.keep_original ? "$args.keep_original" : ""
 
     """
     #!/usr/bin/env Rscript
