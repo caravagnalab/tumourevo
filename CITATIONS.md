@@ -46,7 +46,7 @@
 
   > Gillis, S., Roth, A. PyClone-VI: scalable inference of clonal population structures using whole genome data. BMC Bioinformatics 21, 571 (2020). https://doi.org/10.1186/s12859-020-03919-2
 
-- [SigProfiler](https://www.sciencedirect.com/science/article/pii/S2666979X22001240?via%3Dihub)
+- [SigProfiler](https://www.sciencedirect.com/science/article/pii/S2666979X22001240)
 
   > Islam SMA, Díaz-Gay M, Wu Y, Barnes M, Vangara R, Bergstrom EN, He Y, Vella M, Wang J, Teague JW, Clapham P, Moody S, Senkin S, Li YR, Riva L, Zhang T, Gruber AJ, Steele CD, Otlu B, Khandekar A, Abbasi A, Humphreys L, Syulyukina N, Brady SW, Alexandrov BS, Pillay N, Zhang J, Adams DJ, Martincorena I, Wedge DC, Landi MT, Brennan P, Stratton MR, Rozen SG, and Alexandrov LB (2022) Uncovering novel mutational signatures by de novo extraction with SigProfilerExtractor. Cell Genomics. doi: 10.1016/j.xgen.2022.100179.
 
