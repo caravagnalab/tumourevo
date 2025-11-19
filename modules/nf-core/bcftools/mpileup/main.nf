@@ -1,11 +1,11 @@
 process BCFTOOLS_MPILEUP {
     tag "$meta.id"
-    label "process_low"
+    label 'process_medium'
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/bcftools:1.20--h8b25389_0':
-        'biocontainers/bcftools:1.20--h8b25389_0' }"
+        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/47/474a5ea8dc03366b04df884d89aeacc4f8e6d1ad92266888e7a8e7958d07cde8/data':
+        'community.wave.seqera.io/library/bcftools_htslib:0a3fa2654b52006f' }"
 
     input:
     tuple val(meta), path(bam), path(intervals)
@@ -29,16 +29,16 @@ process BCFTOOLS_MPILEUP {
     def prefix = task.ext.prefix ?: "${meta.id}"
     def mpileup = save_mpileup ? "| tee ${prefix}.mpileup" : ""
     def bgzip_mpileup = save_mpileup ? "bgzip ${prefix}.mpileup" : ""
-    def intervals = intervals ? "-T ${intervals}" : ""
+    def intervals_cmd = intervals ? "-T ${intervals}" : ""
     """
-    echo "${meta.tumour_sample}" > sample_name.list
+    echo "${meta.id}" > sample_name.list
 
     bcftools \\
         mpileup \\
         --fasta-ref $fasta \\
         $args \\
         $bam \\
-        $intervals \\
+        $intervals_cmd \\
         $mpileup \\
         | bcftools call --output-type v $args2 \\
         | bcftools reheader --samples sample_name.list \\

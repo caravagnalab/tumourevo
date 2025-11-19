@@ -9,15 +9,15 @@ process GET_POSITIONS_ALL {
         'community.wave.seqera.io/library/r-cnaqc_r-cli_r-dplyr_r-readr_pruned:0fc82bfd06afe6dc' }"
 
     input:
-    tuple val(meta), path(rds_list, stageAs: '*.rds')
+    tuple val(meta), path(rds_list, stageAs: "*.rds")
 
     output:
-    tuple val(meta), path("*_all_positions.rds"),   emit: all_pos
-    path "versions.yml",                            emit: versions
+    tuple val(meta), path("*_all_positions.rds"), emit: all_pos
+    path "versions.yml",                          emit: versions
 
     script:
-    def args    = task.ext.args     ?:  ''
-    def prefix  = task.ext.prefix   ?:  "${meta.id}"
+    def args   = task.ext.args   ?: ""
+    def prefix = task.ext.prefix ?: "${meta.id}"
 
     """
     #!/usr/bin/env Rscript
@@ -25,7 +25,9 @@ process GET_POSITIONS_ALL {
 
     positions = lapply(strsplit("$rds_list", " ")[[1]], FUN = function(rds){
         df = readRDS(rds)
-        df = df[[1]]\$mutations %>% dplyr::mutate(id = paste(chr, from, to, sep = ":")) %>% dplyr::select(chr, from, to, ref, alt, id)
+        df = df[[1]]\$mutations %>%
+          dplyr::mutate(id = paste(chr, from, to, sep = ":")) %>%
+          dplyr::select(chr, from, to, ref, alt, id)
     })
     all = positions %>% dplyr::bind_rows() %>% dplyr::distinct() %>% dplyr::select(-id)
     saveRDS(object = all, file = paste0("$prefix", "_all_positions.rds"))

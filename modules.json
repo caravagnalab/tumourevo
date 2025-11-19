@@ -7,30 +7,30 @@
                 "nf-core": {
                     "bcftools/mpileup": {
                         "branch": "master",
-                        "git_sha": "a5ba4d59c2b248c0379b0f8aeb4e7e754566cd1f",
+                        "git_sha": "e753770db613ce014b3c4bc94f6cba443427b726",
                         "installed_by": ["modules"],
                         "patch": "modules/nf-core/bcftools/mpileup/bcftools-mpileup.diff"
                     },
                     "bcftools/view": {
                         "branch": "master",
-                        "git_sha": "c9c3ef86c1892413b3c86fb38c4e39fd7288512f",
+                        "git_sha": "e753770db613ce014b3c4bc94f6cba443427b726",
                         "installed_by": ["modules"],
                         "patch": "modules/nf-core/bcftools/view/bcftools-view.diff"
                     },
                     "cnaqc": {
                         "branch": "master",
-                        "git_sha": "a124b81d9294d6715928f23eecd04651e8fb727b",
+                        "git_sha": "e753770db613ce014b3c4bc94f6cba443427b726",
                         "installed_by": ["modules"]
                     },
                     "ctree": {
                         "branch": "master",
-                        "git_sha": "74465cf3d8ef52d88a594350c990b859e2537fdc",
+                        "git_sha": "e753770db613ce014b3c4bc94f6cba443427b726",
                         "installed_by": ["modules"],
                         "patch": "modules/nf-core/ctree/ctree.diff"
                     },
                     "ensemblvep/download": {
                         "branch": "master",
-                        "git_sha": "6e3585d9ad20b41adc7d271009f8cb5e191ecab4",
+                        "git_sha": "0567eee9276d4a358e5f9f01c810a149fbd241f8",
                         "installed_by": ["modules"],
                         "patch": "modules/nf-core/ensemblvep/download/ensemblvep-download.diff"
                     },
@@ -42,22 +42,22 @@
                     },
                     "mobster": {
                         "branch": "master",
-                        "git_sha": "276f61fafb9138cc9895cab9d4c9540b716ea908",
+                        "git_sha": "e753770db613ce014b3c4bc94f6cba443427b726",
                         "installed_by": ["modules"]
                     },
                     "pyclonevi": {
                         "branch": "master",
-                        "git_sha": "3fa617bf5417c57fbd7e795acc76a33f2fe04e47",
+                        "git_sha": "e753770db613ce014b3c4bc94f6cba443427b726",
                         "installed_by": ["modules"]
                     },
                     "sigprofiler": {
                         "branch": "master",
-                        "git_sha": "865b05493d0ae0b8cd50f91311912a8716551d69",
+                        "git_sha": "e753770db613ce014b3c4bc94f6cba443427b726",
                         "installed_by": ["modules"]
                     },
                     "sparsesignatures": {
                         "branch": "master",
-                        "git_sha": "1b59feffa6a52917d2c12d8b9f1d360b9d269d82",
+                        "git_sha": "e753770db613ce014b3c4bc94f6cba443427b726",
                         "installed_by": ["modules"],
                         "patch": "modules/nf-core/sparsesignatures/sparsesignatures.diff"
                     },
@@ -68,23 +68,23 @@
                     },
                     "tinc": {
                         "branch": "master",
-                        "git_sha": "7158a18b9eccd441bcca98199ad5d03be676925e",
+                        "git_sha": "e753770db613ce014b3c4bc94f6cba443427b726",
                         "installed_by": ["modules"]
                     },
                     "untar": {
                         "branch": "master",
-                        "git_sha": "666652151335353eef2fcd58880bcef5bc2928e1",
+                        "git_sha": "00ee87ebb541af0008596400ce6d5f66d79d5408",
                         "installed_by": ["modules"]
                     },
                     "vcf2maf": {
                         "branch": "master",
-                        "git_sha": "3f5420aa22e00bd030a2556dfdffc9e164ec0ec5",
+                        "git_sha": "41dfa3f7c0ffabb96a6a813fe321c6d1cc5b6e46",
                         "installed_by": ["modules"],
                         "patch": "modules/nf-core/vcf2maf/vcf2maf.diff"
                     },
                     "viber": {
                         "branch": "master",
-                        "git_sha": "4f2e2753082eb7804aa634e795c99f4f494cd3de",
+                        "git_sha": "e753770db613ce014b3c4bc94f6cba443427b726",
                         "installed_by": ["modules"]
                     }
                 }

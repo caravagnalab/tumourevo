@@ -12,12 +12,12 @@ process ANNOTATE_DRIVER {
     tuple val(meta), path(rds), path(driver_list)
 
     output:
-    tuple val(meta), path("*.rds"),     emit: rds
-    path "versions.yml",                emit: versions
+    tuple val(meta), path("*.rds"), emit: rds
+    path "versions.yml",            emit: versions
 
     script:
-    def args    =   task.ext.args   ?: ''
-    def prefix  =   task.ext.prefix ?: "${meta.id}"
+    def args   = task.ext.args   ?: ""
+    def prefix = task.ext.prefix ?: "${meta.id}"
 
     """
     #!/usr/bin/env Rscript

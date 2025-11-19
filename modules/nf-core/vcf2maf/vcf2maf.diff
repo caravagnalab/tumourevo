@@ -11,4 +11,7 @@ Changes in 'vcf2maf/main.nf':
      label 'process_low'
  
 
+'modules/nf-core/vcf2maf/tests/main.nf.test.snap' is unchanged
+'modules/nf-core/vcf2maf/tests/nextflow.config' is unchanged
+'modules/nf-core/vcf2maf/tests/main.nf.test' is unchanged
 ************************************************************

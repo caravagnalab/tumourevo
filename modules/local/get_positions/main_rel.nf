@@ -12,12 +12,12 @@ process GET_POSITIONS_REL {
     tuple val(meta), path(rds), path(all_pos)
 
     output:
-    tuple val(meta), path("*_positions_missing"),   emit: bed
-    path "versions.yml",                            emit: versions
+    tuple val(meta), path("*_positions_missing"), emit: bed
+    path "versions.yml",                          emit: versions
 
     script:
-    def args    = task.ext.args     ?:  ''
-    def prefix  = task.ext.prefix   ?:  "${meta.id}"
+    def args   = task.ext.args   ?: ""
+    def prefix = task.ext.prefix ?: "${meta.id}"
 
     """
     #!/usr/bin/env Rscript
