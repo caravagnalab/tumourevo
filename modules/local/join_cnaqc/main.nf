@@ -1,5 +1,5 @@
 process JOIN_CNAQC {
-    tag "${meta.id}"
+    tag "$meta.id"
     label "process_low"
     label "error_retry"
 
@@ -17,11 +17,10 @@ process JOIN_CNAQC {
     path "versions.yml",                                     emit: versions
 
     script:
-    def args          = task.ext.args
-    def prefix        = task.ext.prefix                ?                       : "${meta.id}" ?: ""
-    def qc_filter     = args!='' && args.qc_filter     ? "$args.qc_filter"     : ""
-    def keep_original = args!='' && args.keep_original ? "$args.keep_original" : ""
-
+    def args = task.ext.args ?: ""
+    def prefix = task.ext.prefix ?: "$meta.id"
+    def qc_filter = args!='' && args.qc_filter ? "$args.qc_filter" : ""
+    def keep_original = args!="" && args.keep_original ? "$args.keep_original" : ""
     """
     #!/usr/bin/env Rscript
 
