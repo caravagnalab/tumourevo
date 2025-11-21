@@ -24,7 +24,7 @@
                     },
                     "ctree": {
                         "branch": "master",
-                        "git_sha": "af27af1be706e6a2bb8fe454175b0cdf77f47b49",
+                        "git_sha": "e753770db613ce014b3c4bc94f6cba443427b726",
                         "installed_by": ["modules"],
                         "patch": "modules/nf-core/ctree/ctree.diff"
                     },
@@ -91,11 +91,6 @@
             },
             "subworkflows": {
                 "nf-core": {
-                    "vcf_annotate_ensemblvep": {
-                        "branch": "master",
-                        "git_sha": "05954dab2ff481bcb999f24455da29a5828af08d",
-                        "installed_by": ["subworkflows"]
-                    },
                     "utils_nfcore_pipeline": {
                         "branch": "master",
                         "git_sha": "271e7fc14eb1320364416d996fb077421f3faed2",
@@ -103,7 +98,12 @@
                     },
                     "utils_nfschema_plugin": {
                         "branch": "master",
-                        "git_sha": "4b406a74dc0449c0401ed87d5bfff4252fd277fd",
+                        "git_sha": "e753770db613ce014b3c4bc94f6cba443427b726",
+                        "installed_by": ["subworkflows"]
+                    },
+                    "vcf_annotate_ensemblvep": {
+                        "branch": "master",
+                        "git_sha": "3612066e2850081bfc3fba1208df8efe496c32bf",
                         "installed_by": ["subworkflows"]
                     }
                 }
