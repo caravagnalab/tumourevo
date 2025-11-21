@@ -45,7 +45,6 @@ main:
                 [meta, vcf, tbi, bam, bai, cna_segs, cna_extra]
             }
 
-
     input_vcf = input.map{ meta, vcf, tbi, bam, bai, cna_segs, cna_extra  ->
             [ meta, vcf, tbi ]
             }
