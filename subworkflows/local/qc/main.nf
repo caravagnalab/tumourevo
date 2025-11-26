@@ -24,7 +24,7 @@ workflow QC {
             def sample = meta.tumour_sample
             meta = meta + [id: "${meta.dataset}_${meta.patient}"]
             [meta.subMap('dataset', 'patient', 'id'), rds, sample]}
-            | groupTuple
+            .groupTuple()
 
         JOIN_CNAQC(in_join_cnaqc)
 

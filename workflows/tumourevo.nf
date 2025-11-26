@@ -31,12 +31,12 @@ main:
     input = input_samplesheet.map{ meta, vcf, tbi, bam, bai, cna_segs, cna_extra ->
             meta = meta + [id: "${meta.dataset}_${meta.patient}_${meta.tumour_sample}"]
             [meta.dataset + meta.patient, meta, vcf, tbi, bam, bai, cna_segs, cna_extra] }
-            | groupTuple
-            | map { id, meta, vcf, tbi, bam, bai, cna_segs, cna_extra ->
+            .groupTuple()
+            .map { id, meta, vcf, tbi, bam, bai, cna_segs, cna_extra ->
                 n = vcf.baseName.unique().size()
                 [id, meta, vcf, tbi, bam, bai, cna_segs, cna_extra, n ]}
-            | transpose
-            | map { id, meta, vcf, tbi, bam, bai, cna_segs, cna_extra, n  ->
+            .transpose()
+            .map { id, meta, vcf, tbi, bam, bai, cna_segs, cna_extra, n  ->
                 if (n > 1 && bam){
                     meta = meta + [lifter:true]
                 } else {
