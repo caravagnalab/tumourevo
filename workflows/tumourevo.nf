@@ -5,6 +5,7 @@
 */
 include { BCFTOOLS_VIEW } from "${baseDir}/modules/nf-core/bcftools/view/main"
 include { VCF_ANNOTATE_ENSEMBLVEP } from "${baseDir}/subworkflows/nf-core/vcf_annotate_ensemblvep/main"
+include { ENSEMBLVEP_VEP } from "${baseDir}/modules/nf-core/ensemblvep/vep/main"
 include { FORMATTER as FORMATTER_CNA } from "${baseDir}/subworkflows/local/formatter/main"
 include { FORMATTER as FORMATTER_VCF} from "${baseDir}/subworkflows/local/formatter/main"
 include { LIFTER } from "${baseDir}/subworkflows/local/lifter/main"
@@ -66,15 +67,25 @@ main:
         vcf = input_vcf
     }
 
-    VCF_ANNOTATE_ENSEMBLVEP(vcf,
-                            fasta,
-                            params.vep_genome,
-                            params.vep_species,
-                            params.vep_cache_version,
-                            vep_cache,
-                            ch_extra_files)
+    //VCF_ANNOTATE_ENSEMBLVEP(vcf,
+    //                        fasta,
+    //                        params.vep_genome,
+    //                        params.vep_species,
+    //                        params.vep_cache_version,
+    //                        vep_cache,
+    //                        ch_extra_files)
+    ENSEMBLVEP_VEP(
+        vcf,
+        params.vep_genome,
+        params.vep_species,
+        params.vep_cache_version,
+        vep_cache,
+        fasta,
+        ch_extra_files,
+    )
+    ch_vcf_tbi = ENSEMBLVEP_VEP.out.vcf.join(ENSEMBLVEP_VEP.out.tbi, failOnDuplicate: true, failOnMismatch: true)
 
-    vcf_file = FORMATTER_VCF(VCF_ANNOTATE_ENSEMBLVEP.out.vcf_tbi, "vcf")
+    vcf_file = FORMATTER_VCF(ch_vcf_tbi, "vcf")
     cna_file = FORMATTER_CNA(input_cna, "cna")
 
     join_input = vcf_file.join(input_bam).map{ meta, rds, bam, bai ->

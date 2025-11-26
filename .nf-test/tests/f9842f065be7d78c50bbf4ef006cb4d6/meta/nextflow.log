@@ -1,0 +1,9 @@
+Nov-26 12:01:55.677 [main] DEBUG nextflow.cli.Launcher - $> nextflow -quiet -log /orfeo/cephfs/scratch/area/lvaleriani/tumourevo/.nf-test/tests/f9842f065be7d78c50bbf4ef006cb4d6/meta/nextflow.log run /orfeo/cephfs/scratch/area/lvaleriani/tumourevo/tests/../main.nf -c /orfeo/cephfs/scratch/area/lvaleriani/tumourevo/nextflow.config -c /orfeo/cephfs/scratch/area/lvaleriani/tumourevo/tests/nextflow.config -params-file /orfeo/cephfs/scratch/area/lvaleriani/tumourevo/.nf-test/tests/f9842f065be7d78c50bbf4ef006cb4d6/meta/params.json -ansi-log false -profile test -with-trace /orfeo/cephfs/scratch/area/lvaleriani/tumourevo/.nf-test/tests/f9842f065be7d78c50bbf4ef006cb4d6/meta/trace.csv -w /orfeo/cephfs/scratch/area/lvaleriani/tumourevo/.nf-test/tests/f9842f065be7d78c50bbf4ef006cb4d6/work
+Nov-26 12:01:55.789 [main] INFO  nextflow.cli.CmdRun - N E X T F L O W  ~  version 25.10.0
+Nov-26 12:01:55.884 [main] DEBUG nextflow.config.ConfigBuilder - Found config base: /orfeo/cephfs/scratch/area/lvaleriani/tumourevo/nextflow.config
+Nov-26 12:01:55.886 [main] DEBUG nextflow.config.ConfigBuilder - User config file: /orfeo/cephfs/scratch/area/lvaleriani/tumourevo/nextflow.config
+Nov-26 12:01:55.886 [main] DEBUG nextflow.config.ConfigBuilder - User config file: /orfeo/cephfs/scratch/area/lvaleriani/tumourevo/tests/nextflow.config
+Nov-26 12:01:55.887 [main] DEBUG nextflow.config.ConfigBuilder - Parsing config file: /orfeo/cephfs/scratch/area/lvaleriani/tumourevo/nextflow.config
+Nov-26 12:01:55.887 [main] DEBUG nextflow.config.ConfigBuilder - Parsing config file: /orfeo/cephfs/scratch/area/lvaleriani/tumourevo/nextflow.config
+Nov-26 12:01:55.887 [main] DEBUG nextflow.config.ConfigBuilder - Parsing config file: /orfeo/cephfs/scratch/area/lvaleriani/tumourevo/tests/nextflow.config
+Nov-26 12:01:55.965 [main] DEBUG nextflow.config.ConfigBuilder - Applying config profile: `test`

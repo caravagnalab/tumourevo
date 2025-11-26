@@ -1,0 +1,56 @@
+nextflow.enable.dsl=2
+
+singularity {
+    enabled      = true
+    envWhitelist = ['SINGULARITY_TMPDIR']
+    runOptions   = '--bind /orfeo:/orfeo --contain --workdir ${SINGULARITY_TMPDIR} --writable-tmpfs'
+    cacheDir = "/orfeo/cephfs/scratch/cdslab/shared/containers/singularity/sarek_tumourevo"
+}
+
+workflow {
+    cleanup = true
+}
+
+profiles {
+    epyc {
+        process.executor = 'slurm'
+        process.queue = 'EPYC'
+        process.resourceLimits = [ cpus: 128, memory: 512.GB, time: 100.h ]
+    }
+    genoa {
+        process.executor = 'slurm'
+        process.queue = 'GENOA'
+        process.resourceLimits = [ cpus: 64, memory: 512.GB, time: 100.h ]
+    }
+    thin {
+        process.executor = 'slurm'
+        process.queue = 'THIN'
+        process.resourceLimits = [ cpus: 24, memory: 768.GB, time: 100.h ]
+    }
+}
+
+process {
+    // Slurm executor defaults
+    clusterOptions = '--account=lade --exclude=epyc008'
+    // Default resource allocation
+    cpus          = 4
+    memory        = 10.GB
+    time          = 6.h
+    // Retry strategy
+    errorStrategy = 'retry'
+    maxRetries    = 3
+    // Prolog/Epilog scripts
+    beforeScript  = "source /orfeo/cephfs/fast/area/${USER}/prolog.sh"
+    afterScript   = "source /orfeo/cephfs/fast/area/${USER}/epilog.sh"
+}
+
+
+executor {
+    queueSize       = 40
+    submitRateLimit = '1sec'
+    pollInterval    = '1s'
+}
+
+plugins {
+    id 'nf-validation'
+}
