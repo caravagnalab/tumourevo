@@ -4,14 +4,13 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 include { BCFTOOLS_VIEW } from "${baseDir}/modules/nf-core/bcftools/view/main"
-include { VCF_ANNOTATE_ENSEMBLVEP } from "${baseDir}/subworkflows/nf-core/vcf_annotate_ensemblvep/main"
 include { ENSEMBLVEP_VEP } from "${baseDir}/modules/nf-core/ensemblvep/vep/main"
 include { FORMATTER as FORMATTER_CNA } from "${baseDir}/subworkflows/local/formatter/main"
 include { FORMATTER as FORMATTER_VCF} from "${baseDir}/subworkflows/local/formatter/main"
 include { LIFTER } from "${baseDir}/subworkflows/local/lifter/main"
-include { DRIVER_ANNOTATION } from "${baseDir}/subworkflows/local/annotate_driver/main"
+include { ANNOTATE_DRIVER } from "${baseDir}/modules/local/annotate_driver/main"
 include { FORMATTER as FORMATTER_RDS} from "${baseDir}/subworkflows/local/formatter/main"
-include { QC } from "${baseDir}/subworkflows/local/QC/main"
+include { QC } from "${baseDir}/subworkflows/local/qc/main"
 include { SUBCLONAL_DECONVOLUTION } from "${baseDir}/subworkflows/local/subclonal_deconvolution/main"
 include { SIGNATURE_DECONVOLUTION } from "${baseDir}/subworkflows/local/signature_deconvolution/main"
 /*
@@ -67,13 +66,6 @@ main:
         vcf = input_vcf
     }
 
-    //VCF_ANNOTATE_ENSEMBLVEP(vcf,
-    //                        fasta,
-    //                        params.vep_genome,
-    //                        params.vep_species,
-    //                        params.vep_cache_version,
-    //                        vep_cache,
-    //                        ch_extra_files)
     ENSEMBLVEP_VEP(
         vcf,
         params.vep_genome,
@@ -101,9 +93,9 @@ main:
             [meta, rds]
             }
     vcf_rds = rds_input.concat(out_lifter)
-    annotation = DRIVER_ANNOTATION(vcf_rds, drivers_table)
+    ANNOTATE_DRIVER(vcf_rds.combine(drivers_table))
 
-    in_cnaqc = cna_file.join(annotation)
+    in_cnaqc = cna_file.join(ANNOTATE_DRIVER.out.rds)
     QC(in_cnaqc)
 
     if (params.filter == true){

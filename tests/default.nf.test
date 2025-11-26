@@ -8,7 +8,7 @@ nextflow_pipeline {
 
         when {
             params {
-                tools = "mobster,viber,pyclone-vi,sparsesignatures,sigprofiler"
+                tools = "mobster,pyclone-vi,sigprofiler" //sparsesignatures,viber
                 outdir = "$outputDir"
             }
         }

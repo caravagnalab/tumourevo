@@ -22,7 +22,7 @@ include { TUMOUREVO } from './workflows/tumourevo'
 include { samplesheetToList } from 'plugin/nf-schema'
 
 include { ANNOTATION_CACHE_INITIALISATION  } from './subworkflows/local/annotation_cache_initialisation'
-include { DOWNLOAD_CACHE_VEP } from './subworkflows/local/download_cache_vep'
+include { ENSEMBLVEP_DOWNLOAD } from './modules/nf-core/ensemblvep/download/main'
 include { UNTAR } from './modules/nf-core/untar'
 
 /*
@@ -64,8 +64,8 @@ workflow NFCORE_TUMOUREVO {
 
     if (params.download_cache_vep) {
         ensemblvep_info = Channel.of([ [ id:"${params.vep_cache_version}_${params.vep_genome}" ], params.vep_genome, params.vep_species, params.vep_cache_version ])
-        DOWNLOAD_CACHE_VEP(ensemblvep_info)
-        vep_cache = DOWNLOAD_CACHE_VEP.out.ensemblvep_cache.map{ meta, cache -> [ cache ] }
+        ENSEMBLVEP_DOWNLOAD(ensemblvep_info)
+        vep_cache = ENSEMBLVEP_DOWNLOAD.out.cache.collect().map{ meta, cache -> [ cache ] }
 
     } else {
         if (params.vep_cache.endsWith("tar.gz")){

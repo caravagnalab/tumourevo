@@ -26,8 +26,8 @@ workflow LIFTER {
 
         all_rds = data.map{ meta, rds, bam, bai ->
             meta = meta + [id: "${meta.dataset}_${meta.patient}"]
-            [meta.subMap('dataset', 'patient', 'id', 'normal_sample'), rds]}
-            | groupTuple
+            [meta.subMap('dataset', 'patient', 'id', 'normal_sample'), rds] }
+            .groupTuple()
 
         GET_POSITIONS_ALL(all_rds)
         all_pos = GET_POSITIONS_ALL.out.all_pos.transpose().map{ meta, rds ->

@@ -4,7 +4,7 @@ include { MOBSTER } from "../../../modules/nf-core/mobster/main"
 include { VIBER } from "../../../modules/nf-core/viber/main"
 include { PYCLONEVI } from "../../../modules/nf-core/pyclonevi/main"
 include { FORMATTER } from "../../../subworkflows/local/formatter/main"
-include { CTREE as CTREE_MOBSTERh } from "../../../modules/nf-core/ctree/main"
+include { CTREE as CTREE_MOBSTER } from "../../../modules/nf-core/ctree/main"
 include { CTREE as CTREE_PYCLONEVI } from "../../../modules/nf-core/ctree/main"
 include { CTREE as CTREE_VIBER } from "../../../modules/nf-core/ctree/main"
 
@@ -28,23 +28,13 @@ workflow SUBCLONAL_DECONVOLUTION {
             [meta, rds]}
 
         MOBSTER(joinCNAqc)
-        // in_join = MOBSTERh.out.mobster_best_rds.map{ meta, rds ->
-        //     meta = meta + [id: "${meta.dataset}_${meta.patient}"]
-        //     sample = meta.tumour_sample
-        //     [meta.subMap("dataset", "patient", "id"), rds, sample]}
-        //     | groupTuple
-        // input_joint_fit = rds_join.map{meta, rds, sample-> [meta, rds]}
-        // input_joint_fit.join(in_join).view()
-        // rds_join = JOINT_FIT(input_joint_fit.join(in_join))
 
-        CTREE_MOBSTERh(MOBSTER.out.mobster_best_rds)
+        CTREE_MOBSTER(MOBSTER.out.mobster_best_rds)
 
         mobster_pdf = MOBSTER.out.mobster_report_pdf
-        ctree_mobster_pdf = CTREE_MOBSTERh.out.ctree_report_pdf
+        ctree_mobster_pdf = CTREE_MOBSTER.out.ctree_report_pdf
 
-    } // else if (params.remove_tail && !params.remove_tail.contains("never")){
-    //     error "None method for tail deconvolution specified"
-    // }
+    }
 
     if (params.tools && params.tools.split(",").contains("viber")) {
         VIBER(rds_join)
