@@ -1,28 +1,28 @@
-Nov-27 10:07:47.127 [main] INFO  com.askimed.nf.test.App - nf-test 0.9.2
-Nov-27 10:07:47.136 [main] INFO  com.askimed.nf.test.App - Arguments: [test, --verbose, true, --profile, singularity, tests/default.nf.test]
-Nov-27 10:07:47.702 [main] INFO  com.askimed.nf.test.App - Nextflow Version: 25.10.0
-Nov-27 10:07:47.702 [main] INFO  com.askimed.nf.test.commands.RunTestsCommand - Load config from file /orfeo/cephfs/scratch/area/lvaleriani/tumourevo/nf-test.config...
-Nov-27 10:07:47.991 [main] WARN  com.askimed.nf.test.nextflow.NextflowScript - Module /orfeo/cephfs/scratch/area/lvaleriani/tumourevo/workflows/tumourevo.nf: Dependency '/orfeo/cephfs/scratch/area/lvaleriani/tumourevo/${baseDir}/modules/nf-core/bcftools/view/main.nf' not found.
-Nov-27 10:07:47.991 [main] WARN  com.askimed.nf.test.nextflow.NextflowScript - Module /orfeo/cephfs/scratch/area/lvaleriani/tumourevo/workflows/tumourevo.nf: Dependency '/orfeo/cephfs/scratch/area/lvaleriani/tumourevo/${baseDir}/modules/nf-core/ensemblvep/vep/main.nf' not found.
-Nov-27 10:07:47.991 [main] WARN  com.askimed.nf.test.nextflow.NextflowScript - Module /orfeo/cephfs/scratch/area/lvaleriani/tumourevo/workflows/tumourevo.nf: Dependency '/orfeo/cephfs/scratch/area/lvaleriani/tumourevo/${baseDir}/subworkflows/local/formatter/main.nf' not found.
-Nov-27 10:07:47.991 [main] WARN  com.askimed.nf.test.nextflow.NextflowScript - Module /orfeo/cephfs/scratch/area/lvaleriani/tumourevo/workflows/tumourevo.nf: Dependency '/orfeo/cephfs/scratch/area/lvaleriani/tumourevo/${baseDir}/subworkflows/local/formatter/main.nf' not found.
-Nov-27 10:07:47.991 [main] WARN  com.askimed.nf.test.nextflow.NextflowScript - Module /orfeo/cephfs/scratch/area/lvaleriani/tumourevo/workflows/tumourevo.nf: Dependency '/orfeo/cephfs/scratch/area/lvaleriani/tumourevo/${baseDir}/subworkflows/local/lifter/main.nf' not found.
-Nov-27 10:07:47.991 [main] WARN  com.askimed.nf.test.nextflow.NextflowScript - Module /orfeo/cephfs/scratch/area/lvaleriani/tumourevo/workflows/tumourevo.nf: Dependency '/orfeo/cephfs/scratch/area/lvaleriani/tumourevo/${baseDir}/modules/local/annotate_driver/main.nf' not found.
-Nov-27 10:07:47.991 [main] WARN  com.askimed.nf.test.nextflow.NextflowScript - Module /orfeo/cephfs/scratch/area/lvaleriani/tumourevo/workflows/tumourevo.nf: Dependency '/orfeo/cephfs/scratch/area/lvaleriani/tumourevo/${baseDir}/subworkflows/local/formatter/main.nf' not found.
-Nov-27 10:07:47.991 [main] WARN  com.askimed.nf.test.nextflow.NextflowScript - Module /orfeo/cephfs/scratch/area/lvaleriani/tumourevo/workflows/tumourevo.nf: Dependency '/orfeo/cephfs/scratch/area/lvaleriani/tumourevo/${baseDir}/subworkflows/local/qc/main.nf' not found.
-Nov-27 10:07:47.991 [main] WARN  com.askimed.nf.test.nextflow.NextflowScript - Module /orfeo/cephfs/scratch/area/lvaleriani/tumourevo/workflows/tumourevo.nf: Dependency '/orfeo/cephfs/scratch/area/lvaleriani/tumourevo/${baseDir}/subworkflows/local/subclonal_deconvolution/main.nf' not found.
-Nov-27 10:07:47.992 [main] WARN  com.askimed.nf.test.nextflow.NextflowScript - Module /orfeo/cephfs/scratch/area/lvaleriani/tumourevo/workflows/tumourevo.nf: Dependency '/orfeo/cephfs/scratch/area/lvaleriani/tumourevo/${baseDir}/subworkflows/local/signature_deconvolution/main.nf' not found.
-Nov-27 10:07:48.026 [main] INFO  com.askimed.nf.test.lang.dependencies.DependencyResolver - Loaded 35 files from directory /orfeo/cephfs/scratch/area/lvaleriani/tumourevo in 0.071 sec
-Nov-27 10:07:48.027 [main] INFO  com.askimed.nf.test.lang.dependencies.DependencyResolver - Found 1 files containing tests.
-Nov-27 10:07:48.027 [main] DEBUG com.askimed.nf.test.lang.dependencies.DependencyResolver - Found files: [/orfeo/cephfs/scratch/area/lvaleriani/tumourevo/tests/default.nf.test]
-Nov-27 10:07:48.136 [main] INFO  com.askimed.nf.test.commands.RunTestsCommand - Found 1 tests to execute.
-Nov-27 10:07:48.136 [main] INFO  com.askimed.nf.test.core.TestExecutionEngine - Started test plan
-Nov-27 10:07:48.136 [main] INFO  com.askimed.nf.test.core.TestExecutionEngine - Running testsuite 'Test pipeline' from file '/orfeo/cephfs/scratch/area/lvaleriani/tumourevo/tests/default.nf.test'.
-Nov-27 10:07:48.136 [main] INFO  com.askimed.nf.test.core.TestExecutionEngine - Run test 'f9842f06: test-dataset_full'. type: com.askimed.nf.test.lang.pipeline.PipelineTest
-Nov-27 10:15:35.413 [main] DEBUG com.askimed.nf.test.lang.extensions.SnapshotFile - Init new snapshot file '/orfeo/cephfs/scratch/area/lvaleriani/tumourevo/tests/default.nf.test.snap'
-Nov-27 10:15:35.415 [main] DEBUG com.askimed.nf.test.lang.extensions.Snapshot - Snapshot 'test-dataset_full' not found.
-Nov-27 10:15:35.415 [main] DEBUG com.askimed.nf.test.lang.extensions.SnapshotFile - Created snapshot 'test-dataset_full'
-Nov-27 10:15:39.851 [main] DEBUG com.askimed.nf.test.lang.extensions.SnapshotFile - Wrote snapshots to file '/orfeo/cephfs/scratch/area/lvaleriani/tumourevo/tests/default.nf.test.snap'
-Nov-27 10:15:39.852 [main] INFO  com.askimed.nf.test.core.TestExecutionEngine - Test 'f9842f06: test-dataset_full' finished. status: PASSED
-Nov-27 10:15:39.854 [main] INFO  com.askimed.nf.test.core.TestExecutionEngine - Testsuite 'Test pipeline' finished. snapshot file: true, skipped tests: false, failed tests: false
-Nov-27 10:15:39.856 [main] INFO  com.askimed.nf.test.core.TestExecutionEngine - Executed 1 tests. 0 tests failed. Done!
+Nov-27 14:27:39.162 [main] INFO  com.askimed.nf.test.App - nf-test 0.9.2
+Nov-27 14:27:39.171 [main] INFO  com.askimed.nf.test.App - Arguments: [test, --verbose, true, --profile, singularity, tests/default.nf.test]
+Nov-27 14:27:39.761 [main] INFO  com.askimed.nf.test.App - Nextflow Version: 25.10.0
+Nov-27 14:27:39.762 [main] INFO  com.askimed.nf.test.commands.RunTestsCommand - Load config from file /orfeo/cephfs/scratch/area/lvaleriani/tumourevo/nf-test.config...
+Nov-27 14:27:40.091 [main] WARN  com.askimed.nf.test.nextflow.NextflowScript - Module /orfeo/cephfs/scratch/area/lvaleriani/tumourevo/workflows/tumourevo.nf: Dependency '/orfeo/cephfs/scratch/area/lvaleriani/tumourevo/${baseDir}/modules/nf-core/bcftools/view/main.nf' not found.
+Nov-27 14:27:40.091 [main] WARN  com.askimed.nf.test.nextflow.NextflowScript - Module /orfeo/cephfs/scratch/area/lvaleriani/tumourevo/workflows/tumourevo.nf: Dependency '/orfeo/cephfs/scratch/area/lvaleriani/tumourevo/${baseDir}/modules/nf-core/ensemblvep/vep/main.nf' not found.
+Nov-27 14:27:40.091 [main] WARN  com.askimed.nf.test.nextflow.NextflowScript - Module /orfeo/cephfs/scratch/area/lvaleriani/tumourevo/workflows/tumourevo.nf: Dependency '/orfeo/cephfs/scratch/area/lvaleriani/tumourevo/${baseDir}/subworkflows/local/formatter/main.nf' not found.
+Nov-27 14:27:40.091 [main] WARN  com.askimed.nf.test.nextflow.NextflowScript - Module /orfeo/cephfs/scratch/area/lvaleriani/tumourevo/workflows/tumourevo.nf: Dependency '/orfeo/cephfs/scratch/area/lvaleriani/tumourevo/${baseDir}/subworkflows/local/formatter/main.nf' not found.
+Nov-27 14:27:40.091 [main] WARN  com.askimed.nf.test.nextflow.NextflowScript - Module /orfeo/cephfs/scratch/area/lvaleriani/tumourevo/workflows/tumourevo.nf: Dependency '/orfeo/cephfs/scratch/area/lvaleriani/tumourevo/${baseDir}/subworkflows/local/lifter/main.nf' not found.
+Nov-27 14:27:40.091 [main] WARN  com.askimed.nf.test.nextflow.NextflowScript - Module /orfeo/cephfs/scratch/area/lvaleriani/tumourevo/workflows/tumourevo.nf: Dependency '/orfeo/cephfs/scratch/area/lvaleriani/tumourevo/${baseDir}/modules/local/annotate_driver/main.nf' not found.
+Nov-27 14:27:40.091 [main] WARN  com.askimed.nf.test.nextflow.NextflowScript - Module /orfeo/cephfs/scratch/area/lvaleriani/tumourevo/workflows/tumourevo.nf: Dependency '/orfeo/cephfs/scratch/area/lvaleriani/tumourevo/${baseDir}/subworkflows/local/formatter/main.nf' not found.
+Nov-27 14:27:40.091 [main] WARN  com.askimed.nf.test.nextflow.NextflowScript - Module /orfeo/cephfs/scratch/area/lvaleriani/tumourevo/workflows/tumourevo.nf: Dependency '/orfeo/cephfs/scratch/area/lvaleriani/tumourevo/${baseDir}/subworkflows/local/qc/main.nf' not found.
+Nov-27 14:27:40.091 [main] WARN  com.askimed.nf.test.nextflow.NextflowScript - Module /orfeo/cephfs/scratch/area/lvaleriani/tumourevo/workflows/tumourevo.nf: Dependency '/orfeo/cephfs/scratch/area/lvaleriani/tumourevo/${baseDir}/subworkflows/local/subclonal_deconvolution/main.nf' not found.
+Nov-27 14:27:40.091 [main] WARN  com.askimed.nf.test.nextflow.NextflowScript - Module /orfeo/cephfs/scratch/area/lvaleriani/tumourevo/workflows/tumourevo.nf: Dependency '/orfeo/cephfs/scratch/area/lvaleriani/tumourevo/${baseDir}/subworkflows/local/signature_deconvolution/main.nf' not found.
+Nov-27 14:27:40.170 [main] INFO  com.askimed.nf.test.lang.dependencies.DependencyResolver - Loaded 35 files from directory /orfeo/cephfs/scratch/area/lvaleriani/tumourevo in 0.137 sec
+Nov-27 14:27:40.171 [main] INFO  com.askimed.nf.test.lang.dependencies.DependencyResolver - Found 1 files containing tests.
+Nov-27 14:27:40.171 [main] DEBUG com.askimed.nf.test.lang.dependencies.DependencyResolver - Found files: [/orfeo/cephfs/scratch/area/lvaleriani/tumourevo/tests/default.nf.test]
+Nov-27 14:27:40.277 [main] INFO  com.askimed.nf.test.commands.RunTestsCommand - Found 1 tests to execute.
+Nov-27 14:27:40.277 [main] INFO  com.askimed.nf.test.core.TestExecutionEngine - Started test plan
+Nov-27 14:27:40.277 [main] INFO  com.askimed.nf.test.core.TestExecutionEngine - Running testsuite 'Test pipeline' from file '/orfeo/cephfs/scratch/area/lvaleriani/tumourevo/tests/default.nf.test'.
+Nov-27 14:27:40.277 [main] INFO  com.askimed.nf.test.core.TestExecutionEngine - Run test 'f9842f06: test-dataset_full'. type: com.askimed.nf.test.lang.pipeline.PipelineTest
+Nov-27 14:34:02.972 [main] DEBUG com.askimed.nf.test.lang.extensions.SnapshotFile - Init new snapshot file '/orfeo/cephfs/scratch/area/lvaleriani/tumourevo/tests/default.nf.test.snap'
+Nov-27 14:34:02.974 [main] DEBUG com.askimed.nf.test.lang.extensions.Snapshot - Snapshot 'test-dataset_full' not found.
+Nov-27 14:34:02.974 [main] DEBUG com.askimed.nf.test.lang.extensions.SnapshotFile - Created snapshot 'test-dataset_full'
+Nov-27 14:34:07.321 [main] DEBUG com.askimed.nf.test.lang.extensions.SnapshotFile - Wrote snapshots to file '/orfeo/cephfs/scratch/area/lvaleriani/tumourevo/tests/default.nf.test.snap'
+Nov-27 14:34:07.322 [main] INFO  com.askimed.nf.test.core.TestExecutionEngine - Test 'f9842f06: test-dataset_full' finished. status: PASSED
+Nov-27 14:34:07.324 [main] INFO  com.askimed.nf.test.core.TestExecutionEngine - Testsuite 'Test pipeline' finished. snapshot file: true, skipped tests: false, failed tests: false
+Nov-27 14:34:07.326 [main] INFO  com.askimed.nf.test.core.TestExecutionEngine - Executed 1 tests. 0 tests failed. Done!
