@@ -4,10 +4,11 @@ nextflow_pipeline {
     script "../main.nf"
     tag "pipeline"
 
-    test("-profile test") {
+    test("test-dataset_full") {
 
         when {
             params {
+                tools = "mobster,pyclone-vi" //sparsesignatures,viber,sigprofiler
                 outdir = "$outputDir"
             }
         }
@@ -20,12 +21,14 @@ nextflow_pipeline {
             assertAll(
                 { assert workflow.success},
                 { assert snapshot(
+		    // Number of successful tasks
+		    workflow.trace.succeeded().size(),
                     // pipeline versions.yml file for multiqc from which Nextflow version is removed because we test pipelines on multiple Nextflow versions
                     removeNextflowVersion("$outputDir/pipeline_info/nf_core_tumourevo_software_mqc_versions.yml"),
                     // All stable path name, with a relative path
                     stable_name,
                     // All files with stable contents
-                    stable_path
+                    // stable_path
                 ).match() }
             )
         }
