@@ -9,7 +9,7 @@ process JOIN_CNAQC {
         'biocontainers/r-cnaqc:1.1.2--r44hdfd78af_0' }"
 
     input:
-    tuple val(meta), path(rds_list, stageAs: '*.rds'), val(tumour_samples)
+    tuple val(meta), path(rds_list, stageAs: 'input*.rds'), val(tumour_samples)
 
     output:
     tuple val(meta), path("*ALL.rds"), val(tumour_samples),  emit: rds_all,  optional: true
