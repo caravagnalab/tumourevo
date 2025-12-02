@@ -27,7 +27,7 @@ workflow SIGNATURE_DECONVOLUTION {
         input_sparsesig = FORMATTER_RDS_SPARSESIGNATURES.out.map { meta, tsv, sample ->
             meta = meta + [id: "${meta.dataset}"]
             [meta.subMap('dataset', 'id'), tsv] }
-            | groupTuple
+            .groupTuple()
 
         SPARSE_SIGNATURES(input_sparsesig, params.genome) // run SparseSignatures
 
@@ -52,7 +52,7 @@ workflow SIGNATURE_DECONVOLUTION {
         input_sigprofiler = FORMATTER_RDS_SIGPROFILER.out.map { meta, tsv, sample ->
             meta = meta + [id: "${meta.dataset}"]
             [meta.subMap('dataset', 'id'), tsv]}
-            | groupTuple
+            .groupTuple()
 
         SIGPROFILER(input_sigprofiler, params.genome, genome_path)
         sigprofiler_out = SIGPROFILER.out.results_sigprofiler

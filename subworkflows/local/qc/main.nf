@@ -13,18 +13,7 @@ workflow QC {
 
     main:
         TINC(input)
-        // contamination = TINC.out.tinc_csv
-        //     .splitCsv( header: true )
-        //     .map{ meta, csv ->
-        //     meta = meta + [id: "${meta.dataset}_${meta.patient}"]
-        //     normal_contamination = csv.normal_contamination_flag
-        //     [meta.subMap('dataset', 'patient', 'id'), normal_contamination ]}
-        //     .unique()
-        //     | groupTuple
-        //     | map{ meta, normal_contamination ->
-        //         normal_contamination = normal_contamination.max()
-        //         [ meta, normal_contamination]
-        //     }
+
         input_cnaqc = input.map{meta, cna, snv ->
                 def sample =  meta.tumour_sample
                 [meta, snv, cna, sample]
@@ -35,15 +24,8 @@ workflow QC {
             def sample = meta.tumour_sample
             meta = meta + [id: "${meta.dataset}_${meta.patient}"]
             [meta.subMap('dataset', 'patient', 'id'), rds, sample]}
-            | groupTuple
+            .groupTuple()
 
-        // out_tinc = in_join_cnaqc.map{  meta, rds, sample, normal_contamination ->
-        //    meta = meta + [nc: normal_contamination]
-        //        [meta, rds, sample] }
-        //        .branch { meta, rds, sample ->
-        //                pass: meta.nc == '0'
-        //                not_pass: meta.nc == '1'
-        //        }
         JOIN_CNAQC(in_join_cnaqc)
 
     emit:

@@ -56,14 +56,14 @@ process ANNOTATE_DRIVER {
             is_driver = (TUMOUR_TYPE != "" & SYMBOL != "" & IMPACT %in% c('MODERATE', 'HIGH')),
             driver_label = paste0(SYMBOL, tmp_s2)
         ) %>%
-        select(-tmp_s2) %>%
-        mutate(is_driver = ifelse(is.na(is_driver), FALSE, is_driver))
+        dplyr::select(-tmp_s2) %>%
+        dplyr::mutate(is_driver = ifelse(is.na(is_driver), FALSE, is_driver))
 
     filter_x = x %>%
-        distinct(chr, from, to, ref,  alt,  IMPACT, SYMBOL, Gene, is_driver, driver_label, .keep_all = T) %>%
-        mutate(priority = ifelse(is_driver == TRUE, 1, 0)) %>%
-        arrange(chr, from, to, desc(priority)) %>%
-        distinct(chr, from, to, .keep_all = TRUE)
+        dplyr::distinct(chr, from, to, ref,  alt,  IMPACT, SYMBOL, Gene, is_driver, driver_label, .keep_all = T) %>%
+        dplyr::mutate(priority = ifelse(is_driver == TRUE, 1, 0)) %>%
+        dplyr::arrange(chr, from, to, desc(priority)) %>%
+        dplyr::distinct(chr, from, to, .keep_all = TRUE)
 
     data[["$meta.tumour_sample"]]\$mutations = filter_x
     saveRDS(object = data, file = paste0("$prefix", "_driver.rds"))

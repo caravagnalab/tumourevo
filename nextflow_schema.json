@@ -198,21 +198,10 @@
                     "default": "1:1",
                     "description": "For subclonal simple CNAs, the starting state to determine linear versus branching evolutionary models."
                 },
-                "cnaqc_cluster_subclonal_CCF": {
-                    "type": "string",
-                    "default": "FALSE",
-                    "description": "For subclonal simple CNAs, the starting state to determine linear versus branching evolutionary models."
-                },
                 "cnaqc_muts_per_karyotype": {
                     "type": "integer",
                     "default": 25,
                     "description": "Minimum number of mutations that are required to be mapped to a karyotype in order to compute CCF values (default 25)."
-                },
-                "cnaqc_cutoff_QC_PASS": {
-                    "type": "number",
-                    "default": 0.1,
-                    "description": "For the entropy-based method, percentage of mutations that can be not-assigned (NA) in a karyotype.",
-                    "help_text": " If the karyotype has more than cutoff_QC_PASS percentage of non-assigned mutations, then the overall set of CCFs is failed for the karyotype."
                 },
                 "cnaqc_method": {
                     "type": "string",
@@ -284,11 +273,6 @@
             "description": "",
             "default": "",
             "properties": {
-                "mobster_K": {
-                    "type": "string",
-                    "default": "1:5",
-                    "description": "A vector with the number of Beta components to use. All values of K must be positive and strictly greater than 0."
-                },
                 "mobster_tail": {
                     "type": "string",
                     "default": "TRUE",
@@ -313,11 +297,6 @@
             "description": "",
             "default": "",
             "properties": {
-                "viber_K": {
-                    "type": "integer",
-                    "default": 10,
-                    "description": "The maximum number of clusters returned"
-                },
                 "viber_samples": {
                     "type": "integer",
                     "default": 10,
@@ -337,11 +316,6 @@
                     "type": "integer",
                     "default": 1,
                     "description": "The prior Beta hyperparameter for each Binomial component b"
-                },
-                "viber_maxIter": {
-                    "type": "integer",
-                    "default": 5000,
-                    "description": "The maximum number of fit iterations"
                 },
                 "viber_epsilon_conv": {
                     "type": "number",
@@ -388,11 +362,6 @@
             "description": "",
             "default": "",
             "properties": {
-                "sparsesignatures_K": {
-                    "type": "string",
-                    "default": "2:10",
-                    "description": "The number of signatures (min. value = 2) to be fit to the dataset, including the background signature."
-                },
                 "sparsesignatures_iterations": {
                     "type": "integer",
                     "default": 30,
@@ -681,9 +650,33 @@
         }
     ],
     "properties": {
-        "mobster_min_VAF": {
+        "cnaqc_cluster_subclonal_ccf": {
+            "type": "string",
+            "default": "FALSE"
+        },
+        "cnaqc_cutoff_qc_pass": {
+            "type": "number",
+            "default": 0.1
+        },
+        "mobster_k": {
+            "type": "string",
+            "default": "1:5"
+        },
+        "mobster_min_vaf": {
             "type": "number",
             "default": 0.05
+        },
+        "viber_k": {
+            "type": "integer",
+            "default": 10
+        },
+        "viber_max_iter": {
+            "type": "integer",
+            "default": 5000
+        },
+        "sparsesignatures_k": {
+            "type": "string",
+            "default": "2:10"
         }
     }
 }
