@@ -170,10 +170,10 @@ retrieve_ref_alt = function(row){
 }
 
 parse_Strelka = function(vcf, tumour_id, normal_id){
-    
+
     tb = vcfR::vcfR2tidy(vcf)
     # Strelka tumour_id and normal_id is TUMOR and NORMAL, change to tumour_id/normal_id
-    gt_field = tb[["gt"]] %>% 
+    gt_field = tb[["gt"]] %>%
         dplyr::mutate(sample = ifelse(Indiv=="TUMOR", tumour_id, normal_id)) %>%
         dplyr::select(-Indiv)
 
