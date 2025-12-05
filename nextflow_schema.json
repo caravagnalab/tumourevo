@@ -479,6 +479,11 @@
                     "type": "integer",
                     "default": 10000,
                     "description": "Value defines the number number of iterations to done between checking next convergence ."
+                },
+                "sigprofiler_seeds": {
+                    "type": "string",
+                    "default": "random",
+                    "description": "Value defines the seed ensuring reproducible NMF replicate resamples."
                 }
             },
             "fa_icon": "fas fa-briefcase"
