@@ -203,7 +203,7 @@ The QC subworkflow is a crucial step of the pipeline as it ensures high confiden
 
 ### TINC
 
-[TINC](https://caravagnalab.github.io/TINC/index.html) is a package to calculate the contamination of tumor DNA in a matched normal sample. TINC provides estimates of the proportion of cancer cells containing the normal sample (TIN), and the proportion of cancer cells in the tumor sample (TIT).
+[TINC](https://caravagnalab.github.io/TINC/index.html) is a package to calculate the contamination of tumor DNA in a matched normal sample. TINC provides a methods to determine, for every matched pair of normal and tumour sample biopsies, the proportion of cancer cells, or tumour read fractions, contaminating the normal sample (Tumour in Normal, TIN). Similarly, it determines the proportion of cancer cells in the tumour sample (Tumour in Tumour, TIT), also called tumour purity.
 
 <details markdown="1">
 <summary>Output files for all samples</summary>
