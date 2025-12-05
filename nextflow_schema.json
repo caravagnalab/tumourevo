@@ -2,7 +2,7 @@
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "https://raw.githubusercontent.com/nf-core/tumourevo/master/nextflow_schema.json",
     "title": "nf-core/tumourevo pipeline parameters",
-    "description": "Analysis pipleine to model tumour clonal evolution from WGS data (driver annotation, quality control of copy number calls, subclonal and mutational signature deconvolution)",
+    "description": "Analysis pipeline to model tumour clonal evolution from WGS data (driver annotation, quality control of copy number calls, subclonal and mutational signature deconvolution)",
     "type": "object",
     "$defs": {
         "input_output_options": {
@@ -10,7 +10,7 @@
             "type": "object",
             "fa_icon": "fas fa-terminal",
             "description": "Define where the pipeline should find input data and save output data.",
-            "required": ["input", "outdir"],
+            "required": ["outdir", "input"],
             "properties": {
                 "input": {
                     "type": "string",
@@ -144,6 +144,14 @@
                     "description": "For clonal simple CNAs, a filter for the segments to test.",
                     "help_text": "The segment size is defined based on the number of mutations mapped, this cut is on the proportion relative to the whole set of segments one wishes to analyse (defined by `karyotypes`). For example, by setting `min_karyotype_size = 0.2` one would QC clonal simple CNAs that contain at least 20 The default of this parameter is `0` (all QCed)."
                 },
+                "cnaqc_cluster_subclonal_ccf": {
+                    "type": "string",
+                    "default": "FALSE"
+                },
+                "cnaqc_cutoff_qc_pass": {
+                    "type": "number",
+                    "default": 0.1
+                },
                 "cnaqc_min_absolute_karyotype_mutations": {
                     "type": "integer",
                     "default": 100,
@@ -155,11 +163,6 @@
                     "default": 0.005,
                     "description": "For clonal simple CNAs, peaks detected will be filtered if, in a peak, we map less than p_binsize_peaks * N mutations.",
                     "help_text": "The value N is obtained couting all mutations that map in all peaks. By default this parameters is `0.005`."
-                },
-                "cnaqc_matching_epsilon": {
-                    "type": "string",
-                    "default": "NULL",
-                    "description": "Deprecated parameter."
                 },
                 "cnaqc_purity_error": {
                     "type": "number",
@@ -187,11 +190,6 @@
                     "type": "string",
                     "default": "rightmost",
                     "description": "For clonal simple CNAs, if \"closest\" the closest peak will be used to match the expected peak. If \"rightmost\" peaks are matched prioritizing right to left peaks (the higher-VAF gets matched first); this strategy is more correct in principle but works only if there are no spurious peaks in the estimated density."
-                },
-                "cnaqc_kde": {
-                    "type": "string",
-                    "default": "TRUE",
-                    "description": "Deprecated parameter."
                 },
                 "cnaqc_starting_state_subclonal_evolution": {
                     "type": "string",
@@ -283,6 +281,14 @@
                     "default": 0.02,
                     "description": "The minimum mixing proportion of a cluster to be returned as output."
                 },
+                "mobster_k": {
+                    "type": "string",
+                    "default": "1:5"
+                },
+                "mobster_min_vaf": {
+                    "type": "number",
+                    "default": 0.05
+                },
                 "mobster_n_cutoff": {
                     "type": "integer",
                     "default": 10,
@@ -307,6 +313,14 @@
                     "default": 1e-6,
                     "description": "The concentration parameter of the Dirichlet mixture."
                 },
+                "viber_k": {
+                    "type": "integer",
+                    "default": 10
+                },
+                "viber_max_iter": {
+                    "type": "integer",
+                    "default": 5000
+                },
                 "viber_a_0": {
                     "type": "integer",
                     "default": 1,
@@ -326,7 +340,7 @@
                     "type": "string",
                     "default": "prior",
                     "description": "Initialization of the q-distribution to compute the approximation of the posterior distributions.",
-                    "help_text": "This can be set in three different waysL equal to the prior (q_init = 'prior'), via kmeans clustering (q_init = 'kmeans') and capturing points which are private to each dimension (q_init = 'private')."
+                    "help_text": "This can be set in three different ways: equal to the prior, via kmeans clustering and capturing points which are private to each dimension."
                 },
                 "viber_trace": {
                     "type": "string",
@@ -346,7 +360,7 @@
                 "viber_re_assign": {
                     "type": "string",
                     "default": "FALSE",
-                    "description": "Boolean value whether point assigned to a cluster that is filtered our, are re-assigned from the density function."
+                    "description": "Boolean value whether points assigned to a cluster that is filtered our, are re-assigned from the density function."
                 },
                 "viber_dimensions_cutoff": {
                     "type": "integer",
@@ -366,6 +380,10 @@
                     "type": "integer",
                     "default": 30,
                     "description": "The number of iterations of every single run of NMF LASSO."
+                },
+                "sparsesignatures_k": {
+                    "type": "string",
+                    "default": "2:10"
                 },
                 "sparsesignatures_nmf_runs": {
                     "type": "integer",
@@ -463,27 +481,27 @@
                 "sigprofiler_nmf_replicates": {
                     "type": "integer",
                     "default": 100,
-                    "description": "The number of iteration to be performed to extract each number signature."
+                    "description": "The number of iterations to be performed to extract each number signature."
                 },
                 "sigprofiler_min_nmf_iterations": {
                     "type": "integer",
                     "default": 10000,
-                    "description": "Value defines the minimum number of iterations to be completed before NMF converges."
+                    "description": "The minimum number of iterations to be completed before NMF converges."
                 },
                 "sigprofiler_max_nmf_iterations": {
                     "type": "integer",
                     "default": 1000000,
-                    "description": "Value defines the maximum number of iterations to be completed before NMF converges ."
+                    "description": "The maximum number of iterations to be completed before NMF converges ."
                 },
                 "sigprofiler_nmf_test_conv": {
                     "type": "integer",
                     "default": 10000,
-                    "description": "Value defines the number number of iterations to done between checking next convergence ."
+                    "description": "The number number of iterations to done between checking next convergence ."
                 },
                 "sigprofiler_seeds": {
                     "type": "string",
                     "default": "random",
-                    "description": "Value defines the seed ensuring reproducible NMF replicate resamples."
+                    "description": "The seed ensuring reproducible NMF replicate resamples."
                 }
             },
             "fa_icon": "fas fa-briefcase"
@@ -653,35 +671,5 @@
         {
             "$ref": "#/$defs/other"
         }
-    ],
-    "properties": {
-        "cnaqc_cluster_subclonal_ccf": {
-            "type": "string",
-            "default": "FALSE"
-        },
-        "cnaqc_cutoff_qc_pass": {
-            "type": "number",
-            "default": 0.1
-        },
-        "mobster_k": {
-            "type": "string",
-            "default": "1:5"
-        },
-        "mobster_min_vaf": {
-            "type": "number",
-            "default": 0.05
-        },
-        "viber_k": {
-            "type": "integer",
-            "default": 10
-        },
-        "viber_max_iter": {
-            "type": "integer",
-            "default": 5000
-        },
-        "sparsesignatures_k": {
-            "type": "string",
-            "default": "2:10"
-        }
-    }
+    ]
 }
