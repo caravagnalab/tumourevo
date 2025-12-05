@@ -42,17 +42,17 @@ The default directory structure is as follows:
 │       └── <patient>
 │   └── positions
 │       └── <sample>
-├── QC
+├── qc
 │   ├── tinc
 │       └── <sample>
-│   ├── CNAqc
+│   ├── cnaqc
 │       └── <sample>
-│   └── join_CNAqc
+│   └── join_cnaqc
 │       └── <patient>
 ├── signature_deconvolution
-|   ├── SigProfiler
+|   ├── sigprofiler
 │       └── <dataset>
-|   └── SparseSignatures
+|   └── sparsesignatures
 │       └── <dataset>
 └── subclonal_deconvolution
 |   ├── mobster
