@@ -31,8 +31,13 @@ process JOIN_POSITIONS {
     mutations = vcf[["$meta.tumour_sample"]]\$mutations
 
     pileup = vcfR::read.vcfR("$vcf_pileup")
-    tb = vcfR::vcfR2tidy(pileup)
+    if (nrow(pileup@fix) == 0) {
 
+    message("VCF is empty: no variants found, original vcf is returned.")
+    saveRDS(file = paste0("$prefix", "_pileup_VCF.rds"), object = vcf)
+    } else {
+
+    tb = vcfR::vcfR2tidy(pileup)
     gt_field = tb\$gt %>%
             tidyr::separate(gt_AD, sep = ',', into = c("NR", "NV")) %>%
             dplyr::rename(DP = gt_DP) %>%
@@ -70,7 +75,7 @@ process JOIN_POSITIONS {
 
     vcf[["$meta.tumour_sample"]]\$mutations = dplyr::bind_rows(mutations, bind)
     saveRDS(file = paste0("$prefix", "_pileup_VCF.rds"), object = vcf)
-
+}
 
     # version export
     f <- file("versions.yml","w")
