@@ -157,11 +157,13 @@ retrieve_ref_alt = function(row){
     if (ref == 'T'){NR=as.integer(strsplit(row[["gt_TU"]], split=',')[[1]][1])}
     if (ref == 'G'){NR=as.integer(strsplit(row[["gt_GU"]], split=',')[[1]][1])}
     if (ref == 'C'){NR=as.integer(strsplit(row[["gt_CU"]], split=',')[[1]][1])}
+    if (nchar(ref) > 1 | nchar(alt) > 0 ){NR=as.integer(strsplit(row[["gt_TAR"]], split=',')[[1]][1])}
 
     if (alt == 'A'){NV=as.integer(strsplit(row[["gt_AU"]], split=',')[[1]][1])}
     if (alt == 'T'){NV=as.integer(strsplit(row[["gt_TU"]], split=',')[[1]][1])}
     if (alt == 'G'){NV=as.integer(strsplit(row[["gt_GU"]], split=',')[[1]][1])}
     if (alt == 'C'){NV=as.integer(strsplit(row[["gt_GU"]], split=',')[[1]][1])}
+    if (nchar(ref) > 1 | nchar(alt) > 0 ){NV=as.integer(strsplit(row[["gt_TIR"]], split=',')[[1]][1])}
 
     ref_alt = paste0(NR, ',', NV)
     ref_alt
