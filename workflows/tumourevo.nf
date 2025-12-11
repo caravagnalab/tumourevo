@@ -3,16 +3,16 @@
     IMPORT MODULES / SUBWORKFLOWS / FUNCTIONS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-include { BCFTOOLS_VIEW } from "${baseDir}/modules/nf-core/bcftools/view/main"
-include { ENSEMBLVEP_VEP } from "${baseDir}/modules/nf-core/ensemblvep/vep/main"
-include { FORMATTER as FORMATTER_CNA } from "${baseDir}/subworkflows/local/formatter/main"
-include { FORMATTER as FORMATTER_VCF} from "${baseDir}/subworkflows/local/formatter/main"
-include { LIFTER } from "${baseDir}/subworkflows/local/lifter/main"
-include { ANNOTATE_DRIVER } from "${baseDir}/modules/local/annotate_driver/main"
-include { FORMATTER as FORMATTER_RDS} from "${baseDir}/subworkflows/local/formatter/main"
-include { QC } from "${baseDir}/subworkflows/local/qc/main"
-include { SUBCLONAL_DECONVOLUTION } from "${baseDir}/subworkflows/local/subclonal_deconvolution/main"
-include { SIGNATURE_DECONVOLUTION } from "${baseDir}/subworkflows/local/signature_deconvolution/main"
+include { BCFTOOLS_VIEW } from "..//modules/nf-core/bcftools/view/main"
+include { ENSEMBLVEP_VEP } from "../modules/nf-core/ensemblvep/vep/main"
+include { FORMATTER as FORMATTER_CNA } from "../subworkflows/local/formatter/main"
+include { FORMATTER as FORMATTER_VCF} from "../subworkflows/local/formatter/main"
+include { LIFTER } from "../subworkflows/local/lifter/main"
+include { ANNOTATE_DRIVER } from "../modules/local/annotate_driver/main"
+include { FORMATTER as FORMATTER_RDS} from "../subworkflows/local/formatter/main"
+include { QC } from "../subworkflows/local/qc/main"
+include { SUBCLONAL_DECONVOLUTION } from "../subworkflows/local/subclonal_deconvolution/main"
+include { SIGNATURE_DECONVOLUTION } from "../subworkflows/local/signature_deconvolution/main"
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     RUN MAIN WORKFLOW

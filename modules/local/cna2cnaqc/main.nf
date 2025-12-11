@@ -20,4 +20,15 @@ process CNA2CNAQC {
 
     script:
     template "main_script.R"
+
+    stub:
+    def prefix = task.ext.prefix ?: "${meta.id}"
+    """
+    touch ${prefix}.rds
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        cnaqc: \$(Rscript -e "cat(as.character(packageVersion('CNAqc')))")
+    END_VERSIONS
+    """
 }

@@ -40,4 +40,15 @@ process GET_POSITIONS_ALL {
     close(f)
 
     """
+
+    stub:
+    def prefix = task.ext.prefix ?: "${meta.id}"
+    """
+    touch ${prefix}_all_positions.rds
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        dplyr: \$(Rscript -e "cat(as.character(packageVersion('dplyr')))")
+    END_VERSIONS
+    """
 }

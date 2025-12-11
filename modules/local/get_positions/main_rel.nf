@@ -45,4 +45,14 @@ process GET_POSITIONS_REL {
     close(f)
 
     """
+
+    stub:
+    """
+    touch ${meta.tumour_sample}_positions_missing
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        dplyr: \$(Rscript -e "cat(as.character(packageVersion('dplyr')))")
+    END_VERSIONS
+    """
 }

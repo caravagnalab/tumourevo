@@ -78,6 +78,18 @@ process ANNOTATE_DRIVER {
     writeLines(paste("    dplyr:", dplyr_version), f)
     writeLines(paste("    tidyr:", tidyr_version), f)
     close(f)
+    """
 
+    stub:
+    def prefix = task.ext.prefix ?: "${meta.id}"
+    """
+    touch ${prefix}_driver.rds
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        readr: \$(Rscript -e "cat(as.character(packageVersion('readr')))")
+        dplyr: \$(Rscript -e "cat(as.character(packageVersion('dplyr')))")
+        tidyr: \$(Rscript -e "cat(as.character(packageVersion('tidyr')))")
+    END_VERSIONS
     """
 }

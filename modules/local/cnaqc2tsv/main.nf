@@ -17,4 +17,17 @@ process CNAQC2TSV {
 
     script:
     template "main_script.R"
+
+    stub:
+    def prefix = task.ext.prefix ?: "${meta.id}"
+    """
+    touch ${prefix}_joint_table.tsv
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        cnaqc: \$(Rscript -e "cat(as.character(packageVersion('CNAqc')))")
+        readr: \$(Rscript -e "cat(as.character(packageVersion('readr')))")
+        dplyr: \$(Rscript -e "cat(as.character(packageVersion('dplyr')))")
+    END_VERSIONS
+    """
 }
