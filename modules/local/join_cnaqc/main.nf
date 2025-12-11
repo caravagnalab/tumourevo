@@ -62,4 +62,17 @@ process JOIN_CNAQC {
     close(f)
 
     """
+
+    stub:
+    def prefix = task.ext.prefix ?: "${meta.id}"
+    """
+    touch ${prefix}_multi_cnaqc_ALL.rds
+    touch ${prefix}_multi_cnaqc_PASS.rds
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        CNAqc: \$(Rscript -e "cat(as.character(packageVersion('CNAqc')))")
+        dplyr: \$(Rscript -e "cat(as.character(packageVersion('dplyr')))")
+    END_VERSIONS
+    """
 }

@@ -43,7 +43,8 @@
                 },
                 "genome": {
                     "type": "string",
-                    "description": "Reference genome name."
+                    "description": "Reference genome name.",
+                    "enum": ["GRCh38", "GRCh37"]
                 },
                 "tools": {
                     "type": "string",
@@ -447,7 +448,8 @@
                 "publish_dir_mode_genome_sigprofiler": {
                     "type": "string",
                     "default": "move",
-                    "description": "Mode of publishing the SigProfiler genome."
+                    "description": "Mode of publishing the SigProfiler genome.",
+                    "enum": ["symlink", "rellink", "copy", "copyNoFollow", "move"]
                 },
                 "download_sigprofiler_genome": {
                     "type": "boolean",

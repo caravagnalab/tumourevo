@@ -88,4 +88,17 @@ process JOIN_POSITIONS {
     writeLines(paste("    vcfR:", vcfR_version), f)
     close(f)
     """
+
+    stub:
+    def prefix = task.ext.prefix ?: "${meta.id}"
+    """
+    touch ${prefix}_pileup_VCF.rds
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        dplyr: \$(Rscript -e "cat(as.character(packageVersion('dplyr')))")
+        tidyr: \$(Rscript -e "cat(as.character(packageVersion('tidyr')))")
+        vcfR: \$(Rscript -e "cat(as.character(packageVersion('vcfR')))")
+    END_VERSIONS
+    """
 }
