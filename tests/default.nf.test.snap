@@ -402,25 +402,25 @@
                 "variant_annotation/vep/SCOUT",
                 "variant_annotation/vep/SCOUT/SPN01_MS",
                 "variant_annotation/vep/SCOUT/SPN01_MS/SPN01_100X_0.9p_Sample_B",
-                "variant_annotation/vep/SCOUT/SPN01_MS/SPN01_100X_0.9p_Sample_B/SCOUT_SPN01_MS_SPN01_100X_0.9p_Sample_B.vep.vcf.gz",
+                "variant_annotation/vep/SCOUT/SPN01_MS/SPN01_100X_0.9p_Sample_B/SCOUT_SPN01_MS_SPN01_100X_0.9p_Sample_B.annotated.vep.vcf.gz",
                 "variant_annotation/vep/SCOUT/SPN01_MS/SPN01_100X_0.9p_Sample_C",
-                "variant_annotation/vep/SCOUT/SPN01_MS/SPN01_100X_0.9p_Sample_C/SCOUT_SPN01_MS_SPN01_100X_0.9p_Sample_C.vep.vcf.gz",
+                "variant_annotation/vep/SCOUT/SPN01_MS/SPN01_100X_0.9p_Sample_C/SCOUT_SPN01_MS_SPN01_100X_0.9p_Sample_C.annotated.vep.vcf.gz",
                 "variant_annotation/vep/SCOUT/SPN01_SS",
                 "variant_annotation/vep/SCOUT/SPN01_SS/SPN01_100X_0.9p_Sample_B",
-                "variant_annotation/vep/SCOUT/SPN01_SS/SPN01_100X_0.9p_Sample_B/SCOUT_SPN01_SS_SPN01_100X_0.9p_Sample_B.vep.vcf.gz",
+                "variant_annotation/vep/SCOUT/SPN01_SS/SPN01_100X_0.9p_Sample_B/SCOUT_SPN01_SS_SPN01_100X_0.9p_Sample_B.annotated.vep.vcf.gz",
                 "variant_annotation/vep/SCOUT/SPN01_SS/SPN01_100X_0.9p_Sample_C",
-                "variant_annotation/vep/SCOUT/SPN01_SS/SPN01_100X_0.9p_Sample_C/SCOUT_SPN01_SS_SPN01_100X_0.9p_Sample_C.vep.vcf.gz",
+                "variant_annotation/vep/SCOUT/SPN01_SS/SPN01_100X_0.9p_Sample_C/SCOUT_SPN01_SS_SPN01_100X_0.9p_Sample_C.annotated.vep.vcf.gz",
                 "variant_annotation/vep/SCOUT/SPN01_SS_nobam",
                 "variant_annotation/vep/SCOUT/SPN01_SS_nobam/SPN01_100X_0.9p_Sample_B",
-                "variant_annotation/vep/SCOUT/SPN01_SS_nobam/SPN01_100X_0.9p_Sample_B/SCOUT_SPN01_SS_nobam_SPN01_100X_0.9p_Sample_B.vep.vcf.gz",
+                "variant_annotation/vep/SCOUT/SPN01_SS_nobam/SPN01_100X_0.9p_Sample_B/SCOUT_SPN01_SS_nobam_SPN01_100X_0.9p_Sample_B.annotated.vep.vcf.gz",
                 "variant_annotation/vep/SCOUT/SPN01_SS_nobam/SPN01_100X_0.9p_Sample_C",
-                "variant_annotation/vep/SCOUT/SPN01_SS_nobam/SPN01_100X_0.9p_Sample_C/SCOUT_SPN01_SS_nobam_SPN01_100X_0.9p_Sample_C.vep.vcf.gz"
+                "variant_annotation/vep/SCOUT/SPN01_SS_nobam/SPN01_100X_0.9p_Sample_C/SCOUT_SPN01_SS_nobam_SPN01_100X_0.9p_Sample_C.annotated.vep.vcf.gz"
             ]
         ],
         "meta": {
-            "nf-test": "0.9.2",
+            "nf-test": "0.9.3",
             "nextflow": "25.10.0"
         },
-        "timestamp": "2025-11-27T18:15:57.280765533"
+        "timestamp": "2025-12-03T12:27:15.814144"
     }
 }

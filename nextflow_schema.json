@@ -206,10 +206,6 @@
                     "type": "string",
                     "default": "ENTROPY",
                     "description": "Either \"ENTROPY\" (default) or \"ROUGH\", to reflect the two different algorithms to compute CCF."
-                },
-                "cnaqc_plot_cn": {
-                    "type": "string",
-                    "default": "absolute"
                 }
             },
             "fa_icon": "fas fa-briefcase"

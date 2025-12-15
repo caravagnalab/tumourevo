@@ -157,21 +157,25 @@ retrieve_ref_alt = function(row){
     if (ref == 'T'){NR=as.integer(strsplit(row[["gt_TU"]], split=',')[[1]][1])}
     if (ref == 'G'){NR=as.integer(strsplit(row[["gt_GU"]], split=',')[[1]][1])}
     if (ref == 'C'){NR=as.integer(strsplit(row[["gt_CU"]], split=',')[[1]][1])}
-    if (nchar(ref) > 1 | nchar(alt) > 0 ){NR=as.integer(strsplit(row[["gt_TAR"]], split=',')[[1]][1])}
+    if (nchar(ref) > 1 | nchar(alt) > 1 ){NR=as.integer(strsplit(row[["gt_TAR"]], split=',')[[1]][1])}
 
     if (alt == 'A'){NV=as.integer(strsplit(row[["gt_AU"]], split=',')[[1]][1])}
     if (alt == 'T'){NV=as.integer(strsplit(row[["gt_TU"]], split=',')[[1]][1])}
     if (alt == 'G'){NV=as.integer(strsplit(row[["gt_GU"]], split=',')[[1]][1])}
     if (alt == 'C'){NV=as.integer(strsplit(row[["gt_GU"]], split=',')[[1]][1])}
-    if (nchar(ref) > 1 | nchar(alt) > 0 ){NV=as.integer(strsplit(row[["gt_TIR"]], split=',')[[1]][1])}
+    if (nchar(ref) > 1 | nchar(alt) > 1 ){NV=as.integer(strsplit(row[["gt_TIR"]], split=',')[[1]][1])}
 
     ref_alt = paste0(NR, ',', NV)
     ref_alt
 }
 
 parse_Strelka = function(vcf, tumour_id, normal_id){
+
     tb = vcfR::vcfR2tidy(vcf)
-    gt_field = tb[["gt"]] %>% rename(sample = Indiv)
+    # Strelka tumour_id and normal_id is TUMOR and NORMAL, change to tumour_id/normal_id
+    gt_field = tb[["gt"]] %>%
+        dplyr::mutate(sample = ifelse(Indiv=="TUMOR", tumour_id, normal_id)) %>%
+        dplyr::select(-Indiv)
 
     fix_field = tb[["fix"]] %>%
         dplyr::rename(
