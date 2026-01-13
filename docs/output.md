@@ -23,6 +23,9 @@ The default directory structure is as follows:
 
 ```
 {outdir}
+├── bcftools
+|   └── filter
+│       └── <sample>
 ├── variant_annotation
 |   └── vep
 │       └── <sample>
@@ -81,14 +84,14 @@ This step starts from VCF files.
 
 **Output directory: `{outdir}/variant_annotation/vep/<dataset>/<patient>/<sample>/`**
 
-- `<dataset>_<patient>_<sample>.vcf.gz` and `<dataset>_<patient>_<sample>.vcf.gz.tbi`
+- `<dataset>_<patient>_<sample>.annotated.vep.vcf.gz` and `<dataset>_<patient>_<sample>.annotated.vep.vcf.gz.tbi`
   - VCF file and tabix index with called mutations
 
 </details>
 
 ## Formatter
 
-The Formatter subworkflow is used to convert file to other formats and to standardize the output files resulting from different mutation (Mutect2, Strelka) and cna callers (ASCAT,Sequenza).
+The Formatter subworkflow is used to convert file to other formats and to standardize the output files resulting from different mutation (Mutect2, Strelka, Platypus) and cna callers (ASCAT, Sequenza, Battenberg).
 
 ### vcf2cnaqc
 
@@ -149,8 +152,6 @@ At this stage, [bcftools](https://samtools.github.io/bcftools/bcftools.html) mpi
   - TXT file with statistics on the called mutations
 - `<dataset>_<patient>_<sample>.vcf.gz` and `<dataset>_<patient>_<sample>.vcf.gz.tbi`:
   - VCF file and tabix index with called mutations
-- `<dataset>_<patient>_<sample>.mpileup.gz`:
-  - mpileup gzipped output for all positions
 
 </details>
 
@@ -165,6 +166,8 @@ This step allows to retrieve private and shared mutations across samples origina
 
 - `<dataset>_<patient>_<sample>.positions_missing`
   - TXT file containing mutations to be retrieved for a given sample
+- `<dataset>_<patient>_<sample>_pileup_VCF.rds`
+  - RDS containing retrieved mutations from pileup
 
 </details>
 
@@ -174,7 +177,7 @@ This step allows to retrieve private and shared mutations across samples origina
 **Output directory: `{outdir}/lifter/positions/<dataset>/<patient>/`**
 
 - `<dataset>_<patient>_all_positions.rds`
-  - RDS containing shared and private mutations
+  - RDS containing shared and private mutations of all samples
 
 </details>
 
@@ -198,7 +201,7 @@ According to the specified tumour type, potential driver mutations are identifie
 
 ## QC
 
-The QC subworkflows requires in input a segmentation file from allele-specific copy number callers (either [Sequenza](https://sequenzatools.bitbucket.io/#/home), [ASCAT](https://github.com/VanLoo-lab/ascat)) and the joint VCF file. As a first step, the QC subworkflow provides an estimate of normal and tumour samples contamination in [TINC](#tinc) step, in order to have a measure of experimental quality. Then,it first conducts a quality control on copy number and somatic mutation data for individual samples in [CNAqc](#cnaqc) step, and subsequently summarize validated information at patient level in [join_CNAqc](#join_cnaqc) step.
+The QC subworkflows requires in input a segmentation file from allele-specific copy number callers (either [Sequenza](https://sequenzatools.bitbucket.io/#/home), [ASCAT](https://github.com/VanLoo-lab/ascat) and [Battenberg](https://github.com/Wedge-lab/battenberg)) and the joint VCF file. As a first step, the QC subworkflow provides an estimate of normal and tumour samples contamination in [TINC](#tinc) step, in order to have a measure of experimental quality. Then,it first conducts a quality control on copy number and somatic mutation data for individual samples in [CNAqc](#cnaqc) step, and subsequently summarize validated information at patient level in [join_CNAqc](#join_cnaqc) step.
 The QC subworkflow is a crucial step of the pipeline as it ensures high confidence in identifying clonal and subclonal events while accounting for variations in tumor purity.
 
 ### TINC
@@ -246,10 +249,8 @@ This module creates a multi-CNAqc object for patient by summarizing the quality 
 
 **Output directory: `{outdir}/QC/join_CNAqc/<dataset>/<patient>/`**
 
-- `<dataset>_<patient>_multi_cnaqc_ALL.rds`
-  - unfiltered mCNAqc RDS object
-- `<dataset>_<patient>_multi_cnaqc_PASS.rds`
-  - filtered mCNAqc RDS object
+- `<dataset>_<patient>_multi_cnaqc.rds`
+  - mCNAqc RDS object
 
 </details>
 
@@ -288,8 +289,10 @@ The results of subclonal decovnultion step are collected in `{outdir}/subclonal_
 
 **Output directory: `{outdir}/subclonal_deconvolution/pyclonevi/<dataset>/<patient>`**
 
-- `<dataset>_<patient>.tsv`
+- `<dataset>_<patient>_pyclone_input.tsv`
   - TSV file with Pyclone-VI input table
+- `<dataset>_<patient>_pyclone_input_all_samples.tsv`
+  - TSV file with Pyclone-VI input table of all samples
 - `<dataset>_<patient>_all_fits.h5`
   - HDF5 file for all possible fit and summary stats
 - `<dataset>_<patient>_best_fit.txt`
@@ -356,8 +359,10 @@ The results of this step are collected in `{pubslish_dir}/signature_deconvolutio
 <details markdown="1">
 <summary>Output files for dataset</summary>
 
-**Output directory: `{outdir}/signatures_deconvolution/SparseSig/<dataset>/`**
+**Output directory: `{outdir}/signatures_deconvolution/sparsesignature/<dataset>/`**
 
+- `<dataset>_mut_counts.rds`
+  - RDS of trinucleotide mutation counts of original data
 - `<dataset>_best_params_config.rds`
   - signatures best configiration object
 - `<dataset>_cv_means_mse.rds`
@@ -376,14 +381,12 @@ The results of this step are collected in `{pubslish_dir}/signature_deconvolutio
 <details markdown="1">
 <summary>Output files for all samples</summary>
 
-**Output directory: `{outdir}/signatures_deconvolution/SigProfiler/<dataset>/results`**
+**Output directory: `{outdir}/signatures_deconvolution/sigprofiler/<dataset>/results`**
 
 - `input/`
   - folder containing a copy of the user-provided input files for SigProfilerMatrixGenerator step
 - `input_data.txt`
   - join table of all mutations in the dataset in TXT
-- `logs/`
-  - folder containing the error and log files for SigProfilerMatrixGenerator step
 - `output/`
   - folder containing the DBS, SBS, INDEL nucleotide matrices resulting from SigProfilerMatrixGenerator step
 - `{SBS96,DBS78,ID83}/`

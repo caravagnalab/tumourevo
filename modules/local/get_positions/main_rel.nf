@@ -12,7 +12,7 @@ process GET_POSITIONS_REL {
     tuple val(meta), path(rds), path(all_pos)
 
     output:
-    tuple val(meta), path("*_positions_missing"), emit: bed
+    tuple val(meta), path("*_positions_missing"), emit: pos
     path "versions.yml",                          emit: versions
 
     script:
@@ -35,7 +35,7 @@ process GET_POSITIONS_REL {
             dplyr::filter(chr %in% c(paste0('chr', seq(1,22)), 'chrX', 'chrY')) %>%
             dplyr::select(chr, from)
 
-    write.table(file = paste0("$meta.tumour_sample", "_positions_missing"), missed, quote = F, sep = "\t", row.names = F, col.names = F)
+    write.table(file = paste0("$meta.id", "_positions_missing"), missed, quote = F, sep = "\t", row.names = F, col.names = F)
 
     # version export
     f <- file("versions.yml","w")

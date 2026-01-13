@@ -98,14 +98,8 @@ main:
     in_cnaqc = cna_file.join(ANNOTATE_DRIVER.out.rds)
     QC(in_cnaqc)
 
-    if (params.filter == true){
-        SUBCLONAL_DECONVOLUTION(QC.out.join_cnaqc_PASS)
-        SIGNATURE_DECONVOLUTION(QC.out.join_cnaqc_PASS)
-    } else {
-        SUBCLONAL_DECONVOLUTION(QC.out.join_cnaqc_ALL)
-        SIGNATURE_DECONVOLUTION(QC.out.join_cnaqc_ALL)
-    }
-
+    SUBCLONAL_DECONVOLUTION(QC.out.join_cnaqc)
+    SIGNATURE_DECONVOLUTION(QC.out.join_cnaqc)
 }
 
 /*
