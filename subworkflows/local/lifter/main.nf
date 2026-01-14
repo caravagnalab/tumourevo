@@ -35,7 +35,7 @@ workflow LIFTER {
         }
 
         GET_POSITIONS_REL(rds.combine(all_pos))
-        in_pileup = bam.join(GET_POSITIONS_REL.out.pos, by: [0])
+        in_pileup = bam.join(GET_POSITIONS_REL.out.bed, by: [0])
 
         BCFTOOLS_MPILEUP(in_pileup, fasta, false)
         join = rds.join(BCFTOOLS_MPILEUP.out.vcf, by:[0])

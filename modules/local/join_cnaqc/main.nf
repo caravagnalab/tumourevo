@@ -12,7 +12,8 @@ process JOIN_CNAQC {
     tuple val(meta), path(rds_list, stageAs: 'input*.rds'), val(tumour_samples)
 
     output:
-    tuple val(meta), path("*.rds"), val(tumour_samples),  emit: rds
+    tuple val(meta), path("*ALL.rds"), val(tumour_samples),  emit: rds_all,  optional: true
+    tuple val(meta), path("*PASS.rds"), val(tumour_samples), emit: rds_pass, optional: true
     path "versions.yml",                                     emit: versions
 
     script:
@@ -20,6 +21,7 @@ process JOIN_CNAQC {
     def prefix = task.ext.prefix ?: "$meta.id"
     def qc_filter = args.qc_filter != null ? args.qc_filter : false
     def keep_original = args!="" && args.keep_original ? "$args.keep_original" : ""
+
     """
     #!/usr/bin/env Rscript
 
@@ -38,12 +40,26 @@ process JOIN_CNAQC {
         result[[name]]\$mutations = result[[name]]\$mutations %>% dplyr::rename(Indiv = sample)
     }
 
-    out = CNAqc::multisample_init(result,
+    if (as.logical("$qc_filter") == TRUE){
+      tryCatch(expr = {
+        out_PASS = CNAqc::multisample_init(result,
+                            QC_filter = TRUE,
+                            keep_original = as.logical("$keep_original"),
+                            discard_private = FALSE)
+        }, error = function(e) {
+            print(e)
+            out_PASS <<- NULL
+        }
+      )
+      saveRDS(object = out_PASS, file = paste0("$prefix", "_multi_cnaqc_PASS.rds"))
+    }
+
+    out_all = CNAqc::multisample_init(result,
                             QC_filter = FALSE,
                             keep_original = as.logical("$keep_original"),
                             discard_private = FALSE)
 
-    saveRDS(object = out, file = paste0("$prefix", "_multi_cnaqc.rds"))
+    saveRDS(object = out_all, file = paste0("$prefix", "_multi_cnaqc_ALL.rds"))
 
     # version export
     f <- file("versions.yml","w")

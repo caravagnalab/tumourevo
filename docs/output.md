@@ -138,6 +138,7 @@ This parser is designed to convert mutations data of joint CNAqc analysis from C
 ## Lifter
 
 The Lifter subworkflow is an optional step, and it is run when, despite having multiple samples per patient, variant calling is performed separately on each sample. In this case, instead of a VCF file with a column per sample (multi-sample variant calling), a single VCF file is provided per sample. When multiple samples from the same patient are provided, the user can specify either a single joint VCF file, containing variant calls from all tumor samples of the patient (see [joint variant calling](https://nf-co.re/sarek/3.4.2/parameters/#joint_mutect2)), or individual sample specific VCF files. In the latter case, path to tumor BAM files must be provided in order to collect all mutations from the samples and perform pile-up of sample's private mutations in all the other samples. Two intermediate steps, [get_positions](#get_positions) and [mpileup](#mpileup), are performed to identify private mutations in all the samples and retrieve their variant allele frequency. Once private mutations are properly defined, they are merged back into the original VCF file during the join_positions step. The updated VCF file is then converted into a RDS object.
+The results of Lifter subworkflow step are collected in `{outdir}/lifter/` directory.
 
 ### mpileup
 
@@ -203,6 +204,7 @@ According to the specified tumour type, potential driver mutations are identifie
 
 The QC subworkflows requires in input a segmentation file from allele-specific copy number callers (either [Sequenza](https://sequenzatools.bitbucket.io/#/home), [ASCAT](https://github.com/VanLoo-lab/ascat) and [Battenberg](https://github.com/Wedge-lab/battenberg)) and the joint VCF file. As a first step, the QC subworkflow provides an estimate of normal and tumour samples contamination in [TINC](#tinc) step, in order to have a measure of experimental quality. Then,it first conducts a quality control on copy number and somatic mutation data for individual samples in [CNAqc](#cnaqc) step, and subsequently summarize validated information at patient level in [join_CNAqc](#join_cnaqc) step.
 The QC subworkflow is a crucial step of the pipeline as it ensures high confidence in identifying clonal and subclonal events while accounting for variations in tumor purity.
+The results of QC subworkflow step are collected in `{outdir}/qc/` directory.
 
 ### TINC
 
@@ -257,8 +259,7 @@ This module creates a multi-CNAqc object for patient by summarizing the quality 
 ## Subclonal Deconvolution
 
 The subclonal deconvolution subworkflow requires in input a joint `mCNAqc` object resulting from the [join_CNAqc](#join_cnaqc) step. The subworkflow will perform multi-sample deconvolution if more than one sample for each patient is present.
-
-The results of subclonal decovnultion step are collected in `{outdir}/subclonal_deconvolution/` directory.
+The results of subclonal deconvolution step are collected in `{outdir}/subclonal_deconvolution/` directory.
 
 ### MOBSTER
 
@@ -349,7 +350,6 @@ VIBER and MOBSTER fits are already compatible for ctree analysis.
 ## Signature Deconvolution
 
 Mutational signatures are distinctive patterns of somatic mutations in cancer genomes that reveal the underlying mutational processes driving tumor evolution and progression. These signatures are identified by analyzing aggregated point-mutation counts from multiple samples. Validated mutations from the [join_CNAqc](#join_cnaqc) step are converted into a joint TSV table (see [cnaqc2tsv](#cnaqc2tsv)) and then input into the signature deconvolution subworkflow, which performs _de novo_ extraction, inference, interpretation, or deconvolution of mutational counts.
-
 The results of this step are collected in `{pubslish_dir}/signature_deconvolution/`. Two tools can be specified by using `--tools` parameter: [SparseSignatures](#sparsesignatures) and [SigProfiler](#sigprofiler).
 
 ### SparseSignatures

@@ -16,7 +16,8 @@ multisample_jointTable = list()
 for (s in get_sample_name(multi_cnaqc)){
     purity = mutations_multisample[[s]][["purity"]]
     multisample_jointTable[[s]] = mutations_multisample[[s]][["mutations"]] %>%
-      dplyr::mutate(purity = purity)
+      dplyr::mutate(purity = purity) %>%
+      dplyr::mutate(patient_id = "$meta.patient")
 }
 
 joint_table = bind_rows(multisample_jointTable)

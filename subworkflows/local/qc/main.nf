@@ -40,5 +40,6 @@ workflow QC {
         pdf_tinc = TINC.out.plot_pdf
         csv_tinc = TINC.out.tinc_csv
 
-        join_cnaqc = JOIN_CNAQC.out.rds
+        join_cnaqc_ALL = JOIN_CNAQC.out.rds_all
+        join_cnaqc_PASS = JOIN_CNAQC.out.rds_pass
 }
