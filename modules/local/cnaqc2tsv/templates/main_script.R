@@ -21,6 +21,14 @@ for (s in get_sample_name(multi_cnaqc)){
 
 joint_table = bind_rows(multisample_jointTable)
 
+joint_table <- joint_table %>%
+  dplyr::mutate(
+    from = as.integer(from),
+    to   = as.integer(from + nchar(ref) - 1)
+  )
+
+options(scipen = 999)
+
 write.table(joint_table, file = paste0(opt[["prefix"]], "_joint_table.tsv"), append = F, quote = F, sep = "\t", row.names = FALSE)
 
 # version export
