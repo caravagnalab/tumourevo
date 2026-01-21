@@ -12,7 +12,7 @@ process GET_POSITIONS_REL {
     tuple val(meta), path(rds), path(all_pos)
 
     output:
-    tuple val(meta), path("*_positions_missing"), emit: bed
+    tuple val(meta), path("*_positions_missing.bed"), emit: bed
     path "versions.yml",                          emit: versions
 
     script:
@@ -31,11 +31,12 @@ process GET_POSITIONS_REL {
                 dplyr::mutate(id = paste(chr, from, to, sep = ":")) %>%
                 dplyr::select(chr, from, to, ref, alt, id)
 
-    missed = all_positions %>% filter(!(id %in%  positions\$id)) %>%
+    missed = all_positions %>%
+            dplyr::filter(!(id %in%  positions\$id)) %>%
             dplyr::filter(chr %in% c(paste0('chr', seq(1,22)), 'chrX', 'chrY')) %>%
-            dplyr::select(chr, from)
+            dplyr::select(chr, from, to)
 
-    write.table(file = paste0("$meta.tumour_sample", "_positions_missing"), missed, quote = F, sep = "\t", row.names = F, col.names = F)
+    write.table(file = paste0("$meta.id", "_positions_missing.bed"), missed, quote = F, sep = "\t", row.names = F, col.names = F)
 
     # version export
     f <- file("versions.yml","w")
@@ -48,7 +49,7 @@ process GET_POSITIONS_REL {
 
     stub:
     """
-    touch ${meta.tumour_sample}_positions_missing
+    touch ${meta.tumour_sample}_positions_missing.bed
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

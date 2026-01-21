@@ -105,7 +105,6 @@ main:
         SUBCLONAL_DECONVOLUTION(QC.out.join_cnaqc_ALL)
         SIGNATURE_DECONVOLUTION(QC.out.join_cnaqc_ALL)
     }
-
 }
 
 /*

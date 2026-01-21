@@ -8,7 +8,7 @@
 
 **tumourevo** is a workflow to infer a tumour evolution model from whole-genome sequencing (WGS) data.
 
-Through the analysis of variant and copy-number calls, it reconstructs the evolutionary process leading to the observed tumour genome. Most of the analyses can be done at mutliple levels: single sample, multiple samples from the same patient (multi-region/longitudinal assays), and multiple patients from distinct cohorts.
+Through the analysis of variant and copy-number calls, it reconstructs the evolutionary process leading to the observed tumour genome. Most of the analyses can be done at multiple levels: single sample, multiple samples from the same patient (multi-region/longitudinal assays), and multiple patients from distinct cohorts.
 
 ## Samplesheet input
 
@@ -50,12 +50,12 @@ dataset1,patient1,sample2,N1,patient1_sample2.vcf.gz,patient1_sample2.vcf.gz.tbi
 | `patient` <br /> _Required_                | **Patient ID**; designates the patient/subject; must be unique for each patient, but one patient can have multiple samples (e.g. from multiple regions or multiple time points).                                        |
 | `tumour_sample` <br /> _Required_          | **Sample ID** for each sample; more than one sample for each subject is possible. Must match the sample ID present in the VCF.                                                                                          |
 | `normal_sample` <br /> _Required_          | **Normal sample ID** of each sample. Must match the normal sample ID present in the VCF.                                                                                                                                |
-| `vcf` <br /> _Required_                    | Full path to the vcf file.                                                                                                                                                                                              |
+| `vcf` <br /> _Required_                    | Full path to the vcf file from supported vcf callers (Mutect2, Strelka, Platypus).                                                                                                                                      |
 | `tbi` <br /> _Required_                    | Full path to the vcf `tabix` index file.                                                                                                                                                                                |
-| `cna_caller` <br /> _Required_             | Name of the copy number caller used to generate your data.                                                                                                                                                              |
-| `cna_segments` <br /> _Required_           | Full path to the segmentation files and copy number state from copy-number calling.                                                                                                                                     |
-| `cna_extra` <br /> _Required_              | Full path to files including the ploidy and purity estimate from the copy-number caller.                                                                                                                                |
-| `cancer_type` <br /> _Required_            | Tumour type (either `PANCANCER` or one of the tumour type present in the driver table)                                                                                                                                  |
+| `cna_caller` <br /> _Required_             | Name of the copy number caller used to generate your data (ASCAT, sequenza, Battenberg).                                                                                                                                |
+| `cna_segments` <br /> _Required_           | Full path to the segmentation files and copy number state from the supported allele-specific copy-number caller.                                                                                                        |
+| `cna_extra` <br /> _Required_              | Full path to files including the ploidy and purity estimate from the supported copy-number caller.                                                                                                                      |
+| `cancer_type` <br /> _Required_            | Tumour type (either `PANCANCER` or one of the tumour type present in the driver table).                                                                                                                                 |
 | `tumour_alignment` <br /> _Optional_       | Full path to the tumour bam/cram file.                                                                                                                                                                                  |
 | `tumour_alignment_index` <br /> _Optional_ | Full path to the tumour bam/cram index file.                                                                                                                                                                            |
 
