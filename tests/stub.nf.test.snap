@@ -109,11 +109,11 @@
                 "lifter/positions/SCOUT/SPN01_SS/SCOUT_SPN01_SS_all_positions.rds",
                 "lifter/positions/SCOUT/SPN01_SS/SPN01_100X_0.9p_Sample_B",
                 "lifter/positions/SCOUT/SPN01_SS/SPN01_100X_0.9p_Sample_B/SCOUT_SPN01_SS_SPN01_100X_0.9p_Sample_B_pileup_VCF.rds",
-                "lifter/positions/SCOUT/SPN01_SS/SPN01_100X_0.9p_Sample_B/SPN01_100X_0.9p_Sample_B_positions_missing",
+                "lifter/positions/SCOUT/SPN01_SS/SPN01_100X_0.9p_Sample_B/SPN01_100X_0.9p_Sample_B_positions_missing.bed",
                 "lifter/positions/SCOUT/SPN01_SS/SPN01_100X_0.9p_Sample_B/versions.yml",
                 "lifter/positions/SCOUT/SPN01_SS/SPN01_100X_0.9p_Sample_C",
                 "lifter/positions/SCOUT/SPN01_SS/SPN01_100X_0.9p_Sample_C/SCOUT_SPN01_SS_SPN01_100X_0.9p_Sample_C_pileup_VCF.rds",
-                "lifter/positions/SCOUT/SPN01_SS/SPN01_100X_0.9p_Sample_C/SPN01_100X_0.9p_Sample_C_positions_missing",
+                "lifter/positions/SCOUT/SPN01_SS/SPN01_100X_0.9p_Sample_C/SPN01_100X_0.9p_Sample_C_positions_missing.bed",
                 "lifter/positions/SCOUT/SPN01_SS/SPN01_100X_0.9p_Sample_C/versions.yml",
                 "pipeline_info",
                 "qc",
@@ -446,6 +446,6 @@
             "nf-test": "0.9.2",
             "nextflow": "25.10.0"
         },
-        "timestamp": "2026-01-13T11:20:50.579366187"
+        "timestamp": "2026-01-21T08:59:40.492740793"
     }
 }

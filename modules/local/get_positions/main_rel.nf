@@ -12,7 +12,7 @@ process GET_POSITIONS_REL {
     tuple val(meta), path(rds), path(all_pos)
 
     output:
-    tuple val(meta), path("*_positions_missing"), emit: bed
+    tuple val(meta), path("*_positions_missing.bed"), emit: bed
     path "versions.yml",                          emit: versions
 
     script:
@@ -49,7 +49,7 @@ process GET_POSITIONS_REL {
 
     stub:
     """
-    touch ${meta.tumour_sample}_positions_missing
+    touch ${meta.tumour_sample}_positions_missing.bed
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
