@@ -53,7 +53,6 @@
                 },
                 "filter": {
                     "type": "boolean",
-                    "default": true,
                     "description": "Flag for filtering or not QC mutations."
                 },
                 "publish_dir_mode": {

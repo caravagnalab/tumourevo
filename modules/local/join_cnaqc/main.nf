@@ -40,6 +40,14 @@ process JOIN_CNAQC {
         result[[name]]\$mutations = result[[name]]\$mutations %>% dplyr::rename(Indiv = sample)
     }
 
+    out_all = CNAqc::multisample_init(result,
+                            QC_filter = FALSE,
+                            keep_original = as.logical("$keep_original"),
+                            discard_private = FALSE)
+
+    saveRDS(object = out_all, file = paste0("$prefix", "_multi_cnaqc_ALL.rds"))
+
+
     if (as.logical("$qc_filter") == TRUE){
       tryCatch(expr = {
         out_PASS = CNAqc::multisample_init(result,
@@ -48,18 +56,13 @@ process JOIN_CNAQC {
                             discard_private = FALSE)
         }, error = function(e) {
             print(e)
+            print('Not found common segments with QC PASS karyotype, the multi-CNaqc object will be NULL: re-run the pipeline with --filter false')
             out_PASS <<- NULL
         }
       )
       saveRDS(object = out_PASS, file = paste0("$prefix", "_multi_cnaqc_PASS.rds"))
     }
 
-    out_all = CNAqc::multisample_init(result,
-                            QC_filter = FALSE,
-                            keep_original = as.logical("$keep_original"),
-                            discard_private = FALSE)
-
-    saveRDS(object = out_all, file = paste0("$prefix", "_multi_cnaqc_ALL.rds"))
 
     # version export
     f <- file("versions.yml","w")
