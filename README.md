@@ -100,8 +100,6 @@ The nf-core/tumourevo pipeline comes with documentation about the pipeline, foun
 4. [Output and how to interpret the results](docs/output.md)
 5. [Troubleshooting](https://nf-co.re/usage/troubleshooting)
 
-<!-- TODO nf-core: Add a brief overview of what the pipeline does and how it works -->
-
 ## Contributions and Support
 
 If you would like to contribute to this pipeline, please see the [contributing guidelines](.github/CONTRIBUTING.md).

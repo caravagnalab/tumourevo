@@ -358,7 +358,7 @@ VIBER and MOBSTER fits are already compatible for ctree analysis.
 - `{<dataset>_<patient>,<dataset>_<patient>_<sample>}_ctree_<tool>_plots.rds`
   - RDS file for clone tree plot
 - `{<dataset>_<patient>,<dataset>_<patient>_<sample>}_ctree_<tool>_report.{rds,png,pdf}`
-  - ctree report in RDS, PNG and PDF
+  - ctree report as RDS, PNG and PDF
 
 </details>
 
