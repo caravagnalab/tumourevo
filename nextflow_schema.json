@@ -73,9 +73,8 @@
             "default": "",
             "properties": {
                 "download_cache_vep": {
-                    "type": "string",
+                    "type": "boolean",
                     "description": "Parameter for downloading VEP cache.",
-                    "default": "FALSE",
                     "enum": ["TRUE", "FALSE"]
                 },
                 "vep_cache": {
@@ -138,7 +137,7 @@
             "properties": {
                 "cnaqc_karyotypes": {
                     "type": "string",
-                    "default": "\"c(\\\"1:0\\\", \\\"1:1\\\", \\\"2:0\\\", \\\"2:1\\\", \\\"2:2\\\")\"",
+                    "default": "c(\"1:0\", \"1:1\", \"2:0\", \"2:1\", \"2:2\")",
                     "description": "For clonal simple CNAs, the list of segments to test.",
                     "help_text": "By default LOH regions (A, AA), diploid regions (AB), and amplification regions (AAB, AABB) are tested, corresponding to '1:0', '1:1', '2:1', '2:0', '2:2' in \"Major:minor\" notation."
                 },
