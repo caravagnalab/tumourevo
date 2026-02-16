@@ -37,7 +37,7 @@ By default, if multiple samples from the same patient are provided, they will be
 to retrieve information useful in the reconstruction of the evolutionary process. Depending on the variant calling strategy (single sample or multi sample) and the provided input files,
 different strategies will be applied.
 
-![tumourevo workflow](docs/images/ nf-core-tumourevo_metromap.png)
+![tumourevo workflow](docs/images/nf-core-tumourevo_metromap.png)
 
 - Variant Annotation (`VEP`)
 - Quality Control (`CNAqc`, `TINC`)
