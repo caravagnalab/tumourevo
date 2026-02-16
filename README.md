@@ -37,9 +37,7 @@ By default, if multiple samples from the same patient are provided, they will be
 to retrieve information useful in the reconstruction of the evolutionary process. Depending on the variant calling strategy (single sample or multi sample) and the provided input files,
 different strategies will be applied.
 
-<p align="center">
-    <img title="tumourevo workflow" src="docs/images/workflow_last.png" width=90%>
-</p>
+![tumourevo workflow](docs/images/workflow_last.png)
 
 - Variant Annotation (`VEP`)
 - Quality Control (`CNAqc`, `TINC`)
@@ -111,10 +109,6 @@ If you would like to contribute to this pipeline, please see the [contributing g
 For further information or help, don't hesitate to get in touch on the [Slack `#tumourevo` channel](https://nfcore.slack.com/channels/tumourevo) (you can join with [this invite](https://nf-co.re/join/slack)).
 
 ## Citations
-
-<!-- TODO nf-core: Add citation for pipeline after first release. Uncomment lines below and update Zenodo doi and badge at the top of this file. -->
-<!-- If you use nf-core/tumourevo for your analysis, please cite it using the following doi: [10.5281/zenodo.XXXXXX](https://doi.org/10.5281/zenodo.XXXXXX) -->
-<!-- TODO nf-core: Add bibliography of tools and data used in your pipeline -->
 
 An extensive list of references for the tools used by the pipeline can be found in the [`CITATIONS.md`](CITATIONS.md) file.
 

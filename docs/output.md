@@ -91,7 +91,7 @@ This step starts from VCF files.
 
 ## Formatter
 
-The Formatter subworkflow is used to convert file to other formats and to standardize the output files resulting from different mutation (Mutect2, Strelka, Platypus) and cna callers (ASCAT, Sequenza, Battenberg).
+The Formatter subworkflow is used to convert files to other formats and to standardize the output files resulting from different mutation (Mutect2, Strelka, Platypus) and cna callers (ASCAT, Sequenza, Battenberg).
 
 ### vcf2cnaqc
 
@@ -123,7 +123,7 @@ This parser is designed to standardize copy number calls and purity estimates fr
 
 ### cnaqc2tsv
 
-This parser is designed to convert mutations data of joint CNAqc analysis from CNAqc format (RDS file) into a tabular format (TSV file). This step is mandatory for running python-based tools (e.g. PyClone-VI, SigProfiler) and it is mandatory if `--tools` contains either `pyclone-vi` or `sigprofiler`.
+This parser is designed to convert mutations data of joint CNAqc analysis from CNAqc format (RDS file) into a tabular format (TSV file). This step is always run for python-based tools (e.g. PyClone-VI, SigProfiler) and it is mandatory if `--tools` contains either `pyclone-vi` or `sigprofiler`.
 
 <details markdown="1">
 <summary>Output files for all patients</summary>
@@ -131,13 +131,20 @@ This parser is designed to convert mutations data of joint CNAqc analysis from C
 **Output directory: `{outdir}/formatter/cnaqc2tsv/<dataset>/<patient>/`**
 
 - `<dataset>_<patient>_joint_table.tsv`
-  - TSV file containing mutations mapped to corrsponding copy number segments.
+  - TSV file containing mutations mapped to corresponding copy number segments.
 
 </details>
 
 ## Lifter
 
-The Lifter subworkflow is an optional step, and it is run when, despite having multiple samples per patient, variant calling is performed separately on each sample. In this case, instead of a VCF file with a column per sample (multi-sample variant calling), a single VCF file is provided per sample. When multiple samples from the same patient are provided, the user can specify either a single joint VCF file, containing variant calls from all tumor samples of the patient (see [joint variant calling](https://nf-co.re/sarek/3.4.2/parameters/#joint_mutect2)), or individual sample specific VCF files. In the latter case, path to tumor BAM files must be provided in order to collect all mutations from the samples and perform pile-up of sample's private mutations in all the other samples. Two intermediate steps, [get_positions](#get_positions) and [mpileup](#mpileup), are performed to identify private mutations in all the samples and retrieve their variant allele frequency. Once private mutations are properly defined, they are merged back into the original VCF file during the join_positions step. The updated VCF file is then converted into a RDS object.
+The Lifter subworkflow is an optional step, and it is run when, despite having multiple samples per patient, variant calling is performed separately on each sample.
+In this case, instead of a VCF file with a column per sample (multi-sample variant calling), a single VCF file is provided per sample.
+When multiple samples from the same patient are provided, the user can specify either a single joint VCF file, containing variant calls from all tumor samples of the patient (obtained from a joint mutation calling analysis) or individual sample specific VCF files.
+
+In the latter case, path to tumor BAM files must be provided in order to collect all mutations from the samples and perform pile-up of sample's private mutations in all the other samples.
+Two intermediate steps, [get_positions](#get_positions) and [mpileup](#mpileup), are performed to identify private mutations in all the samples and retrieve their variant allele frequency.
+Once private mutations are properly defined, they are merged back into the original VCF file during the join_positions step.
+The updated VCF file is then converted into a RDS object.
 The results of Lifter subworkflow step are collected in `{outdir}/lifter/` directory.
 
 ### mpileup
@@ -202,13 +209,18 @@ According to the specified tumour type, potential driver mutations are identifie
 
 ## QC
 
-The QC subworkflows requires in input a segmentation file from allele-specific copy number callers (either [Sequenza](https://sequenzatools.bitbucket.io/#/home), [ASCAT](https://github.com/VanLoo-lab/ascat) and [Battenberg](https://github.com/Wedge-lab/battenberg)) and the joint VCF file. As a first step, the QC subworkflow provides an estimate of normal and tumour samples contamination in [TINC](#tinc) step, in order to have a measure of experimental quality. Then,it first conducts a quality control on copy number and somatic mutation data for individual samples in [CNAqc](#cnaqc) step, and subsequently summarize validated information at patient level in [join_CNAqc](#join_cnaqc) step.
+The QC subworkflows requires in input a segmentation file from allele-specific copy number callers (either [Sequenza](https://sequenzatools.bitbucket.io/#/home), [ASCAT](https://github.com/VanLoo-lab/ascat) and [Battenberg](https://github.com/Wedge-lab/battenberg)) and the joint VCF file.
+As a first step, the QC subworkflow provides an estimate of normal and tumour samples contamination in [TINC](#tinc) step, in order to have a measure of experimental quality.
+Then, it first conducts a quality control on copy number and somatic mutation data for individual samples in [CNAqc](#cnaqc) step, and subsequently summarize validated information at patient level in [join CNAqc](#join_cnaqc) step.
+
 The QC subworkflow is a crucial step of the pipeline as it ensures high confidence in identifying clonal and subclonal events while accounting for variations in tumor purity.
+
 The results of QC subworkflow step are collected in `{outdir}/qc/` directory.
 
 ### TINC
 
-[TINC](https://caravagnalab.github.io/TINC/index.html) is a package to calculate the contamination of tumor DNA in a matched normal sample. TINC provides a methods to determine, for every matched pair of normal and tumour sample biopsies, the proportion of cancer cells, or tumour read fractions, contaminating the normal sample (Tumour in Normal, TIN). Similarly, it determines the proportion of cancer cells in the tumour sample (Tumour in Tumour, TIT), also called tumour purity.
+[TINC](https://caravagnalab.github.io/TINC/index.html) is a package to calculate the contamination of tumor DNA in a matched normal sample.
+TINC provides a methods to determine, for every matched pair of normal and tumour sample biopsies, the proportion of cancer cells, or tumour read fractions, contaminating the normal sample (Tumour in Normal, TIN). Similarly, it determines the proportion of cancer cells in the tumour sample (Tumour in Tumour, TIT), also called tumour purity.
 
 <details markdown="1">
 <summary>Output files for all samples</summary>
@@ -218,7 +230,7 @@ The results of QC subworkflow step are collected in `{outdir}/qc/` directory.
 - `<dataset>_<patient>_<sample>_fit.rds`
   - TINC fit containing TIN and TIT estimates in RDS;
 - `<dataset>_<patient>_<sample>_plot.rds` and `<dataset>_<patient>_<sample>_plot.pdf`:
-  - TINC report contianign TIN and TIT plots in PDF and RDS;
+  - TINC report containing TIN and TIT plots in PDF and RDS;
 - `<dataset>_<patient>_<sample>_qc.csv`:
   - TINC summary report on normal contamination.
 
@@ -244,7 +256,7 @@ The results of QC subworkflow step are collected in `{outdir}/qc/` directory.
 
 ### join_CNAqc
 
-This module creates a multi-CNAqc object for patient by summarizing the quality check performed at the single sample level. For more information about the structure of multi-CNAqc object see [CNAqc documentation](https://caravagnalab.github.io/CNAqc/articles/b10_MultiCNAqc.html).
+This module creates a multi-CNAqc object for each patient by summarizing the quality check performed at the single sample level. For more information about the structure of multi-CNAqc object see the [CNAqc documentation](https://caravagnalab.github.io/CNAqc/articles/b10_MultiCNAqc.html).
 
 <details markdown="1">
 <summary>Output files for all patients</summary>
@@ -258,7 +270,8 @@ This module creates a multi-CNAqc object for patient by summarizing the quality 
 
 ## Subclonal Deconvolution
 
-The subclonal deconvolution subworkflow requires in input a joint `mCNAqc` object resulting from the [join_CNAqc](#join_cnaqc) step. The subworkflow will perform multi-sample deconvolution if more than one sample for each patient is present.
+The subclonal deconvolution subworkflow requires a joint `mCNAqc` object resulting from the [join_CNAqc](#join_cnaqc) step as input. The subworkflow will perform multi-sample deconvolution if more than one sample for each patient is present.
+
 The results of subclonal deconvolution step are collected in `{outdir}/subclonal_deconvolution/` directory.
 
 ### MOBSTER
@@ -327,9 +340,11 @@ The results of subclonal deconvolution step are collected in `{outdir}/subclonal
 
 ### ctree
 
-Subclonal deconvolution results are used to build clone tree from both single samples and multple samples using [ctree](https://caravagnalab.github.io/ctree/index.html). ctree is a R-based package which implements basic functions to create, manipulate and visualize clone trees by modelling Cancer Cell Fractions (CCF) clusters. Annotated driver genes must be provided in the input data.
+Subclonal deconvolution results are used to build clone trees from both single samples and multple samples using [ctree](https://caravagnalab.github.io/ctree/index.html). ctree is a R-based package which implements basic functions to create, manipulate and visualize clone trees by modelling Cancer Cell Fractions (CCF) clusters. Annotated driver genes must be provided in the input data.
 
-> **NB:** When `--tools pyclone-vi` is used, the output of PyClone-VI subclonal deconvolution is preprocessed prior to clone tree inference. Since ctree requires labeling one of the clusters as "clonal," the one with the highest CCF across all samples is choosen.
+:::note
+When `--tools pyclone-vi` is used, the output of PyClone-VI subclonal deconvolution is preprocessed prior to clone tree inference. Since ctree requires labeling one of the clusters as "clonal," the one with the highest CCF across all samples is choosen.
+:::
 
 VIBER and MOBSTER fits are already compatible for ctree analysis.
 
@@ -343,14 +358,19 @@ VIBER and MOBSTER fits are already compatible for ctree analysis.
 - `{<dataset>_<patient>,<dataset>_<patient>_<sample>}_ctree_<tool>_plots.rds`
   - RDS file for clone tree plot
 - `{<dataset>_<patient>,<dataset>_<patient>_<sample>}_ctree_<tool>_report.{rds,png,pdf}`
-  - ctree report in RDS,PNG and PDF
+  - ctree report in RDS, PNG and PDF
 
 </details>
 
 ## Signature Deconvolution
 
-Mutational signatures are distinctive patterns of somatic mutations in cancer genomes that reveal the underlying mutational processes driving tumor evolution and progression. These signatures are identified by analyzing aggregated point-mutation counts from multiple samples. Validated mutations from the [join_CNAqc](#join_cnaqc) step are converted into a joint TSV table (see [cnaqc2tsv](#cnaqc2tsv)) and then input into the signature deconvolution subworkflow, which performs _de novo_ extraction, inference, interpretation, or deconvolution of mutational counts.
-The results of this step are collected in `{pubslish_dir}/signature_deconvolution/`. Two tools can be specified by using `--tools` parameter: [SparseSignatures](#sparsesignatures) and [SigProfiler](#sigprofiler).
+Mutational signatures are distinctive patterns of somatic mutations in cancer genomes that reveal the underlying mutational processes driving tumor evolution and progression.
+These signatures are identified by analyzing aggregated point-mutation counts from multiple samples.
+
+Validated mutations from the [join_CNAqc](#join_cnaqc) step are converted into a joint TSV table (see [cnaqc2tsv](#cnaqc2tsv)) and then input into the signature deconvolution subworkflow, which performs _de novo_ extraction, inference, interpretation, or deconvolution of mutational counts.
+
+Two tools can be specified by using `--tools` parameter: [SparseSignatures](#sparsesignatures) and [SigProfiler](#sigprofiler).
+The results of this step are collected in `{pubslish_dir}/signature_deconvolution/`.
 
 ### SparseSignatures
 
@@ -364,7 +384,7 @@ The results of this step are collected in `{pubslish_dir}/signature_deconvolutio
 - `<dataset>_mut_counts.rds`
   - RDS of trinucleotide mutation counts of original data
 - `<dataset>_best_params_config.rds`
-  - signatures best configiration object
+  - signatures best configuration object
 - `<dataset>_cv_means_mse.rds`
   - cross validation output RDS
 - `<dataset>_nmf_Lasso_out.rds`
@@ -386,11 +406,11 @@ The results of this step are collected in `{pubslish_dir}/signature_deconvolutio
 - `input/`
   - folder containing a copy of the user-provided input files for SigProfilerMatrixGenerator step
 - `input_data.txt`
-  - join table of all mutations in the dataset in TXT
+  - joint table of all mutations in the dataset in TXT
 - `output/`
-  - folder containing the DBS, SBS, INDEL nucleotide matrices resulting from SigProfilerMatrixGenerator step
+  - folder containing the DBS, SBS, INDEL nucleotide matrices resulting from the SigProfilerMatrixGenerator step
 - `{SBS96,DBS78,ID83}/`
-  - folder containing the results of SigProfilerExtractor step in the SBS, DBS and ID mutational contexts. This directory will contain:
+  - folder containing the results of the SigProfilerExtractor step in the SBS, DBS and ID mutational contexts. This directory will contain:
     - `{SBS96,DBS78,ID83}/All_Solutions/`
       - subdirectory containing the results from running extractions at each rank within the range of the input. For more details visit the [official website](https://osf.io/t6j7u/wiki/5.%20Output%20-%20All%20Solutions/)
     - `{SBS96,DBS78,ID83}/Suggested_Solution/`
@@ -419,7 +439,7 @@ The results of this step are collected in `{pubslish_dir}/signature_deconvolutio
 
 ## Reference files
 
-Different tools of the pipeline generate references files. Once reference file for VEP and SigProfiler are not provided they are stored in the tool-specific folder.
+Different tools of the pipeline generate references files. If reference files for VEP and SigProfiler are not provided, they are then stored in the tool-specific folder.
 
 ### VEP
 
@@ -427,7 +447,7 @@ When VEP cache is not specified, the desired VEP cache is downladed in `{outdir}
 
 ### SigProfiler
 
-Reference genome for SigProfiler is store in the following folder:
+Reference genome for SigProfiler is stored in the following folder:
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -435,7 +455,7 @@ Reference genome for SigProfiler is store in the following folder:
 **Output directory: `{outdir}/subclonal_deconvolution/signature_deconvolution/SigProfiler/genome/tsb/{ref_genome}`**
 
 - `{chromosome}.txt`
-  - genome assemby chromosme level
+  - genome assembly chromosme level
 - `{ref_genome}_proportions.txt`
-  - genome assemby proportions
+  - genome assembly proportions
   </details>
