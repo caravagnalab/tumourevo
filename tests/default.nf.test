@@ -4,11 +4,11 @@ nextflow_pipeline {
     script "../main.nf"
     tag "pipeline"
 
-    test("test-dataset_full") {
+    test("-profile test_full") {
 
         when {
             params {
-                tools = "mobster,pyclone-vi" //sparsesignatures,viber,sigprofiler
+                tools = "mobster,pyclone-vi"
                 outdir = "$outputDir"
             }
         }

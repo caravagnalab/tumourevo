@@ -67,10 +67,6 @@
                     {
                         "type": "string",
                         "pattern": "^\\S+$"
-                    },
-                    {
-                        "type": "string",
-                        "maxLength": 0
                     }
                 ]
             },

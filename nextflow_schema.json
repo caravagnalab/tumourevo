@@ -73,10 +73,9 @@
             "default": "",
             "properties": {
                 "download_cache_vep": {
-                    "type": "string",
+                    "type": "boolean",
                     "description": "Parameter for downloading VEP cache.",
-                    "default": "FALSE",
-                    "enum": ["TRUE", "FALSE"]
+                    "default": true
                 },
                 "vep_cache": {
                     "type": "string",
@@ -138,13 +137,14 @@
             "properties": {
                 "cnaqc_karyotypes": {
                     "type": "string",
-                    "default": "\"c(\\\"1:0\\\", \\\"1:1\\\", \\\"2:0\\\", \\\"2:1\\\", \\\"2:2\\\")\"",
+                    "default": "c(\"1:0\", \"1:1\", \"2:0\", \"2:1\", \"2:2\")",
                     "description": "For clonal simple CNAs, the list of segments to test.",
-                    "help_text": "By default LOH regions (A, AA), diploid regions (AB), and amplification regions (AAB, AABB) are tested, corresponding to '1:0', '1:1', '2:1', '2:0', '2:2' in \"Major:minor\" notation."
+                    "help_text": "By default LOH regions (A, AA), diploid regions (AB), and amplification regions (AAB, AABB) are tested, corresponding to '1:0', '1:1', '2:1', '2:0', '2:2' in \"Major:minor\" notation.",
+                    "pattern": "^c\\(\\s*\"(1:[01]|2:[012])\"(?:\\s*,\\s*\"(1:[01]|2:[012])\")*\\s*\\)$"
                 },
                 "cnaqc_min_karyotype_size": {
                     "type": "number",
-                    "default": 0,
+                    "default": 0.0,
                     "description": "For clonal simple CNAs, a filter for the segments to test.",
                     "help_text": "The segment size is defined based on the number of mutations mapped. This threshold is the proportion relative to the whole set of segments one wishes to analyse (defined by `karyotypes`). For example, by setting `cnaqc_min_karyotype_size = 0.2` one would QC clonal simple CNAs that contain at least 20.",
                     "minimum": 0,
@@ -205,7 +205,8 @@
                 "cnaqc_starting_state_subclonal_evolution": {
                     "type": "string",
                     "default": "1:1",
-                    "description": "For subclonal simple CNAs, the starting state to determine linear versus branching evolutionary models."
+                    "description": "For subclonal simple CNAs, the starting state to determine linear versus branching evolutionary models.",
+                    "pattern": "^(1:[01]|2:[012])$"
                 },
                 "cnaqc_muts_per_karyotype": {
                     "type": "integer",
@@ -227,12 +228,6 @@
             "description": "joinCNAqc",
             "default": "",
             "properties": {
-                "joincnaqc_qc_filter": {
-                    "type": "string",
-                    "description": "If TRUE the mutations flagged as FAILED by CNAqc are discarded while building the joinCNAqc segmentation, if FALSE they are kept in the new object.",
-                    "default": "FALSE",
-                    "enum": ["TRUE", "FALSE"]
-                },
                 "joincnaqc_keep_original": {
                     "type": "string",
                     "default": "TRUE",
@@ -245,7 +240,7 @@
         "pyclone_vi": {
             "title": "pyClone-VI",
             "type": "object",
-            "description": "",
+            "description": "pyClone-VI",
             "default": "",
             "properties": {
                 "pyclonevi_density": {
@@ -297,7 +292,8 @@
                     "type": "string",
                     "default": "1:5",
                     "description": "A vector with the number of Beta components to use.",
-                    "help_text": "All values of K must be positive and strictly greater than 0; they are combined with the value of tail to define all model configurations tested for model selection"
+                    "help_text": "All values of K must be positive and strictly greater than 0; they are combined with the value of tail to define all model configurations tested for model selection",
+                    "pattern": "^[1-9][0-9]*:[1-9][0-9]*$"
                 },
                 "mobster_min_vaf": {
                     "type": "number",
@@ -405,7 +401,8 @@
                 "sparsesignatures_k": {
                     "type": "string",
                     "default": "2:10",
-                    "description": "Number of signatures to be discovered."
+                    "description": "Number of signatures to be discovered.",
+                    "pattern": "^[1-9][0-9]*:[1-9][0-9]*$"
                 },
                 "sparsesignatures_nmf_runs": {
                     "type": "integer",
@@ -420,7 +417,8 @@
                 "sparsesignatures_num_processes": {
                     "type": "string",
                     "default": "all",
-                    "description": "The number of requested NMF worker subprocesses to spawn. If Inf, an adaptive maximum number is automatically chosen. If NA or NULL, the function is run as a single process."
+                    "description": "The number of requested NMF worker subprocesses to spawn. If Inf, an adaptive maximum number is automatically chosen. If NA or NULL, the function is run as a single process.",
+                    "pattern": "^(all|[0-9]+:[0-9]+)$"
                 },
                 "sparsesignatures_cross_validation_entries": {
                     "type": "number",
@@ -440,7 +438,8 @@
                 "sparsesignatures_lambda_values_beta": {
                     "type": "string",
                     "default": "c(0.01, 0.05, 0.1, 0.2)",
-                    "description": "The candidate values of the sparsity parameter for the signature matrix 'beta' whose goodness of fit is assessed by cross-validation."
+                    "description": "The candidate values of the sparsity parameter for the signature matrix 'beta' whose goodness of fit is assessed by cross-validation.",
+                    "pattern": "^c\\(\\s*[0-9]+(?:\\.[0-9]+)?(?:\\s*,\\s*[0-9]+(?:\\.[0-9]+)?)*\\s*\\)$"
                 },
                 "sparsesignatures_lambda_rate_alpha": {
                     "type": "integer",
@@ -455,7 +454,8 @@
                 "sparsesignatures_lambda_values_alpha": {
                     "type": "string",
                     "default": "c(0.00, 0.01, 0.05, 0.10)",
-                    "description": "The candidate values of the sparsity parameter for the exposure-matrix entries alpha whose goodness of fit is assessed by cross-validation."
+                    "description": "The candidate values of the sparsity parameter for the exposure-matrix entries alpha whose goodness of fit is assessed by cross-validation.",
+                    "pattern": "^c\\(\\s*[0-9]+(?:\\.[0-9]+)?(?:\\s*,\\s*[0-9]+(?:\\.[0-9]+)?)*\\s*\\)$"
                 }
             },
             "fa_icon": "fas fa-briefcase"
@@ -499,7 +499,8 @@
                 "sigprofiler_context_type": {
                     "type": "string",
                     "default": "96,DINUC,ID",
-                    "description": "Mutation context name(s), separated by commas (,), that define the mutational contexts for signature extraction. In the default value, 96 represents the SBS96 context, DINUC represents the dinucleotide context, and ID represents the indel context."
+                    "description": "Mutation context name(s), separated by commas (,), that define the mutational contexts for signature extraction. In the default value, 96 represents the SBS96 context, DINUC represents the dinucleotide context, and ID represents the indel context.",
+                    "pattern": "^(96|DINUC|ID)(?:,(96|DINUC|ID))*$"
                 },
                 "sigprofiler_nmf_replicates": {
                     "type": "integer",

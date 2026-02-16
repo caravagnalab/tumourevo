@@ -37,7 +37,7 @@ By default, if multiple samples from the same patient are provided, they will be
 to retrieve information useful in the reconstruction of the evolutionary process. Depending on the variant calling strategy (single sample or multi sample) and the provided input files,
 different strategies will be applied.
 
-![tumourevo workflow](docs/images/workflow_last.png)
+![tumourevo workflow](docs/images/ nf-core-tumourevo_metromap.png)
 
 - Variant Annotation (`VEP`)
 - Quality Control (`CNAqc`, `TINC`)
@@ -88,17 +88,6 @@ For more details about the output files and reports, please refer to the
 ## Credits
 
 nf-core/tumourevo was originally written by Nicola Calonaci, Elena Buscaroli, Katsiaryna Davydzenka, Giorgia Gandolfi, Virginia Gazziero, Brandon Hastings, Davide Rambaldi, Rodolfo Tolloi, Lucrezia Valeriani and Giulio Caravagna.
-
-The nf-core/tumourevo pipeline comes with documentation about the pipeline, found in the `docs/` directory:
-
-1. [Installation](https://nf-co.re/usage/installation)
-2. Pipeline configuration
-   - [Local installation](https://nf-co.re/usage/local_installation)
-   - [Adding your own system config](https://nf-co.re/usage/adding_own_config)
-   - [Reference genomes](https://nf-co.re/usage/reference_genomes)
-3. [Running the pipeline](docs/usage.md)
-4. [Output and how to interpret the results](docs/output.md)
-5. [Troubleshooting](https://nf-co.re/usage/troubleshooting)
 
 ## Contributions and Support
 

@@ -57,15 +57,15 @@ The default directory structure is as follows:
 │       └── <dataset>
 |   └── sparsesignatures
 │       └── <dataset>
-└── subclonal_deconvolution
+├── subclonal_deconvolution
 |   ├── mobster
 │       └── <sample>
 |   ├── viber
 │       └── <patient>
-|   └── pyclonevi
+|   ├── pyclonevi
 │       └── <patient>
-|   ├── ctree
-│       └── <patient>,<sample>
+|   └── ctree
+        └── <patient>,<sample>
 work/
 .nextflow.log
 ```
