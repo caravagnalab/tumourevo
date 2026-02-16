@@ -11,6 +11,7 @@ nextflow_pipeline {
             params {
                 tools = "mobster,pyclone-vi" //sparsesignatures,viber,sigprofiler
                 outdir = "$outputDir"
+
             }
         }
 
