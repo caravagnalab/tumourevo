@@ -37,9 +37,7 @@ By default, if multiple samples from the same patient are provided, they will be
 to retrieve information useful in the reconstruction of the evolutionary process. Depending on the variant calling strategy (single sample or multi sample) and the provided input files,
 different strategies will be applied.
 
-<p align="center">
-    <img title="tumourevo workflow" src="docs/images/workflow_last.png" width=90%>
-</p>
+![tumourevo workflow](docs/images/nf-core-tumourevo_metromap.png)
 
 - Variant Annotation (`VEP`)
 - Quality Control (`CNAqc`, `TINC`)
@@ -91,19 +89,6 @@ For more details about the output files and reports, please refer to the
 
 nf-core/tumourevo was originally written by Nicola Calonaci, Elena Buscaroli, Katsiaryna Davydzenka, Giorgia Gandolfi, Virginia Gazziero, Brandon Hastings, Davide Rambaldi, Rodolfo Tolloi, Lucrezia Valeriani and Giulio Caravagna.
 
-The nf-core/tumourevo pipeline comes with documentation about the pipeline, found in the `docs/` directory:
-
-1. [Installation](https://nf-co.re/usage/installation)
-2. Pipeline configuration
-   - [Local installation](https://nf-co.re/usage/local_installation)
-   - [Adding your own system config](https://nf-co.re/usage/adding_own_config)
-   - [Reference genomes](https://nf-co.re/usage/reference_genomes)
-3. [Running the pipeline](docs/usage.md)
-4. [Output and how to interpret the results](docs/output.md)
-5. [Troubleshooting](https://nf-co.re/usage/troubleshooting)
-
-<!-- TODO nf-core: Add a brief overview of what the pipeline does and how it works -->
-
 ## Contributions and Support
 
 If you would like to contribute to this pipeline, please see the [contributing guidelines](.github/CONTRIBUTING.md).
@@ -111,10 +96,6 @@ If you would like to contribute to this pipeline, please see the [contributing g
 For further information or help, don't hesitate to get in touch on the [Slack `#tumourevo` channel](https://nfcore.slack.com/channels/tumourevo) (you can join with [this invite](https://nf-co.re/join/slack)).
 
 ## Citations
-
-<!-- TODO nf-core: Add citation for pipeline after first release. Uncomment lines below and update Zenodo doi and badge at the top of this file. -->
-<!-- If you use nf-core/tumourevo for your analysis, please cite it using the following doi: [10.5281/zenodo.XXXXXX](https://doi.org/10.5281/zenodo.XXXXXX) -->
-<!-- TODO nf-core: Add bibliography of tools and data used in your pipeline -->
 
 An extensive list of references for the tools used by the pipeline can be found in the [`CITATIONS.md`](CITATIONS.md) file.
 

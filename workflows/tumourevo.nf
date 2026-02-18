@@ -60,7 +60,7 @@ main:
     ch_extra_files = []
 
     if (params.vcf_filter_mutations == true){
-        BCFTOOLS_VIEW(input_vcf)
+        BCFTOOLS_VIEW(input_vcf, [], [], [])
         vcf = BCFTOOLS_VIEW.out.vcf.join(BCFTOOLS_VIEW.out.tbi)
     } else {
         vcf = input_vcf

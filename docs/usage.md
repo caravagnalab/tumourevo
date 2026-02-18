@@ -26,7 +26,7 @@ It is recommended to use the absolute path of the files, but a relative path sho
 
 For the joint analysis of multiple samples, a tumour BAM/CRAM (with its corresponding BAI/CRAI) file is required for each sample, such that the number of reads of a private mutation can be retrieved for all the samples thorugh `mpileup`.
 
-Multiple samples from the same patient must be specified with the same `dataset` ID, `patient` ID, and a different `tumour_sample` ID. `normal_sample` ID columns is required.
+Multiple samples from the same patient must be specified with the same `dataset` ID, `patient` ID, and a different `tumour_sample` ID. The `normal_sample` ID column is also required.
 
 Multiple patients from the same dataset must be specified with the same `dataset` ID, and a different `patient` ID.
 
@@ -62,13 +62,14 @@ dataset1,patient1,sample2,N1,patient1_sample2.vcf.gz,patient1_sample2.vcf.gz.tbi
 ### Pipeline modalities
 
 The tumourevo pipeline supports variant annotation, driver annotation, quality control processes, subclonal deconvolution and signature deconvolution analysis through various tools. It can be used to analyse both single sample experiments and longitudinal/multi-region assays, in which multiple samples from the same patient are avaiable.
+
 As input, you must provide at least information on the samples, the VCF file from one of the supported callers and the output of one of the supported copy number callers. By default, if multiple samples from the same patient are provided, they will be analysed in a multivariate framework (which affects in particular the subclonal deconvolution steps) to retrieve information useful in the reconstruction of the evolutionary process. Depending on the variant calling strategy (single sample or multi sample) and the provided input files, different strategies will be applied.
 
 #### Variant calling
 
 ##### 1. Multi-sample variant calling
 
-Modern tools (ie: Platypus and Mutect2) allow to perform variant calling directly in multisample mode. If the VCFs provided as input are already multisample, no additional step is required.
+Tools such as Platypus and Mutect2 allow to perform variant calling directly in multisample mode. If the VCFs provided as input are already multisample, no additional step is required.
 
 ###### Examples
 
@@ -107,24 +108,28 @@ If you can not include the alignment files in the input csv, the pipeline will r
 
 #### 3. Filtering data
 
-During the QC step, the pipeline will combine purity, copy number and mutation data to perform quality control on the copy number calls, by applying the [CNAqc algorithm](https://caravagnalab.github.io/CNAqc/). Each segment (for each sample) will be flagged as passing or not the QC, in the given combination of estimated purity and ploidy. According to CNAqc, a badly called segment should be recalled with a different purity estimation, in order to obtain more reliable results.
-After CNAqc quality control, all the segments (coming from samples of the same patient) are used to build a multi-sample CNAqc object, in which a common segmentation is applied. In this way, only those regions that are shared among all samples will be kept in the new object. It is possible to control whether to include or not in the new segmentation the segments, for each sample, that do not pass the QC test using the `--filter` flag. If it is set to true, only QC passing segments for each sample will be used to build the mCNAqc object and will then be passed to the subclonal deconvolution steps. This will lead to exclude some regions of the genome and the mutations that sit on it, but should result in more precise analyses. Otherwise, keeping also the segments that do not pass the QC will result in not losing any mutations but might lead to less precise results in the subclonal deconvolution steps.
+During the QC step, the pipeline will combine purity, copy number and mutation data to perform quality control on the copy number calls, by applying the [CNAqc algorithm](https://caravagnalab.github.io/CNAqc/). Each segment (for each sample) will be flagged as passing or not passing the QC, in the given combination of estimated purity and ploidy. According to CNAqc, a badly called segment should be recalled with a different purity estimation, in order to obtain more reliable results.
+
+After CNAqc quality control, all the segments (coming from samples of the same patient) are used to build a multi-sample CNAqc object, in which a common segmentation is applied.
+In this way, only those regions that are shared among all samples will be kept in the new object.
+It is possible to control whether to include or not in the new segmentation the segments, for each sample, that do not pass the QC test using the `--filter` flag.
+If it is set to true, only QC passing segments for each sample will be used to build the mCNAqc object and will then be passed to the subclonal deconvolution steps. This will lead to exclude some regions of the genome and the mutations that sit on it, but should result in more precise analyses. Otherwise, keeping also the segments that do not pass the QC will result in not losing any mutations but might lead to less precise results in the subclonal deconvolution steps.
 
 #### 4. Driver annotation
 
 You can retrieve tumour-specific drivers in the driver annotation step by specifying the tumour type in the input csv. Pan-cancer drivers will be retrieved by specifying `PANCANCER` as tumour type in the input csv file.
+
 For this step, we currently refer to [IntOGen latest release](https://www.nature.com/articles/s41568-020-0290-x), but it is also possible to provide a custom driver table that will be used in the analysis.
-Please note that the tumour types reported in the input file must correspond to those present in the table used for the annotation (default driver table used can be found [here](https://github.com/caravagnalab/nextflow_modules/blob/main/2023-05-31_IntOGen-Drivers/Unfiltered_drivers.tsv))
+
+Please note that the tumour types reported in the input file must correspond to those present in the table used for the annotation (default driver table used can be found [here](https://raw.githubusercontent.com/nf-core/test-datasets/refs/heads/tumourevo/data/DRIVER_ANNOTATION/ANNOTATE_DRIVER/Compendium_Cancer_Genes.tsv))
 
 ### 5. Available tools
-
-We report the different tools included in the pipeline.
 
 1. **Gene annotation**
    - [EnsemblVEP](https://www.ensembl.org/info/docs/tools/vep/index.html)
 
 2. **Driver annotation**
-   - Custom made algorithm
+   - [Custom made algorithm](https://github.com/nf-core/tumourevo/blob/dev/modules/local/annotate_driver/main.nf)
 
 3. **Quality control**
    - [TINC](https://caravagnalab.github.io/TINC/)
@@ -157,8 +162,6 @@ nextflow run nf-core/tumourevo \
 
 `-profile <PROFILE>` is mandatory and should reflect either your own institutional profile or any pipeline profile specified in the [profile section](#-profile).
 
-This documentation imply that any `nextflow run nf-core/tumourevo` command is run with the appropriate `-r` and `-profile` commands.
-
 This will launch the pipeline and perform variant calling with the tools specified in `--tools`, see the [parameter section](https://nf-co.re/tumourevo/dev/parameters/) for details on the available tools.
 
 Unless running with the `test` profile, the paths of input files must be provided within the `<INPUT CSV>` file specified in `--input`, see the [input section](#samplesheet-input) for input requirements.
@@ -172,8 +175,7 @@ results         # Finished results (configurable, see below)
 # Other nextflow hidden files, eg. history of pipeline runs and old logs.
 ```
 
-If you wish to repeatedly use the same parameters for multiple runs, rather than specifying each flag in the command,
-you can specify these in a params file.
+If you wish to repeatedly use the same parameters for multiple runs, rather than specifying each flag in the command, you can specify these in a params file.
 
 Pipeline settings can be provided in a `yaml` or `json` file via `-params-file <file>`.
 

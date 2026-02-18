@@ -5,12 +5,13 @@ nextflow_pipeline {
     tag "pipeline"
     options "-stub"
 
-    test("test-dataset_full_stub") {
+    test("-profile test_full_stub") {
 
         when {
             params {
                 tools = "mobster,pyclone-vi" //sparsesignatures,viber,sigprofiler
                 outdir = "$outputDir"
+
             }
         }
 
