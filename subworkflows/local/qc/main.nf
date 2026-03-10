@@ -12,7 +12,9 @@ workflow QC {
         input
 
     main:
+        ch_versions = Channel.empty()
         TINC(input)
+        ch_versions = ch_versions.mix(TINC.out.versions)
 
         input_cnaqc = input.map{meta, cna, snv ->
                 def sample =  meta.tumour_sample
@@ -20,6 +22,7 @@ workflow QC {
         }
 
         CNAQC(input_cnaqc)
+        ch_versions = ch_versions.mix(CNAQC.out.versions)
         in_join_cnaqc = CNAQC.out.qc_rds.map{ meta, rds ->
             def sample = meta.tumour_sample
             meta = meta + [id: "${meta.dataset}_${meta.patient}"]
@@ -27,6 +30,7 @@ workflow QC {
             .groupTuple()
 
         JOIN_CNAQC(in_join_cnaqc)
+        ch_versions = ch_versions.mix(JOIN_CNAQC.out.versions)
 
     emit:
         rds_cnaqc = CNAQC.out.qc_rds
@@ -42,4 +46,6 @@ workflow QC {
 
         join_cnaqc_ALL = JOIN_CNAQC.out.rds_all
         join_cnaqc_PASS = JOIN_CNAQC.out.rds_pass
+
+        versions = ch_versions
 }

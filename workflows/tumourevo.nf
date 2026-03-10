@@ -13,6 +13,8 @@ include { FORMATTER as FORMATTER_RDS} from "../subworkflows/local/formatter/main
 include { QC } from "../subworkflows/local/qc/main"
 include { SUBCLONAL_DECONVOLUTION } from "../subworkflows/local/subclonal_deconvolution/main"
 include { SIGNATURE_DECONVOLUTION } from "../subworkflows/local/signature_deconvolution/main"
+
+include { softwareVersionsToYAML           } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     RUN MAIN WORKFLOW
@@ -26,6 +28,7 @@ workflow TUMOUREVO {
     fasta
     drivers_table
     vep_cache
+    ch_versions
 
 main:
     input = input_samplesheet.map{ meta, vcf, tbi, bam, bai, cna_segs, cna_extra ->
@@ -75,10 +78,24 @@ main:
         fasta,
         ch_extra_files,
     )
+
+    ch_ensemblvep_versions = ENSEMBLVEP_VEP.out.versions_ensemblvep
+                    .mix(ENSEMBLVEP_VEP.out.versions_tabix)
+                    .mix(ENSEMBLVEP_VEP.out.versions_perlmathcdf)
+                    .map { process_name, tool, version ->
+                        """${process_name}:
+                    ${tool}: ${version}"""
+                    }
+                    .collectFile(name: 'versions.yml', newLine: true, sort: false)
+    ch_versions = ch_versions.mix(ch_ensemblvep_versions)
     ch_vcf_tbi = ENSEMBLVEP_VEP.out.vcf.join(ENSEMBLVEP_VEP.out.tbi, failOnDuplicate: true, failOnMismatch: true)
 
-    vcf_file = FORMATTER_VCF(ch_vcf_tbi, "vcf")
-    cna_file = FORMATTER_CNA(input_cna, "cna")
+    FORMATTER_VCF(ch_vcf_tbi, "vcf")
+    FORMATTER_CNA(input_cna, "cna")
+    vcf_file = FORMATTER_VCF.out.out_data
+    cna_file = FORMATTER_CNA.out.out_data
+    ch_versions = ch_versions.mix(FORMATTER_VCF.out.versions)
+    ch_versions = ch_versions.mix(FORMATTER_CNA.out.versions)
 
     join_input = vcf_file.join(input_bam).map{ meta, rds, bam, bai ->
             [ meta, rds, bam, bai ] }
@@ -87,24 +104,40 @@ main:
                 multisample: meta.lifter == false
             }
 
-    out_lifter = LIFTER(join_input.to_lift, fasta)
+    LIFTER(join_input.to_lift, fasta)
+    out_lifter = LIFTER.out.out_data
+    ch_versions = ch_versions.mix(LIFTER.out.versions)
 
     rds_input = join_input.multisample.map{ meta, rds, bam, bai ->
             [meta, rds]
             }
+
     vcf_rds = rds_input.concat(out_lifter)
     ANNOTATE_DRIVER(vcf_rds.combine(drivers_table))
+    ch_versions = ch_versions.mix(ANNOTATE_DRIVER.out.versions)
 
     in_cnaqc = cna_file.join(ANNOTATE_DRIVER.out.rds)
     QC(in_cnaqc)
+    ch_versions = ch_versions.mix(QC.out.versions)
 
     if (params.filter == true){
         SUBCLONAL_DECONVOLUTION(QC.out.join_cnaqc_PASS)
         SIGNATURE_DECONVOLUTION(QC.out.join_cnaqc_PASS)
+
     } else {
         SUBCLONAL_DECONVOLUTION(QC.out.join_cnaqc_ALL)
         SIGNATURE_DECONVOLUTION(QC.out.join_cnaqc_ALL)
     }
+
+    ch_versions = ch_versions.mix(SUBCLONAL_DECONVOLUTION.out.versions)
+    ch_versions = ch_versions.mix(SIGNATURE_DECONVOLUTION.out.versions)
+
+    softwareVersionsToYAML(ch_versions)
+        .collectFile(storeDir: "${params.outdir}/pipeline_info", name: 'nf_core_tumourevo_software_mqc_versions.yml', sort: true, newLine: true)
+        .set { ch_collated_versions }
+
+emit:
+    versions = ch_collated_versions
 }
 
 /*

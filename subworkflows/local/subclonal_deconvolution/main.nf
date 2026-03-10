@@ -13,6 +13,7 @@ workflow SUBCLONAL_DECONVOLUTION {
     rds_join // tuple val(meta), path("*.rds"), val(tumour_samples), emit: rds
 
     main:
+    ch_versions = Channel.empty()
     mobster_pdf = null
     ctree_mobster_pdf = null
     viber_pdf = null
@@ -28,8 +29,10 @@ workflow SUBCLONAL_DECONVOLUTION {
             [meta, rds]}
 
         MOBSTER(joinCNAqc)
+        ch_versions = ch_versions.mix(MOBSTER.out.versions)
 
         CTREE_MOBSTER(MOBSTER.out.mobster_best_rds)
+        //ch_versions = ch_versions.mix(CTREE_MOBSTER.out.versions)
 
         mobster_pdf = MOBSTER.out.mobster_report_pdf
         ctree_mobster_pdf = CTREE_MOBSTER.out.ctree_report_pdf
@@ -38,7 +41,10 @@ workflow SUBCLONAL_DECONVOLUTION {
 
     if (params.tools && params.tools.split(",").contains("viber")) {
         VIBER(rds_join)
+        ch_versions = ch_versions.mix(VIBER.out.versions)
+
         CTREE_VIBER(VIBER.out.viber_rds)
+        //ch_versions = ch_versions.mix(CTREE_VIBER.out.versions)
 
         viber_pdf = VIBER.out.viber_report_pdf
         ctree_viber_pdf = CTREE_VIBER.out.ctree_report_pdf
@@ -46,11 +52,16 @@ workflow SUBCLONAL_DECONVOLUTION {
 
     if (params.tools && params.tools.split(",").contains("pyclone-vi")) {
         FORMATTER(rds_join, "rds")
-        PYCLONEVI(FORMATTER.out.out)
+        PYCLONEVI(FORMATTER.out.out_data)
         CTREE_PYCLONEVI(PYCLONEVI.out.ctree_input)
+
+        ch_versions = ch_versions.mix(FORMATTER.out.versions)
+        //ch_versions = ch_versions.mix(PYCLONEVI.out.versions)
+        //ch_versions = ch_versions.mix(CTREE_PYCLONEVI.out.versions)
+
         pyclone_fits = PYCLONEVI.out.pyclone_all_fits
         pyclone_best = PYCLONEVI.out.pyclone_best_fit
-        pyclone_table = FORMATTER.out.out
+        pyclone_table = FORMATTER.out.out_data
         ctree_pyclone_pdf = CTREE_PYCLONEVI.out.ctree_report_pdf
     }
 
@@ -63,4 +74,5 @@ workflow SUBCLONAL_DECONVOLUTION {
     mobster_pdf
     ctree_mobster_pdf
     pyclone_table
+    versions = ch_versions
 }

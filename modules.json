@@ -40,12 +40,12 @@
                     },
                     "mobster": {
                         "branch": "master",
-                        "git_sha": "1e0259db8e0a2b2c5bd99f83cc2ecf8583a85020",
+                        "git_sha": "ee54577f78696e5fec045de8784bbfddf01d5e25",
                         "installed_by": ["modules"]
                     },
                     "pyclonevi": {
                         "branch": "master",
-                        "git_sha": "e753770db613ce014b3c4bc94f6cba443427b726",
+                        "git_sha": "a039cea3fd78c17219897cf2f78d254b43ef33a8",
                         "installed_by": ["modules"]
                     },
                     "sigprofiler": {
@@ -77,7 +77,7 @@
                     },
                     "viber": {
                         "branch": "master",
-                        "git_sha": "f6031b14e341929835b54a4c98f26ba94e739dc6",
+                        "git_sha": "642d6c5c0b7a4fbd7122fd00cbbb9a4a671d6d0a",
                         "installed_by": ["modules"]
                     }
                 }

@@ -49,6 +49,7 @@ workflow NFCORE_TUMOUREVO {
     input
 
     main:
+    ch_versions = Channel.empty()
     fasta = params.fasta ? Channel.fromPath(params.fasta).map{ it -> [ [id:it.baseName], it ] }.collect() : Channel.empty()
     drivers_table =  params.drivers_table ? Channel.fromPath(params.drivers_table).map{ it -> [ it ] }.collect() : Channel.empty()
 
@@ -81,11 +82,13 @@ workflow NFCORE_TUMOUREVO {
         input,
         fasta,
         drivers_table,
-        vep_cache
+        vep_cache,
+        ch_versions
     )
+    ch_versions = ch_versions.mix(TUMOUREVO.out.versions)
 
     emit:
-    null
+    versions = ch_versions
 }
 
 /*
