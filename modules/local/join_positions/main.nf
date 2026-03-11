@@ -67,9 +67,10 @@ process JOIN_POSITIONS {
         stop("Mismatch between the VCF fixed fields and the genotypes, will not process this file.")
 
     pileup_mutations = dplyr::bind_cols(fix_field, gt_field)  %>%
-                dplyr::select(chr, from, to, ref, NV, DP, VAF, dplyr::everything(), -alt, -ChromKey) %>%
+                dplyr::select(chr, from, to, ref, NV, DP, dplyr::everything(), -alt, -ChromKey) %>%
                 dplyr::mutate(from = from+1, to = to+1)  %>%
-                dplyr::mutate(NV = 0)
+                dplyr::mutate(NV = 0) %>%
+                dplyr::mutate(VAF = NV/DP)
 
     bind = inner_join(pileup_mutations, all_positions, by = join_by(chr, from, to, ref))
 
