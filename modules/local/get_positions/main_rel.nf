@@ -34,7 +34,8 @@ process GET_POSITIONS_REL {
     missed = all_positions %>%
             dplyr::filter(!(id %in%  positions\$id)) %>%
             dplyr::filter(chr %in% c(paste0('chr', seq(1,22)), 'chrX', 'chrY')) %>%
-            dplyr::select(chr, from, to)
+            dplyr::select(chr, from, to) %>%
+            dplyr::mutate(from = from-1, to = to-1)
 
     write.table(file = paste0("$meta.id", "_positions_missing.bed"), missed, quote = F, sep = "\t", row.names = F, col.names = F)
 

@@ -37,7 +37,7 @@ process JOIN_CNAQC {
     names(result) = samples
 
     for (name in names(result)){
-        result[[name]]\$mutations = result[[name]]\$mutations %>% dplyr::rename(Indiv = sample)
+        result[[name]]\$mutations = result[[name]]\$mutations %>% dplyr::rename(Indiv = sample) %>% dplyr::select(-additional_info)
     }
 
     out_all = CNAqc::multisample_init(result,
