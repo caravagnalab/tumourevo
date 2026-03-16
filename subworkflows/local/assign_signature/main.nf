@@ -6,6 +6,10 @@ include { FORMATTER } from "../../../subworkflows/local/formatter/main"
 include { PREPARE_CLUSTER as PREPARE_CLUSTER_PYCLONE } from '../../../modules/local/prepare_cluster/main'
 include { PREPARE_CLUSTER as PREPARE_CLUSTER_MOBSTER } from '../../../modules/local/prepare_cluster/main'
 include { PREPARE_CLUSTER as PREPARE_CLUSTER_VIBER } from '../../../modules/local/prepare_cluster/main'
+include { ASSIGN_CLUSTER as ASSIGN_CLUSTER_VIBER } from '../../../modules/local/assign_cluster/main'
+include { ASSIGN_CLUSTER as ASSIGN_CLUSTER_MOBSTER } from '../../../modules/local/assign_cluster/main'
+include { ASSIGN_CLUSTER as ASSIGN_CLUSTER_PYCLONE } from '../../../modules/local/assign_cluster/main'
+
 
 
 workflow ASSIGN_SIGNATURE {
@@ -17,16 +21,52 @@ workflow ASSIGN_SIGNATURE {
         sigprofiler_fit
 
     main:
+        ch_versions = Channel.empty()
+        table_pyclone = null
+        table_mobster = null
+        table_viber = null
 
-        FORMATTER(rds_join, "rds")
-        pyclone_combined = pyclone_fit.join(FORMATTER.out.out_data, by: 0).map {meta, fit, data, samples -> tuple(meta, fit, data)}
-        viber_combined = viber_fit.map { meta, fit -> tuple(meta, fit, []) }
-        mobster_combined = mobster_fit.map { meta, fit -> tuple(meta, fit, []) }
+        if (params.download_sigprofiler_genome) {
+            genome_path = channel.fromPath('opt/null')
+        } else {
+            genome_path = params.genome_installed_path
+        }
 
-        PREPARE_CLUSTER_PYCLONE(pyclone_combined)
-        //PREPARE_CLUSTER_VIBER(viber_combined)
-        //PREPARE_CLUSTER_MOBSTER(mobster_combined)
+
+        if (params.tools && params.tools.split(",").contains("mobster")) {
+            mobster_combined = mobster_fit.map { meta, fit -> tuple(meta, fit, []) }
+            PREPARE_CLUSTER_MOBSTER(mobster_combined)
+            table_mobster = PREPARE_CLUSTER_MOBSTER.out.signature_table
+            ch_versions = ch_versions.mix(PREPARE_CLUSTER_MOBSTER.out.versions)
+        }
+
+
+        if (params.tools && params.tools.split(",").contains("viber")) {
+            viber_combined = viber_fit.map { meta, fit -> tuple(meta, fit, []) }
+            PREPARE_CLUSTER_VIBER(viber_combined)
+            table_viber = PREPARE_CLUSTER_VIBER.out.signature_table
+            ch_versions = ch_versions.mix(PREPARE_CLUSTER_VIBER.out.versions)
+        }
+
+        if (params.tools && params.tools.split(",").contains("pyclone-vi")) {
+            FORMATTER(rds_join, "rds")
+            ch_versions = ch_versions.mix(FORMATTER.out.versions)
+
+            pyclone_combined = pyclone_fit.join(FORMATTER.out.out_data, by: 0).map {meta, fit, data, samples -> tuple(meta, fit, data)}
+            PREPARE_CLUSTER_PYCLONE(pyclone_combined)
+            table_pyclone = PREPARE_CLUSTER_PYCLONE.out.signature_table
+            ch_versions = ch_versions.mix(PREPARE_CLUSTER_PYCLONE.out.versions)
+
+            input = table_pyclone.combine(sigprofiler_fit).combine(genome_path)
+            ASSIGN_CLUSTER_PYCLONE(input, 'pyclonevi')
+
+
+        }
+
 
     emit:
-        null
+        table_pyclone
+        table_viber
+        table_mobster
+        ch_versions
 }

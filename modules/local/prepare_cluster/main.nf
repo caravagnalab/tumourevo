@@ -12,8 +12,8 @@ process PREPARE_CLUSTER {
     tuple val(meta), path(fit), path(data)
 
     output:
-    //tuple val(meta), path("*_all_positions.rds"), emit: all_pos
-    path "versions.yml",                          emit: versions
+    tuple val(meta), path("*.txt"), emit: signature_table
+    path "versions.yml",            emit: versions
 
     script:
     def args   = task.ext.args   ?: ""
@@ -24,7 +24,7 @@ process PREPARE_CLUSTER {
     library(dplyr)
 
     if (grepl(pattern = 'viber', x = "$fit")){
-        print('is viber')
+        tool <- 'viber'
         tool_table <- readRDS("$fit")
 
         sigprofiler_table <- tool_table\$data %>%
@@ -34,7 +34,7 @@ process PREPARE_CLUSTER {
             dplyr::select(-tmp) %>%
             dplyr::bind_cols(tool_table\$labels) %>%
             dplyr::rename(cluster = cluster.Binomial) %>%
-            dplyr::mutate(Project = "$meta.id", Genome = 'GRCh38', mut_type = 'SNP', Type = 'SOMATIC', ID = cluster, Sample = cluster) %>%
+            dplyr::mutate(Project = "$meta.id", Genome = "${params.genome}", mut_type = 'SNP', Type = 'SOMATIC', ID = cluster, Sample = cluster) %>%
             dplyr::rename(chrom = chr, pos_start = from) %>%
             dplyr::rowwise() %>%
             dplyr::mutate(pos_end = pos_start + abs(stringr::str_count(ref) - stringr::str_count(alt))) %>%
@@ -44,6 +44,7 @@ process PREPARE_CLUSTER {
 
 
     } else if (grepl(pattern = 'mobster', x = "$fit")){
+        tool <- 'mobster'
         tool_table <- readRDS("$fit")
 
         sigprofiler_table <- tool_table\$data %>%
@@ -51,7 +52,7 @@ process PREPARE_CLUSTER {
             dplyr::distinct() %>%
             tidyr::separate(col = chr, sep = 'chr', into = c('tmp', 'chr')) %>%
             dplyr::select(-tmp)  %>%
-            dplyr::mutate(Project = "$meta.id", Genome = 'GRCh38', mut_type = 'SNP', Type = 'SOMATIC', ID = cluster, Sample = cluster) %>%
+            dplyr::mutate(Project = "$meta.id", Genome = "${params.genome}", mut_type = 'SNP', Type = 'SOMATIC', ID = cluster, Sample = cluster) %>%
             dplyr::rename(chrom = chr, pos_start = from) %>%
             dplyr::rowwise() %>%
             dplyr::mutate(pos_end = pos_start + abs(stringr::str_count(ref) - stringr::str_count(alt))) %>%
@@ -60,22 +61,22 @@ process PREPARE_CLUSTER {
             dplyr::distinct()
 
     } else if (grepl(pattern = 'best_fit.txt', x = "$fit")){
+        tool <- 'pyclonevi'
         cluster_table <- readr::read_tsv("$fit") %>%
             dplyr::select(mutation_id, cluster_id) %>%
             dplyr::distinct()
-        print(cluster_table)
 
         data_table <- readr::read_tsv("$data") %>%
             dplyr::select(chr, from, to, ref, alt) %>%
             dplyr::mutate(chr = sub("chr", "", chr)) %>%
             dplyr::mutate(mutation_id = paste("$meta.patient", chr, from, alt, sep = ':'))
-        print(data_table)
 
         sigprofiler_table <- cluster_table %>%
             dplyr::left_join(data_table) %>%
             dplyr::select(-mutation_id) %>%
             dplyr::rename(cluster = cluster_id) %>%
-            dplyr::mutate(Project = "$meta.id", Genome = 'GRCh38', mut_type = 'SNP', Type = 'SOMATIC', ID = cluster, Sample = cluster) %>%
+            dplyr::mutate(cluster = paste0('C', cluster)) %>%
+            dplyr::mutate(Project = "$meta.id", Genome = "${params.genome}", mut_type = 'SNP', Type = 'SOMATIC', ID = cluster, Sample = cluster) %>%
             dplyr::rename(chrom = chr, pos_start = from) %>%
             dplyr::rowwise() %>%
             dplyr::mutate(pos_end = pos_start + abs(stringr::str_count(ref) - stringr::str_count(alt))) %>%
@@ -85,17 +86,28 @@ process PREPARE_CLUSTER {
 
     }
 
+    write.table(sigprofiler_table, file = paste0("$prefix", "_", tool, ".txt"), quote = F, sep = '\\t', row.names = F)
 
+    # version export
+    f <- file("versions.yml","w")
+    dplyr_version <- sessionInfo()\$otherPkgs\$dplyr\$Version
+    tidyr_version <- sessionInfo()\$otherPkgs\$tidyr\$Version
+    vcfR_version <- sessionInfo()\$otherPkgs\$vcfR\$Version
+    writeLines(paste0('"', "$task.process", '"', ":"), f)
+    writeLines(paste("    dplyr:", dplyr_version), f)
+    writeLines(paste("    tidyr:", tidyr_version), f)
+    close(f)
     """
 
     stub:
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
-    touch ${prefix}_all_positions.rds
+    touch ${prefix}.txt
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         dplyr: \$(Rscript -e "cat(as.character(packageVersion('dplyr')))")
+        tidyr: \$(Rscript -e "cat(as.character(packageVersion('tidyr')))")
     END_VERSIONS
     """
 }
