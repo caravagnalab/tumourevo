@@ -22,6 +22,8 @@ workflow SUBCLONAL_DECONVOLUTION {
     pyclone_best = null
     pyclone_table = null
     ctree_pyclone_pdf = null
+    viber_results = null
+    mobster_results = null
 
     if (params.tools && params.tools.split(",").contains("mobster")) {
         joinCNAqc = rds_join.transpose().map{ meta, rds, sample ->
@@ -34,6 +36,7 @@ workflow SUBCLONAL_DECONVOLUTION {
         CTREE_MOBSTER(MOBSTER.out.mobster_best_rds)
         //ch_versions = ch_versions.mix(CTREE_MOBSTER.out.versions_ctree)
 
+        mobster_results = MOBSTER.out.mobster_best_rds
         mobster_pdf = MOBSTER.out.mobster_report_pdf
         ctree_mobster_pdf = CTREE_MOBSTER.out.ctree_report_pdf
 
@@ -46,6 +49,7 @@ workflow SUBCLONAL_DECONVOLUTION {
         CTREE_VIBER(VIBER.out.viber_rds)
         //ch_versions = ch_versions.mix(CTREE_VIBER.out.versions_ctree)
 
+        viber_results = VIBER.out.viber_heuristic_rds
         viber_pdf = VIBER.out.viber_report_pdf
         ctree_viber_pdf = CTREE_VIBER.out.ctree_report_pdf
     }
@@ -74,5 +78,7 @@ workflow SUBCLONAL_DECONVOLUTION {
     mobster_pdf
     ctree_mobster_pdf
     pyclone_table
+    mobster_results
+    viber_results
     versions = ch_versions
 }

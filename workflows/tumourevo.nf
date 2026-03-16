@@ -13,6 +13,8 @@ include { FORMATTER as FORMATTER_RDS} from "../subworkflows/local/formatter/main
 include { QC } from "../subworkflows/local/qc/main"
 include { SUBCLONAL_DECONVOLUTION } from "../subworkflows/local/subclonal_deconvolution/main"
 include { SIGNATURE_DECONVOLUTION } from "../subworkflows/local/signature_deconvolution/main"
+include { ASSIGN_SIGNATURE } from "../subworkflows/local/assign_signature/main"
+
 
 include { softwareVersionsToYAML           } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 /*
@@ -131,6 +133,12 @@ main:
 
     ch_versions = ch_versions.mix(SUBCLONAL_DECONVOLUTION.out.versions)
     ch_versions = ch_versions.mix(SIGNATURE_DECONVOLUTION.out.versions)
+
+    ASSIGN_SIGNATURE(SUBCLONAL_DECONVOLUTION.out.pyclone_best,
+                    QC.out.join_cnaqc_ALL,
+                    SUBCLONAL_DECONVOLUTION.out.mobster_results,
+                    SUBCLONAL_DECONVOLUTION.out.viber_results,
+                    SIGNATURE_DECONVOLUTION.out.sigprofiler_out)
 
     softwareVersionsToYAML(ch_versions)
         .collectFile(storeDir: "${params.outdir}/pipeline_info", name: 'nf_core_tumourevo_software_mqc_versions.yml', sort: true, newLine: true)
