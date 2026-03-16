@@ -13,7 +13,7 @@ process ASSIGN_CLUSTER {
 
     output:
     tuple val(meta), path("${meta.dataset}*")  , emit: results_sigprofiler
-    path "versions.yml"                   , emit: versions
+    path "versions.yml"                         , emit: versions
 
     script:
     def args   = task.ext.args   ?: ""
@@ -55,15 +55,11 @@ process ASSIGN_CLUSTER {
 
     genome = opt["genome"]
 
-    if tool != 'mobster':
-        out = f'{dataset}/{patient}/{tool}'
-    else:
-        out = f'{dataset}/{patient}/{sample}/{tool}'
-
+    name = f'{prefix}_{tool}'
+    out = f'{prefix}_{tool}'
     if not os.path.exists(out):
         os.makedirs(out, exist_ok=True)
 
-    name = f'{prefix}_{tool}'
     table_path = os.path.join(out, "${table}")
     os.rename("${table}", table_path)
 

@@ -25,6 +25,9 @@ workflow ASSIGN_SIGNATURE {
         table_pyclone = null
         table_mobster = null
         table_viber = null
+        assign_pyclone = null
+        assign_mobster = null
+        assign_viber = null
 
         if (params.download_sigprofiler_genome) {
             genome_path = channel.fromPath('opt/null')
@@ -38,6 +41,10 @@ workflow ASSIGN_SIGNATURE {
             PREPARE_CLUSTER_MOBSTER(mobster_combined)
             table_mobster = PREPARE_CLUSTER_MOBSTER.out.signature_table
             ch_versions = ch_versions.mix(PREPARE_CLUSTER_MOBSTER.out.versions)
+
+            input = table_mobster.combine(sigprofiler_fit).combine(genome_path)
+            ASSIGN_CLUSTER_MOBSTER(input, 'mobster')
+            assign_mobster = ASSIGN_CLUSTER_MOBSTER.out.results_sigprofiler
         }
 
 
@@ -46,6 +53,9 @@ workflow ASSIGN_SIGNATURE {
             PREPARE_CLUSTER_VIBER(viber_combined)
             table_viber = PREPARE_CLUSTER_VIBER.out.signature_table
             ch_versions = ch_versions.mix(PREPARE_CLUSTER_VIBER.out.versions)
+
+            input = table_viber.combine(sigprofiler_fit).combine(genome_path)
+            ASSIGN_CLUSTER_VIBER(input, 'viber')
         }
 
         if (params.tools && params.tools.split(",").contains("pyclone-vi")) {
@@ -59,8 +69,7 @@ workflow ASSIGN_SIGNATURE {
 
             input = table_pyclone.combine(sigprofiler_fit).combine(genome_path)
             ASSIGN_CLUSTER_PYCLONE(input, 'pyclonevi')
-
-
+            assign_pyclone = ASSIGN_CLUSTER_PYCLONE.out.results_sigprofiler
         }
 
 
@@ -68,5 +77,8 @@ workflow ASSIGN_SIGNATURE {
         table_pyclone
         table_viber
         table_mobster
+        assign_pyclone
+        assign_viber
+        assign_mobster
         ch_versions
 }
