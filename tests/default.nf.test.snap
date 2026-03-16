@@ -2,6 +2,89 @@
     "-profile test_full": {
         "content": [
             74,
+            {
+                "ANNOTATE_DRIVER": {
+                    "readr": "2.1.5",
+                    "dplyr": "1.1.4",
+                    "tidyr": "1.3.1"
+                },
+                "BCFTOOLS_MPILEUP": {
+                    "bcftools": 1.22
+                },
+                "CNA2CNAQC": {
+                    "readr": "2.1.5",
+                    "dplyr": "1.1.4"
+                },
+                "CNAQC2TSV": {
+                    "dplyr": "1.1.4",
+                    "CNAqc": "1.1.2"
+                },
+                "CNAQC": {
+                    "CNAqc": "1.1.3",
+                    "dplyr": "1.1.4"
+                },
+                "CTREE_MOBSTER": {
+                    "ctree": "1.1.0",
+                    "mobster": "0.1.1",
+                    "VIBER": "1.0.0",
+                    "cli": "3.6.5",
+                    "dplyr": "1.1.4",
+                    "tidyr": "1.3.1",
+                    "ggplot2": "3.5.2",
+                    "ggpubr": "0.6.1"
+                },
+                "CTREE_PYCLONEVI": {
+                    "ctree": "1.1.0",
+                    "mobster": "0.1.1",
+                    "VIBER": "1.0.0",
+                    "cli": "3.6.5",
+                    "dplyr": "1.1.4",
+                    "tidyr": "1.3.1",
+                    "ggplot2": "3.5.2",
+                    "ggpubr": "0.6.1"
+                },
+                "ENSEMBLVEP_VEP": {
+                    "perl-math-cdf": 0.1
+                },
+                "GET_POSITIONS_ALL": {
+                    "dplyr": "1.1.4"
+                },
+                "GET_POSITIONS_REL": {
+                    "dplyr": "1.1.4"
+                },
+                "JOIN_CNAQC": {
+                    "CNAqc": "1.1.2",
+                    "dplyr": "1.1.4"
+                },
+                "JOIN_POSITIONS": {
+                    "dplyr": "1.1.4",
+                    "tidyr": "1.3.1",
+                    "vcfR": "1.15.0"
+                },
+                "MOBSTER": {
+                    "CNAqc": "1.1.3",
+                    "mobster": "0.1.1",
+                    "cli": "3.6.5",
+                    "dplyr": "1.1.4",
+                    "ggplot2": "3.5.2"
+                },
+                "PYCLONEVI": {
+                    "pyclonevi": "0.1.6"
+                },
+                "TINC": {
+                    "CNAqc": "1.1.2",
+                    "tidyverse": "2.0.0",
+                    "TINC": "0.1.0"
+                },
+                "VCF2CNAQC": {
+                    "dplyr": "1.1.4",
+                    "tidyr": "1.3.1",
+                    "vcfR": "1.15.0"
+                },
+                "Workflow": {
+                    "nf-core/tumourevo": "v1.0.0"
+                }
+            },
             [
                 "bcftools",
                 "bcftools/filter",
@@ -113,6 +196,7 @@
                 "lifter/positions/SCOUT/SPN01_SS/SPN01_100X_0.9p_Sample_C/SCOUT_SPN01_SS_SPN01_100X_0.9p_Sample_C_positions_missing.bed",
                 "lifter/positions/SCOUT/SPN01_SS/SPN01_100X_0.9p_Sample_C/versions.yml",
                 "pipeline_info",
+                "pipeline_info/nf_core_tumourevo_software_mqc_versions.yml",
                 "qc",
                 "qc/cnaqc",
                 "qc/cnaqc/SCOUT",
@@ -414,10 +498,10 @@
                 "variant_annotation/vep/SCOUT/SPN01_SS_nobam/SPN01_100X_0.9p_Sample_C/SCOUT_SPN01_SS_nobam_SPN01_100X_0.9p_Sample_C.annotated.vcf.gz"
             ]
         ],
+        "timestamp": "2026-03-16T10:17:36.979114321",
         "meta": {
-            "nf-test": "0.9.2",
+            "nf-test": "0.9.4",
             "nextflow": "25.10.0"
-        },
-        "timestamp": "2026-02-26T10:56:17.624429048"
+        }
     }
 }

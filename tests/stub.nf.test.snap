@@ -1,7 +1,117 @@
 {
     "-profile test_full_stub": {
         "content": [
-            74,
+            88,
+            {
+                "ANNOTATE_DRIVER": {
+                    "readr": "2.1.5",
+                    "dplyr": "1.1.4",
+                    "tidyr": "1.3.1"
+                },
+                "BCFTOOLS_MPILEUP": {
+                    "bcftools": 1.22
+                },
+                "CNA2CNAQC": {
+                    "cnaqc": "1.1.2"
+                },
+                "CNAQC2TSV": {
+                    "cnaqc": "1.1.2",
+                    "readr": "2.1.5",
+                    "dplyr": "1.1.4"
+                },
+                "CNAQC": {
+                    "cnaqc": "1.1.3",
+                    "dplyr": "1.1.4"
+                },
+                "CTREE_MOBSTER": {
+                    "ctree": "1.1.0",
+                    "mobster": "0.1.1",
+                    "VIBER": "1.0.0",
+                    "cli": "3.6.5",
+                    "dplyr": "1.1.4",
+                    "tidyr": "1.3.1",
+                    "ggplot2": "3.5.2",
+                    "ggpubr": "0.6.1"
+                },
+                "CTREE_PYCLONEVI": {
+                    "ctree": "1.1.0",
+                    "mobster": "0.1.1",
+                    "VIBER": "1.0.0",
+                    "cli": "3.6.5",
+                    "dplyr": "1.1.4",
+                    "tidyr": "1.3.1",
+                    "ggplot2": "3.5.2",
+                    "ggpubr": "0.6.1"
+                },
+                "CTREE_VIBER": {
+                    "ctree": "1.1.0",
+                    "mobster": "0.1.1",
+                    "VIBER": "1.0.0",
+                    "cli": "3.6.5",
+                    "dplyr": "1.1.4",
+                    "tidyr": "1.3.1",
+                    "ggplot2": "3.5.2",
+                    "ggpubr": "0.6.1"
+                },
+                "ENSEMBLVEP_VEP": {
+                    "tabix": 1.21
+                },
+                "GET_POSITIONS_ALL": {
+                    "dplyr": "1.1.4"
+                },
+                "GET_POSITIONS_REL": {
+                    "dplyr": "1.1.4"
+                },
+                "JOIN_CNAQC": {
+                    "CNAqc": "1.1.2",
+                    "dplyr": "1.1.4"
+                },
+                "JOIN_POSITIONS": {
+                    "dplyr": "1.1.4",
+                    "tidyr": "1.3.1",
+                    "vcfR": "1.15.0"
+                },
+                "MOBSTER": {
+                    "CNAqc": "1.1.3",
+                    "mobster": "0.1.1",
+                    "cli": "3.6.5",
+                    "dplyr": "1.1.4",
+                    "ggplot2": "3.5.2"
+                },
+                "PYCLONEVI": {
+                    "pyclonevi": "0.1.6"
+                },
+                "SIGPROFILER": {
+                    "python": "3.13.7",
+                    "SigProfilerAssignment": "0.2.6",
+                    "SigProfilerExtractor": "1.2.2",
+                    "SigProfilerMatrixGenerator": "1.3.5",
+                    "pandas": "2.3.2",
+                    "sigProfilerPlotting": "1.4.1"
+                },
+                "SPARSE_SIGNATURES": {
+                    "bioconductor-sparsesignatures": "2.16.0",
+                    "bioconductor-bsgenome.hsapiens.1000genomes.hs37d5": "0.99.1",
+                    "bioconductor-bsgenome.hsapiens.ucsc.hg38": "1.4.5"
+                },
+                "TINC": {
+                    "bioconductor-rtinc": "0.1.0"
+                },
+                "VCF2CNAQC": {
+                    "cnaqc": "1.1.2",
+                    "vcfR": "1.15.0",
+                    "dplyr": "1.1.4"
+                },
+                "VIBER": {
+                    "VIBER": "1.0.0",
+                    "cli": "3.6.5",
+                    "dplyr": "1.1.4",
+                    "ggplot2": "3.5.2"
+                },
+                "Workflow": {
+                    "nf-core/tumourevo": "v1.0.0"
+                }
+            },
             [
                 "bcftools",
                 "bcftools/filter",
@@ -115,6 +225,7 @@
                 "lifter/positions/SCOUT/SPN01_SS/SPN01_100X_0.9p_Sample_C/SPN01_100X_0.9p_Sample_C_positions_missing.bed",
                 "lifter/positions/SCOUT/SPN01_SS/SPN01_100X_0.9p_Sample_C/versions.yml",
                 "pipeline_info",
+                "pipeline_info/nf_core_tumourevo_software_mqc_versions.yml",
                 "qc",
                 "qc/cnaqc",
                 "qc/cnaqc/SCOUT",
@@ -207,6 +318,47 @@
                 "references/vep",
                 "references/vep/vep.tar",
                 "references/vep/versions.yml",
+                "signature_deconvolution",
+                "signature_deconvolution/sigprofiler",
+                "signature_deconvolution/sigprofiler/SCOUT",
+                "signature_deconvolution/sigprofiler/SCOUT/results",
+                "signature_deconvolution/sigprofiler/SCOUT/results/DBS78",
+                "signature_deconvolution/sigprofiler/SCOUT/results/DBS78/DBS78",
+                "signature_deconvolution/sigprofiler/SCOUT/results/DBS78/DBS78/Samples.txt",
+                "signature_deconvolution/sigprofiler/SCOUT/results/DBS78/DBS78/Suggested_Solution",
+                "signature_deconvolution/sigprofiler/SCOUT/results/DBS78/DBS78/Suggested_Solution/COSMIC_DBS78_Decomposed_Solution",
+                "signature_deconvolution/sigprofiler/SCOUT/results/DBS78/DBS78/Suggested_Solution/COSMIC_DBS78_Decomposed_Solution/Signatures",
+                "signature_deconvolution/sigprofiler/SCOUT/results/DBS78/DBS78/Suggested_Solution/COSMIC_DBS78_Decomposed_Solution/Signatures/COSMIC_DBS78_Signatures.txt",
+                "signature_deconvolution/sigprofiler/SCOUT/results/ID83",
+                "signature_deconvolution/sigprofiler/SCOUT/results/ID83/ID83",
+                "signature_deconvolution/sigprofiler/SCOUT/results/ID83/ID83/Samples.txt",
+                "signature_deconvolution/sigprofiler/SCOUT/results/ID83/ID83/Suggested_Solution",
+                "signature_deconvolution/sigprofiler/SCOUT/results/ID83/ID83/Suggested_Solution/COSMIC_ID83_Decomposed_Solution",
+                "signature_deconvolution/sigprofiler/SCOUT/results/ID83/ID83/Suggested_Solution/COSMIC_ID83_Decomposed_Solution/Signatures",
+                "signature_deconvolution/sigprofiler/SCOUT/results/ID83/ID83/Suggested_Solution/COSMIC_ID83_Decomposed_Solution/Signatures/COSMIC_ID83_Signatures.txt",
+                "signature_deconvolution/sigprofiler/SCOUT/results/SBS96",
+                "signature_deconvolution/sigprofiler/SCOUT/results/SBS96/SBS96",
+                "signature_deconvolution/sigprofiler/SCOUT/results/SBS96/SBS96/Samples.txt",
+                "signature_deconvolution/sigprofiler/SCOUT/results/SBS96/SBS96/Suggested_Solution",
+                "signature_deconvolution/sigprofiler/SCOUT/results/SBS96/SBS96/Suggested_Solution/COSMIC_SBS96_Decomposed_Solution",
+                "signature_deconvolution/sigprofiler/SCOUT/results/SBS96/SBS96/Suggested_Solution/COSMIC_SBS96_Decomposed_Solution/Signatures",
+                "signature_deconvolution/sigprofiler/SCOUT/results/SBS96/SBS96/Suggested_Solution/COSMIC_SBS96_Decomposed_Solution/Signatures/COSMIC_SBS96_Signatures.txt",
+                "signature_deconvolution/sigprofiler/SCOUT/results/input",
+                "signature_deconvolution/sigprofiler/SCOUT/results/input/input_data.txt",
+                "signature_deconvolution/sigprofiler/SCOUT/results/output/DBS78",
+                "signature_deconvolution/sigprofiler/SCOUT/results/output/DBS78/SCOUT.DBS78.all",
+                "signature_deconvolution/sigprofiler/SCOUT/results/output/ID83",
+                "signature_deconvolution/sigprofiler/SCOUT/results/output/ID83/SCOUT.ID83.all",
+                "signature_deconvolution/sigprofiler/SCOUT/results/output/SBS96",
+                "signature_deconvolution/sigprofiler/SCOUT/results/output/SBS96/SCOUT.SBS96.all",
+                "signature_deconvolution/sparsesignature",
+                "signature_deconvolution/sparsesignature/SCOUT",
+                "signature_deconvolution/sparsesignature/SCOUT/SCOUT_best_params_config.rds",
+                "signature_deconvolution/sparsesignature/SCOUT/SCOUT_cv_means_mse.rds",
+                "signature_deconvolution/sparsesignature/SCOUT/SCOUT_mut_counts.rds",
+                "signature_deconvolution/sparsesignature/SCOUT/SCOUT_nmf_Lasso_out.rds",
+                "signature_deconvolution/sparsesignature/SCOUT/SCOUT_plot_all.pdf",
+                "signature_deconvolution/sparsesignature/SCOUT/SCOUT_plot_all.rds",
                 "subclonal_deconvolution",
                 "subclonal_deconvolution/ctree",
                 "subclonal_deconvolution/ctree/SCOUT",
@@ -415,6 +567,32 @@
                 "subclonal_deconvolution/pyclonevi/SCOUT/SPN01_SS_nobam/SCOUT_SPN01_SS_nobam_all_fits.h5",
                 "subclonal_deconvolution/pyclonevi/SCOUT/SPN01_SS_nobam/SCOUT_SPN01_SS_nobam_best_fit.txt",
                 "subclonal_deconvolution/pyclonevi/SCOUT/SPN01_SS_nobam/SCOUT_SPN01_SS_nobam_cluster_table.csv",
+                "subclonal_deconvolution/viber",
+                "subclonal_deconvolution/viber/SCOUT",
+                "subclonal_deconvolution/viber/SCOUT/SPN01_MS",
+                "subclonal_deconvolution/viber/SCOUT/SPN01_MS/SCOUT_SPN01_MS_viber_best_fit.rds",
+                "subclonal_deconvolution/viber/SCOUT/SPN01_MS/SCOUT_SPN01_MS_viber_best_fit_plots.rds",
+                "subclonal_deconvolution/viber/SCOUT/SPN01_MS/SCOUT_SPN01_MS_viber_best_heuristic_fit.rds",
+                "subclonal_deconvolution/viber/SCOUT/SPN01_MS/SCOUT_SPN01_MS_viber_best_heuristic_fit_plots.rds",
+                "subclonal_deconvolution/viber/SCOUT/SPN01_MS/SCOUT_SPN01_MS_viber_report.pdf",
+                "subclonal_deconvolution/viber/SCOUT/SPN01_MS/SCOUT_SPN01_MS_viber_report.png",
+                "subclonal_deconvolution/viber/SCOUT/SPN01_MS/SCOUT_SPN01_MS_viber_report.rds",
+                "subclonal_deconvolution/viber/SCOUT/SPN01_SS",
+                "subclonal_deconvolution/viber/SCOUT/SPN01_SS/SCOUT_SPN01_SS_viber_best_fit.rds",
+                "subclonal_deconvolution/viber/SCOUT/SPN01_SS/SCOUT_SPN01_SS_viber_best_fit_plots.rds",
+                "subclonal_deconvolution/viber/SCOUT/SPN01_SS/SCOUT_SPN01_SS_viber_best_heuristic_fit.rds",
+                "subclonal_deconvolution/viber/SCOUT/SPN01_SS/SCOUT_SPN01_SS_viber_best_heuristic_fit_plots.rds",
+                "subclonal_deconvolution/viber/SCOUT/SPN01_SS/SCOUT_SPN01_SS_viber_report.pdf",
+                "subclonal_deconvolution/viber/SCOUT/SPN01_SS/SCOUT_SPN01_SS_viber_report.png",
+                "subclonal_deconvolution/viber/SCOUT/SPN01_SS/SCOUT_SPN01_SS_viber_report.rds",
+                "subclonal_deconvolution/viber/SCOUT/SPN01_SS_nobam",
+                "subclonal_deconvolution/viber/SCOUT/SPN01_SS_nobam/SCOUT_SPN01_SS_nobam_viber_best_fit.rds",
+                "subclonal_deconvolution/viber/SCOUT/SPN01_SS_nobam/SCOUT_SPN01_SS_nobam_viber_best_fit_plots.rds",
+                "subclonal_deconvolution/viber/SCOUT/SPN01_SS_nobam/SCOUT_SPN01_SS_nobam_viber_best_heuristic_fit.rds",
+                "subclonal_deconvolution/viber/SCOUT/SPN01_SS_nobam/SCOUT_SPN01_SS_nobam_viber_best_heuristic_fit_plots.rds",
+                "subclonal_deconvolution/viber/SCOUT/SPN01_SS_nobam/SCOUT_SPN01_SS_nobam_viber_report.pdf",
+                "subclonal_deconvolution/viber/SCOUT/SPN01_SS_nobam/SCOUT_SPN01_SS_nobam_viber_report.png",
+                "subclonal_deconvolution/viber/SCOUT/SPN01_SS_nobam/SCOUT_SPN01_SS_nobam_viber_report.rds",
                 "variant_annotation",
                 "variant_annotation/vep",
                 "variant_annotation/vep/SCOUT",
@@ -441,10 +619,10 @@
                 "variant_annotation/vep/SCOUT/SPN01_SS_nobam/SPN01_100X_0.9p_Sample_C/SCOUT_SPN01_SS_nobam_SPN01_100X_0.9p_Sample_C.annotated_summary.html"
             ]
         ],
+        "timestamp": "2026-03-16T09:43:02.812466127",
         "meta": {
-            "nf-test": "0.9.2",
+            "nf-test": "0.9.4",
             "nextflow": "25.10.0"
-        },
-        "timestamp": "2026-02-26T10:40:32.471944152"
+        }
     }
 }
