@@ -81,37 +81,38 @@ process ASSIGN_CLUSTER {
     catalog_sbs = 'SBS96/SBS96/Suggested_Solution/COSMIC_SBS96_Decomposed_Solution/Signatures/COSMIC_SBS96_Signatures.txt'
     catalog_id = 'ID83/ID83/Suggested_Solution/COSMIC_ID83_Decomposed_Solution/Signatures/COSMIC_ID83_Signatures.txt'
 
-    data_sbs = os.path.join(out, f'output/SBS/{name}.SBS96.all')
-    data_id = os.path.join(out, f'output/ID/{name}.ID83.all')
+    if os.path.exists(catalog_sbs):
+      data_sbs = os.path.join(out, f'output/SBS/{name}.SBS96.all')
+      os.mkdir(os.path.join(out, 'SBS/'))
+      Analyze.cosmic_fit(data_sbs,
+                      os.path.join(out, 'SBS/'),
+                      input_type="matrix",
+                      context_type="96",
+                      cosmic_version=3.3,
+                      collapse_to_SBS96 = False,
+                      exome=False,
+                      genome_build=genome,
+                      signature_database=catalog_sbs,
+                      export_probabilities=True,
+                      make_plots=True,
+                      verbose=True)
 
-    os.mkdir(os.path.join(out, 'SBS/'))
-    os.mkdir(os.path.join(out, 'ID/'))
+    if os.path.exists(catalog_id):
+      data_id = os.path.join(out, f'output/ID/{name}.ID83.all')
+      os.mkdir(os.path.join(out, 'ID/'))
 
-    Analyze.cosmic_fit(data_sbs,
-                    os.path.join(out, 'SBS/'),
-                    input_type="matrix",
-                    context_type="96",
-                    cosmic_version=3.3,
-                    collapse_to_SBS96 = False,
-                    exome=False,
-                    genome_build=genome,
-                    signature_database=catalog_sbs,
-                    export_probabilities=True,
-                    make_plots=True,
-                    verbose=True)
-
-    Analyze.cosmic_fit(data_id,
-                    os.path.join(out, 'ID/'),
-                    input_type="matrix",
-                    context_type="83",
-                    cosmic_version=3.3,
-                    collapse_to_SBS96 = False,
-                    exome=False,
-                    genome_build=genome,
-                    signature_database=catalog_id,
-                    export_probabilities=True,
-                    make_plots=True,
-                    verbose=True)
+      Analyze.cosmic_fit(data_id,
+                      os.path.join(out, 'ID/'),
+                      input_type="matrix",
+                      context_type="83",
+                      cosmic_version=3.3,
+                      collapse_to_SBS96 = False,
+                      exome=False,
+                      genome_build=genome,
+                      signature_database=catalog_id,
+                      export_probabilities=True,
+                      make_plots=True,
+                      verbose=True)
 
     with open("versions.yml", "w") as f:
         f.write('"${task.process}":\\n')

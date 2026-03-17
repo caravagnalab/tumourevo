@@ -24,6 +24,7 @@ workflow SUBCLONAL_DECONVOLUTION {
     ctree_pyclone_pdf = null
     viber_results = null
     mobster_results = null
+    viber_results_heuristic = null
 
     if (params.tools && params.tools.split(",").contains("mobster")) {
         joinCNAqc = rds_join.transpose().map{ meta, rds, sample ->
@@ -49,7 +50,8 @@ workflow SUBCLONAL_DECONVOLUTION {
         CTREE_VIBER(VIBER.out.viber_rds)
         //ch_versions = ch_versions.mix(CTREE_VIBER.out.versions_ctree)
 
-        viber_results = VIBER.out.viber_heuristic_rds
+        viber_results = VIBER.out.viber_rds
+        viber_results_heuristic = VIBER.out.viber_heuristic_rds
         viber_pdf = VIBER.out.viber_report_pdf
         ctree_viber_pdf = CTREE_VIBER.out.ctree_report_pdf
     }
@@ -80,5 +82,6 @@ workflow SUBCLONAL_DECONVOLUTION {
     pyclone_table
     mobster_results
     viber_results
+    viber_results_heuristic
     versions = ch_versions
 }
