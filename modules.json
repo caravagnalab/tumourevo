@@ -40,7 +40,7 @@
                     },
                     "mobster": {
                         "branch": "master",
-                        "git_sha": "ee54577f78696e5fec045de8784bbfddf01d5e25",
+                        "git_sha": "be8d7a5227223396a308243db310379f329082e4",
                         "installed_by": ["modules"]
                     },
                     "pyclonevi": {
