@@ -46,7 +46,8 @@ process JOIN_POSITIONS {
                 NV = as.numeric(NV),
                 VAF = NV/DP) %>%
             dplyr::mutate(VAF = ifelse(is.na(VAF),0,VAF)) %>%
-            dplyr::rename(sample = Indiv)
+	    dplyr::mutate(sample = "$meta.tumour_sample") %>%
+            dplyr::select(!Indiv)
 
     fix_field = tb\$fix %>%
             dplyr::rename(
