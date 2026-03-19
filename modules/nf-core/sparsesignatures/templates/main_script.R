@@ -59,7 +59,7 @@ tables = lapply(patients_tsv, FUN = function(p_table){
         mutate(across(everything(), as.character))
 }
 )
-multisample_table = dplyr::bind_rows(tables)
+multisample_table = dplyr::bind_rows(tables) %>% dplyr::filter(NV != 0)
 
 #Extract input data information
 input_data = multisample_table[,c("Indiv","chr","from","to","ref","alt")]
