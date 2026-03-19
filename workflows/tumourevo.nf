@@ -79,15 +79,6 @@ main:
         ch_extra_files,
     )
 
-    ch_ensemblvep_versions = ENSEMBLVEP_VEP.out.versions_ensemblvep
-                    .mix(ENSEMBLVEP_VEP.out.versions_tabix)
-                    .mix(ENSEMBLVEP_VEP.out.versions_perlmathcdf)
-                    .map { process_name, tool, version ->
-                        """${process_name}:
-                    ${tool}: ${version}"""
-                    }
-                    .collectFile(name: 'versions.yml', newLine: true, sort: false)
-    ch_versions = ch_versions.mix(ch_ensemblvep_versions)
     ch_vcf_tbi = ENSEMBLVEP_VEP.out.vcf.join(ENSEMBLVEP_VEP.out.tbi, failOnDuplicate: true, failOnMismatch: true)
 
     FORMATTER_VCF(ch_vcf_tbi, "vcf")

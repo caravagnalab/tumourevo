@@ -53,9 +53,6 @@
                     "ggplot2": "3.5.2",
                     "ggpubr": "0.6.1"
                 },
-                "ENSEMBLVEP_VEP": {
-                    "tabix": 1.21
-                },
                 "GET_POSITIONS_ALL": {
                     "dplyr": "1.1.4"
                 },
@@ -619,7 +616,7 @@
                 "variant_annotation/vep/SCOUT/SPN01_SS_nobam/SPN01_100X_0.9p_Sample_C/SCOUT_SPN01_SS_nobam_SPN01_100X_0.9p_Sample_C.annotated_summary.html"
             ]
         ],
-        "timestamp": "2026-03-16T09:43:02.812466127",
+        "timestamp": "2026-03-19T10:26:18.379910421",
         "meta": {
             "nf-test": "0.9.4",
             "nextflow": "25.10.0"
