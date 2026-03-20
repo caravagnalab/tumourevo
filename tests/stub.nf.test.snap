@@ -78,13 +78,10 @@
                 "PYCLONEVI": {
                     "pyclonevi": "0.1.6"
                 },
-                "SIGPROFILER": {
-                    "python": "3.13.7",
-                    "SigProfilerAssignment": "0.2.6",
-                    "SigProfilerExtractor": "1.2.2",
-                    "SigProfilerMatrixGenerator": "1.3.5",
-                    "pandas": "2.3.2",
-                    "sigProfilerPlotting": "1.4.1"
+                "SPARSE_SIGNATURES": {
+                    "bioconductor-sparsesignatures": "2.16.0",
+                    "bioconductor-bsgenome.hsapiens.1000genomes.hs37d5": "0.99.1",
+                    "bioconductor-bsgenome.hsapiens.ucsc.hg38": "1.4.5"
                 },
                 "TINC": {
                     "bioconductor-rtinc": "0.1.0"
@@ -311,38 +308,14 @@
                 "references/vep/vep.tar",
                 "references/vep/versions.yml",
                 "signature_deconvolution",
-                "signature_deconvolution/sigprofiler",
-                "signature_deconvolution/sigprofiler/SCOUT",
-                "signature_deconvolution/sigprofiler/SCOUT/results",
-                "signature_deconvolution/sigprofiler/SCOUT/results/DBS78",
-                "signature_deconvolution/sigprofiler/SCOUT/results/DBS78/DBS78",
-                "signature_deconvolution/sigprofiler/SCOUT/results/DBS78/DBS78/Samples.txt",
-                "signature_deconvolution/sigprofiler/SCOUT/results/DBS78/DBS78/Suggested_Solution",
-                "signature_deconvolution/sigprofiler/SCOUT/results/DBS78/DBS78/Suggested_Solution/COSMIC_DBS78_Decomposed_Solution",
-                "signature_deconvolution/sigprofiler/SCOUT/results/DBS78/DBS78/Suggested_Solution/COSMIC_DBS78_Decomposed_Solution/Signatures",
-                "signature_deconvolution/sigprofiler/SCOUT/results/DBS78/DBS78/Suggested_Solution/COSMIC_DBS78_Decomposed_Solution/Signatures/COSMIC_DBS78_Signatures.txt",
-                "signature_deconvolution/sigprofiler/SCOUT/results/ID83",
-                "signature_deconvolution/sigprofiler/SCOUT/results/ID83/ID83",
-                "signature_deconvolution/sigprofiler/SCOUT/results/ID83/ID83/Samples.txt",
-                "signature_deconvolution/sigprofiler/SCOUT/results/ID83/ID83/Suggested_Solution",
-                "signature_deconvolution/sigprofiler/SCOUT/results/ID83/ID83/Suggested_Solution/COSMIC_ID83_Decomposed_Solution",
-                "signature_deconvolution/sigprofiler/SCOUT/results/ID83/ID83/Suggested_Solution/COSMIC_ID83_Decomposed_Solution/Signatures",
-                "signature_deconvolution/sigprofiler/SCOUT/results/ID83/ID83/Suggested_Solution/COSMIC_ID83_Decomposed_Solution/Signatures/COSMIC_ID83_Signatures.txt",
-                "signature_deconvolution/sigprofiler/SCOUT/results/SBS96",
-                "signature_deconvolution/sigprofiler/SCOUT/results/SBS96/SBS96",
-                "signature_deconvolution/sigprofiler/SCOUT/results/SBS96/SBS96/Samples.txt",
-                "signature_deconvolution/sigprofiler/SCOUT/results/SBS96/SBS96/Suggested_Solution",
-                "signature_deconvolution/sigprofiler/SCOUT/results/SBS96/SBS96/Suggested_Solution/COSMIC_SBS96_Decomposed_Solution",
-                "signature_deconvolution/sigprofiler/SCOUT/results/SBS96/SBS96/Suggested_Solution/COSMIC_SBS96_Decomposed_Solution/Signatures",
-                "signature_deconvolution/sigprofiler/SCOUT/results/SBS96/SBS96/Suggested_Solution/COSMIC_SBS96_Decomposed_Solution/Signatures/COSMIC_SBS96_Signatures.txt",
-                "signature_deconvolution/sigprofiler/SCOUT/results/input",
-                "signature_deconvolution/sigprofiler/SCOUT/results/input/input_data.txt",
-                "signature_deconvolution/sigprofiler/SCOUT/results/output/DBS78",
-                "signature_deconvolution/sigprofiler/SCOUT/results/output/DBS78/SCOUT.DBS78.all",
-                "signature_deconvolution/sigprofiler/SCOUT/results/output/ID83",
-                "signature_deconvolution/sigprofiler/SCOUT/results/output/ID83/SCOUT.ID83.all",
-                "signature_deconvolution/sigprofiler/SCOUT/results/output/SBS96",
-                "signature_deconvolution/sigprofiler/SCOUT/results/output/SBS96/SCOUT.SBS96.all",
+                "signature_deconvolution/sparsesignature",
+                "signature_deconvolution/sparsesignature/SCOUT",
+                "signature_deconvolution/sparsesignature/SCOUT/SCOUT_best_params_config.rds",
+                "signature_deconvolution/sparsesignature/SCOUT/SCOUT_cv_means_mse.rds",
+                "signature_deconvolution/sparsesignature/SCOUT/SCOUT_mut_counts.rds",
+                "signature_deconvolution/sparsesignature/SCOUT/SCOUT_nmf_Lasso_out.rds",
+                "signature_deconvolution/sparsesignature/SCOUT/SCOUT_plot_all.pdf",
+                "signature_deconvolution/sparsesignature/SCOUT/SCOUT_plot_all.rds",
                 "subclonal_deconvolution",
                 "subclonal_deconvolution/ctree",
                 "subclonal_deconvolution/ctree/SCOUT",
@@ -603,7 +576,7 @@
                 "variant_annotation/vep/SCOUT/SPN01_SS_nobam/SPN01_100X_0.9p_Sample_C/SCOUT_SPN01_SS_nobam_SPN01_100X_0.9p_Sample_C.annotated_summary.html"
             ]
         ],
-        "timestamp": "2026-03-20T11:53:48.980770362",
+        "timestamp": "2026-03-20T12:08:14.528485337",
         "meta": {
             "nf-test": "0.9.4",
             "nextflow": "25.10.0"
