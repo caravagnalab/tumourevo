@@ -85,6 +85,10 @@
                     {
                         "type": "string",
                         "pattern": "^Battenberg$"
+                    },
+		    {
+                        "type": "string",
+                        "pattern": "^facets$"
                     }
                 ]
             },
