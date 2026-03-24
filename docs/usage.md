@@ -84,12 +84,12 @@ nextflow run nf-core/tumourevo \
  --tools pyclonevi,mobster,viber,sparsesignature,sigprofiler
 ```
 
-Minimal input file, two samples from the same patient:
+Minimal input file, two samples from the same patient with joint variant calling vcf file:
 
 ```csv
 dataset,patient,tumour_sample,normal_sample,vcf,tbi,cna_segments,cna_extra,cna_caller,cancer_type
-dataset1,patient1,sample1,N1,patient1_sample1.vcf.gz,patient1_sample1.vcf.gz.tbi,/CNA/patient1/sample1/segments.txt,CNA/patient1/sample1/purity_ploidy.txt,caller,PANCANCER
-dataset1,patient1,sample2,N1,patient1_sample2.vcf.gz,patient1_sample2.vcf.gz.tbi,/CNA/patient1/sample2/segments.txt,CNA/patient1/sample2/purity_ploidy.txt,caller,PANCANCER
+dataset1,patient1,sample1,N1,patient1.vcf.gz,patient1.vcf.gz.tbi,/CNA/patient1/sample1/segments.txt,CNA/patient1/sample1/purity_ploidy.txt,caller,PANCANCER
+dataset1,patient1,sample2,N1,patient1.vcf.gz,patient1.vcf.gz.tbi,/CNA/patient1/sample2/segments.txt,CNA/patient1/sample2/purity_ploidy.txt,caller,PANCANCER
 ```
 
 ##### 2. Single sample variant calling

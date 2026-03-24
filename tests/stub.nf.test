@@ -9,7 +9,7 @@ nextflow_pipeline {
 
         when {
             params {
-                tools = "mobster,pyclone-vi" //sparsesignatures,viber,sigprofiler
+                tools = "mobster,pyclone-vi,viber"
                 outdir = "$outputDir"
 
             }
@@ -21,12 +21,12 @@ nextflow_pipeline {
             assertAll(
                 { assert workflow.success},
                 { assert snapshot(
-		    // Number of successful tasks
-		    workflow.trace.succeeded().size(),
-                    // pipeline versions.yml file for multiqc from which Nextflow version is removed because we test pipelines on multiple Nextflow versions
+                    // Number of successful tasks
+                    workflow.trace.succeeded().size(),
+                    // pipeline versions.yml file for multiqc from which Nextflow and pipeline versions are removed (all from the workflow key)
                     removeNextflowVersion("$outputDir/pipeline_info/nf_core_tumourevo_software_mqc_versions.yml"),
                     // All stable path name, with a relative path
-                    stable_name,
+                    stable_name
                 ).match() }
             )
         }

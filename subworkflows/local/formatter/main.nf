@@ -13,9 +13,10 @@ workflow FORMATTER {
         extension
 
     main:
-
+        ch_versions = Channel.empty()
         if (extension == "vcf"){
                 VCF2CNAQC(input)
+                ch_versions = ch_versions.mix(VCF2CNAQC.out.versions)
                 out = VCF2CNAQC.out.rds
 
         } else if (extension == "cna"){
@@ -23,13 +24,16 @@ workflow FORMATTER {
                     [ meta, cna[0], cna[1] ]
                 }
                 CNA2CNAQC(input_cna)
+                ch_versions = ch_versions.mix(CNA2CNAQC.out.versions)
                 out = CNA2CNAQC.out.rds
 
         } else if (extension == "rds"){ // for pyclone-vi
                 CNAQC2TSV(input)
+                ch_versions = ch_versions.mix(CNAQC2TSV.out.versions)
                 out = CNAQC2TSV.out.tsv
         }
 
     emit:
-        out
+        out_data = out
+        versions = ch_versions
 }

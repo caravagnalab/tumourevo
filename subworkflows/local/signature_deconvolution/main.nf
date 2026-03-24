@@ -13,6 +13,7 @@ workflow SIGNATURE_DECONVOLUTION {
     join_cnaqc_out // tuple val(meta), path("*.rds"), val(tumor_samples)
 
     main:
+    ch_versions = Channel.empty()
     plot_pdf = null
     plot_rds = null
     signatures_nmfOut = null
@@ -24,13 +25,16 @@ workflow SIGNATURE_DECONVOLUTION {
 
     if (params.tools && params.tools.split(',').contains('sparsesignatures')) {
         FORMATTER_RDS_SPARSESIGNATURES(join_cnaqc_out, "rds")
-        input_sparsesig = FORMATTER_RDS_SPARSESIGNATURES.out.map { meta, tsv, sample ->
+        ch_versions = ch_versions.mix(FORMATTER_RDS_SPARSESIGNATURES.out.versions)
+
+        input_sparsesig = FORMATTER_RDS_SPARSESIGNATURES.out.out_data.map { meta, tsv, sample ->
             meta = meta + [id: "${meta.dataset}"]
             [meta.subMap('dataset', 'id'), tsv] }
             .groupTuple()
 
         SPARSE_SIGNATURES(input_sparsesig, params.genome) // run SparseSignatures
 
+        ch_versions = ch_versions.mix(SPARSE_SIGNATURES.out.versions_sparsesignatures)
         plot_pdf = SPARSE_SIGNATURES.out.signatures_plot_pdf
         plot_rds = SPARSE_SIGNATURES.out.signatures_plot_rds
         signatures_nmfOut = SPARSE_SIGNATURES.out.signatures_nmfOut_rds
@@ -48,13 +52,15 @@ workflow SIGNATURE_DECONVOLUTION {
         }
 
         FORMATTER_RDS_SIGPROFILER(join_cnaqc_out, "rds")
+        ch_versions = ch_versions.mix(FORMATTER_RDS_SIGPROFILER.out.versions)
 
-        input_sigprofiler = FORMATTER_RDS_SIGPROFILER.out.map { meta, tsv, sample ->
+        input_sigprofiler = FORMATTER_RDS_SIGPROFILER.out.out_data.map { meta, tsv, sample ->
             meta = meta + [id: "${meta.dataset}"]
             [meta.subMap('dataset', 'id'), tsv]}
             .groupTuple()
 
         SIGPROFILER(input_sigprofiler, params.genome, genome_path)
+        ch_versions = ch_versions.mix(SIGPROFILER.out.versions)
         sigprofiler_out = SIGPROFILER.out.results_sigprofiler
     }
 
@@ -66,5 +72,6 @@ workflow SIGNATURE_DECONVOLUTION {
     sign_cv
     mut_counts
     sigprofiler_out
+    versions = ch_versions
 
 }

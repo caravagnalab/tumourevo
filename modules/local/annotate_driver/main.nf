@@ -57,15 +57,18 @@ process ANNOTATE_DRIVER {
             driver_label = paste0(SYMBOL, tmp_s2)
         ) %>%
         dplyr::select(-tmp_s2) %>%
-        dplyr::mutate(is_driver = ifelse(is.na(is_driver), FALSE, is_driver))
+        dplyr::mutate(is_driver = ifelse(is.na(is_driver), FALSE, is_driver)) %>%
+        dplyr::mutate(IMPACT = factor(IMPACT, levels = c("LOW", "MODIFIER", "MODERATE", "HIGH"))) %>%
+        dplyr::mutate(pos = paste(chr, from, to, sep = ":")) %>%
+        dplyr::group_by(pos) %>%
+        dplyr::mutate(additional_info = tibble(SYMBOL, IMPACT, Consequence, HGVSc, HGVSp, is_driver)) %>%
+        dplyr::mutate(additional_info = list(across(additional_info))) %>%
+	      dplyr::arrange(desc(SYMBOL)) %>%
+        dplyr::slice_max(order_by = as.numeric(IMPACT), n = 1, with_ties = FALSE) %>%
+        dplyr::distinct(pos, SYMBOL, IMPACT, .keep_all = TRUE) %>%
+        dplyr::ungroup()
 
-    filter_x = x %>%
-        dplyr::distinct(chr, from, to, ref,  alt,  IMPACT, SYMBOL, Gene, is_driver, driver_label, .keep_all = T) %>%
-        dplyr::mutate(priority = ifelse(is_driver == TRUE, 1, 0)) %>%
-        dplyr::arrange(chr, from, to, desc(priority)) %>%
-        dplyr::distinct(chr, from, to, .keep_all = TRUE)
-
-    data[["$meta.tumour_sample"]]\$mutations = filter_x
+    data[["$meta.tumour_sample"]]\$mutations = x
     saveRDS(object = data, file = paste0("$prefix", "_driver.rds"))
 
     # version export

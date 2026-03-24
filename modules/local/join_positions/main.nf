@@ -46,7 +46,8 @@ process JOIN_POSITIONS {
                 NV = as.numeric(NV),
                 VAF = NV/DP) %>%
             dplyr::mutate(VAF = ifelse(is.na(VAF),0,VAF)) %>%
-            dplyr::rename(sample = Indiv)
+	    dplyr::mutate(sample = "$meta.tumour_sample") %>%
+            dplyr::select(!Indiv)
 
     fix_field = tb\$fix %>%
             dplyr::rename(
@@ -67,9 +68,10 @@ process JOIN_POSITIONS {
         stop("Mismatch between the VCF fixed fields and the genotypes, will not process this file.")
 
     pileup_mutations = dplyr::bind_cols(fix_field, gt_field)  %>%
-                dplyr::select(chr, from, to, ref, NV, DP, VAF, dplyr::everything(), -alt, -ChromKey) %>%
+                dplyr::select(chr, from, to, ref, NV, DP, dplyr::everything(), -alt, -ChromKey) %>%
                 dplyr::mutate(from = from+1, to = to+1)  %>%
-                dplyr::mutate(NV = 0)
+                dplyr::mutate(NV = 0) %>%
+                dplyr::mutate(VAF = NV/DP)
 
     bind = inner_join(pileup_mutations, all_positions, by = join_by(chr, from, to, ref))
 

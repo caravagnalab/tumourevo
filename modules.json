@@ -23,7 +23,7 @@
                     },
                     "ctree": {
                         "branch": "master",
-                        "git_sha": "e753770db613ce014b3c4bc94f6cba443427b726",
+                        "git_sha": "dd038876340e01159091a82a9765a4017ab9012a",
                         "installed_by": ["modules"],
                         "patch": "modules/nf-core/ctree/ctree.diff"
                     },
@@ -40,12 +40,13 @@
                     },
                     "mobster": {
                         "branch": "master",
-                        "git_sha": "1e0259db8e0a2b2c5bd99f83cc2ecf8583a85020",
-                        "installed_by": ["modules"]
+                        "git_sha": "be8d7a5227223396a308243db310379f329082e4",
+                        "installed_by": ["modules"],
+                        "patch": "modules/nf-core/mobster/mobster.diff"
                     },
                     "pyclonevi": {
                         "branch": "master",
-                        "git_sha": "e753770db613ce014b3c4bc94f6cba443427b726",
+                        "git_sha": "a039cea3fd78c17219897cf2f78d254b43ef33a8",
                         "installed_by": ["modules"]
                     },
                     "sigprofiler": {
@@ -55,7 +56,7 @@
                     },
                     "sparsesignatures": {
                         "branch": "master",
-                        "git_sha": "e753770db613ce014b3c4bc94f6cba443427b726",
+                        "git_sha": "ebb717c1ec96c97695b88a4a9c9d8c0e1b1b980b",
                         "installed_by": ["modules"],
                         "patch": "modules/nf-core/sparsesignatures/sparsesignatures.diff"
                     },
@@ -77,8 +78,9 @@
                     },
                     "viber": {
                         "branch": "master",
-                        "git_sha": "f6031b14e341929835b54a4c98f26ba94e739dc6",
-                        "installed_by": ["modules"]
+                        "git_sha": "642d6c5c0b7a4fbd7122fd00cbbb9a4a671d6d0a",
+                        "installed_by": ["modules"],
+                        "patch": "modules/nf-core/viber/viber.diff"
                     }
                 }
             },

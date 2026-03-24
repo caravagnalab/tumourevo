@@ -90,7 +90,7 @@ retrieve_ref_alt = function(row){
     if (alt == 'A'){NV=as.integer(strsplit(row[["gt_AU"]], split=',')[[1]][1])}
     if (alt == 'T'){NV=as.integer(strsplit(row[["gt_TU"]], split=',')[[1]][1])}
     if (alt == 'G'){NV=as.integer(strsplit(row[["gt_GU"]], split=',')[[1]][1])}
-    if (alt == 'C'){NV=as.integer(strsplit(row[["gt_GU"]], split=',')[[1]][1])}
+    if (alt == 'C'){NV=as.integer(strsplit(row[["gt_CU"]], split=',')[[1]][1])}
     if (nchar(ref) > 1 | nchar(alt) > 1 ){NV=as.integer(strsplit(row[["gt_TIR"]], split=',')[[1]][1])}
 
     ref_alt = paste0(NR, ',', NV)
