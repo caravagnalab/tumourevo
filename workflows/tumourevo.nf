@@ -13,7 +13,8 @@ include { FORMATTER as FORMATTER_RDS} from "../subworkflows/local/formatter/main
 include { QC } from "../subworkflows/local/qc/main"
 include { SUBCLONAL_DECONVOLUTION } from "../subworkflows/local/subclonal_deconvolution/main"
 include { SIGNATURE_DECONVOLUTION } from "../subworkflows/local/signature_deconvolution/main"
-include { ASSIGN_SIGNATURE } from "../subworkflows/local/assign_signature/main"
+//include { ASSIGN_SIGNATURE } from "../subworkflows/local/assign_signature/main"
+include { GENOME_INTERPRETER } from "../subworkflows/local/genome_interpreter/main"
 
 
 include { softwareVersionsToYAML           } from '../subworkflows/nf-core/utils_nfcore_pipeline'
@@ -139,6 +140,10 @@ main:
                     SUBCLONAL_DECONVOLUTION.out.mobster_results,
                     SUBCLONAL_DECONVOLUTION.out.viber_results,
                     SIGNATURE_DECONVOLUTION.out.sigprofiler_out)
+
+    GENOME_INTERPRETER(QC.out.rds_cnaqc,
+                    QC.out.rds_tinc)
+                  
 
     softwareVersionsToYAML(ch_versions)
         .collectFile(storeDir: "${params.outdir}/pipeline_info", name: 'nf_core_tumourevo_software_mqc_versions.yml', sort: true, newLine: true)
