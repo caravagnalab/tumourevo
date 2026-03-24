@@ -41,7 +41,8 @@
                     "mobster": {
                         "branch": "master",
                         "git_sha": "be8d7a5227223396a308243db310379f329082e4",
-                        "installed_by": ["modules"]
+                        "installed_by": ["modules"],
+                        "patch": "modules/nf-core/mobster/mobster.diff"
                     },
                     "pyclonevi": {
                         "branch": "master",
@@ -55,7 +56,7 @@
                     },
                     "sparsesignatures": {
                         "branch": "master",
-                        "git_sha": "1f92295b4c7cafb2e013575669e4390ca61a9014",
+                        "git_sha": "ebb717c1ec96c97695b88a4a9c9d8c0e1b1b980b",
                         "installed_by": ["modules"],
                         "patch": "modules/nf-core/sparsesignatures/sparsesignatures.diff"
                     },
@@ -78,7 +79,8 @@
                     "viber": {
                         "branch": "master",
                         "git_sha": "642d6c5c0b7a4fbd7122fd00cbbb9a4a671d6d0a",
-                        "installed_by": ["modules"]
+                        "installed_by": ["modules"],
+                        "patch": "modules/nf-core/viber/viber.diff"
                     }
                 }
             },
