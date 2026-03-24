@@ -6,7 +6,7 @@ include { FORMATTER as FORMATTER_RDS_SIGPROFILER } from "../../../subworkflows/l
 include { FORMATTER as FORMATTER_RDS_SPARSESIGNATURES } from "../../../subworkflows/local/formatter/main"
 include { SPARSE_SIGNATURES } from "../../../modules/nf-core/sparsesignatures/main"
 include { SIGPROFILER } from "../../../modules/nf-core/sigprofiler/main"
-
+include { SPARSESIGNATURE_ASSIGN } from '../../../modules/local/sparsesignature_assign_cosmic/main'
 
 workflow SIGNATURE_DECONVOLUTION {
     take:
@@ -20,6 +20,7 @@ workflow SIGNATURE_DECONVOLUTION {
     bestConf = null
     sign_cv = null
     mut_counts = null
+    sparsesignature_assign_cosmic = null
     genome_path = null
     sigprofiler_out = null
 
@@ -41,6 +42,10 @@ workflow SIGNATURE_DECONVOLUTION {
         bestConf = SPARSE_SIGNATURES.out.signatures_bestConf_rds
         sign_cv = SPARSE_SIGNATURES.out.signatures_cv_rds
         mut_counts = SPARSE_SIGNATURES.out.signatures_mutCounts_rds
+        SPARSESIGNATURE_ASSIGN(signatures_nmfOut,mut_counts, params.genome)
+        
+        sparsesignature_assign_cosmic = SPARSESIGNATURE_ASSIGN.out.sparsesignature_assigned
+        
     }
 
 
@@ -71,6 +76,7 @@ workflow SIGNATURE_DECONVOLUTION {
     bestConf
     sign_cv
     mut_counts
+    sparsesignature_assign_cosmic
     sigprofiler_out
     versions = ch_versions
 
