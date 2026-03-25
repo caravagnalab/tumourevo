@@ -25,13 +25,15 @@ process SPARSESIGNATURE_ASSIGN {
     #!/usr/bin/env Rscript
     library(dplyr)
     
+    url_reference <- paste0("https://raw.githubusercontent.com/SigProfilerSuite/SigProfilerAssignment/main/SigProfilerAssignment/data/Reference_Signatures/",${genome},"/COSMIC_v3.5_SBS_",${genome},".txt")
+    destfile_path <- paste0("COSMIC_v3.5_SBS_",${genome},".txt")
     download.file(
-     url = "https://raw.githubusercontent.com/SigProfilerSuite/SigProfilerAssignment/main/SigProfilerAssignment/data/Reference_Signatures/GRCh38/COSMIC_v3.5_SBS_GRCh38.txt",
-     destfile = "COSMIC_v3.5_SBS_GRCh38.txt",
+     url = url_reference,
+     destfile = destfile_path,
      mode = "wb"
     )
     
-    cosmic_path <- "COSMIC_v3.5_SBS_GRCh38.txt"
+    cosmic_path <-destfile_path
     
     cos_sim <- function(x, y) {
       res <- x %*% y / (sqrt(x %*% x) * sqrt(y %*% y))
