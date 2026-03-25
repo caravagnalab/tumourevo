@@ -2,7 +2,7 @@
 // GENOME INTERPRETER WORKFLOW
 //
 
-include { COHORT_QC_REPORT } from "../../../modules/local/cohort_qc_report/main"
+include { COHORT_QC } from "../../../modules/local/cohort_qc/main"
 
 
 workflow GENOME_INTERPRETER {
@@ -49,12 +49,12 @@ workflow GENOME_INTERPRETER {
 
     cohort_qc_input = cohort_cnaqc.join(cohort_tinc)
 
-    COHORT_QC_REPORT(cohort_qc_input)
+    COHORT_QC(cohort_qc_input)
     
-    ch_versions = ch_versions.mix(COHORT_QC_REPORT.out.versions)
-    summary_table_rds  = COHORT_QC_REPORT.out.summary_table_rds
-    summary_plot_rds  = COHORT_QC_REPORT.out.summary_plot_rds
-    summary_report_pdf = COHORT_QC_REPORT.out.summary_report_pdf
+    ch_versions = ch_versions.mix(COHORT_QC.out.versions)
+    summary_table_rds  = COHORT_QC.out.summary_table_rds
+    summary_plot_rds  = COHORT_QC.out.summary_plot_rds
+    summary_report_pdf = COHORT_QC.out.summary_report_pdf
 
     emit:
     summary_table_rds

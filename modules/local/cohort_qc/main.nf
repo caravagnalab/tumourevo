@@ -1,6 +1,6 @@
-process COHORT_QC_REPORT {
+process COHORT_QC {
     tag "${meta.id}"
-    label 'process_medium'
+    label 'process_low'
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' ?

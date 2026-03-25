@@ -13,7 +13,7 @@ include { FORMATTER as FORMATTER_RDS} from "../subworkflows/local/formatter/main
 include { QC } from "../subworkflows/local/qc/main"
 include { SUBCLONAL_DECONVOLUTION } from "../subworkflows/local/subclonal_deconvolution/main"
 include { SIGNATURE_DECONVOLUTION } from "../subworkflows/local/signature_deconvolution/main"
-//include { ASSIGN_SIGNATURE } from "../subworkflows/local/assign_signature/main"
+include { ASSIGN_SIGNATURE } from "../subworkflows/local/assign_signature/main"
 include { GENOME_INTERPRETER } from "../subworkflows/local/genome_interpreter/main"
 
 
