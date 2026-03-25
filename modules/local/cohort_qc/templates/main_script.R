@@ -42,7 +42,6 @@ safe_median <- function(x) {
 }
 
 # IDs parser
-
 strip_suffix <- function(x, suffix) {
   ifelse(endsWith(x, suffix), substr(x, 1, nchar(x) - nchar(suffix)), x)
 }
@@ -78,7 +77,6 @@ classify_tin <- function(x) {
   )
 }
 
-
 ### TINC summary extractor ###
 
 get_tinc_summary <- function(fit, sample_id = NULL) {
@@ -86,11 +84,8 @@ get_tinc_summary <- function(fit, sample_id = NULL) {
   if (is.null(sid)) {
     sid <- if (!is.null(fit[["sample"]])) fit[["sample"]] else NA_character_
   }
-
   tin <- fit[["TIN"]]
-  
   tin_pct <- if (!is.null(tin) && !is.na(tin)) 100 * tin else NA_real_
- 
   tibble::tibble(
     sample_id = as.character(sid),
     TIN = tin,
@@ -161,10 +156,7 @@ get_cnaqc_summary <- function(qc, sample_id = NULL) {
   purity <- qc[["purity"]]
   ploidy <- qc[["ploidy"]]
   most_prevalent_karyotype <- qc[["most_prevalent_karyotype"]]
-  
-  # FGA from basepairs_by_karyotype
-  fga <- NA_real_
-  
+   
   # Assign QC class
   qc_class <- dplyr::case_when(
     !is.na(mutation_pass_rate) && !is.na(cna_pass_rate) &&
