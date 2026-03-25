@@ -57,6 +57,22 @@ parse_Battenberg = function(segments_file, extra_file){
     return(list(segments = segments, purity = purity_ploidy[['purity']], ploidy = purity_ploidy[['ploidy']]))
 }
 
+parse_facets = function(segments_file, extra_file){
+  # Extract the extra information
+  purity_ploidy = read.table(extra_file, sep = '\t', header = T) %>%
+    dplyr::select(purity, ploidy)
+
+  # Extract the segments information
+  segments = readr::read_tsv(segments_file, col_types = readr::cols()) %>%
+    dplyr::select(chr, from, to, Major, minor)
+
+  return(list(
+    segments = segments,
+    purity   = purity_ploidy[["purity"]][1],
+    ploidy   = purity_ploidy[["ploidy"]][1]
+  ))
+}
+
 if ("$meta.cna_caller" == 'sequenza'){
 CNA = parse_Sequenza(segments = "$cna_segs", extra = "$cna_extra")
 
@@ -65,6 +81,9 @@ CNA = parse_ASCAT(segments = "$cna_segs", extra = "$cna_extra")
 
 } else if ("$meta.cna_caller" == 'Battenberg'){
 CNA = parse_Battenberg(segments = "$cna_segs", extra = "$cna_extra")
+
+} else if ("$meta.cna_caller" == 'facets'){
+CNA = parse_facets(segments = "$cna_segs", extra = "$cna_extra")
 
 } else {
 stop('Copy Number Caller not supported.')
