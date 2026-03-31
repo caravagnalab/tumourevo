@@ -46,7 +46,7 @@ strip_suffix <- function(x, suffix) {
   ifelse(endsWith(x, suffix), substr(x, 1, nchar(x) - nchar(suffix)), x)
 }
 
-extract_id <- function(x, pattern, default = NA_character_) {
+get_id <- function(x, pattern, default = NA_character_) {
   out <- stringr::str_extract(x, pattern)
   ifelse(is.na(out), default, out)
 }
@@ -54,16 +54,40 @@ extract_id <- function(x, pattern, default = NA_character_) {
 get_ids <- function(file,
                     suffix,
                     patient_pattern = "U[0-9]+",
-                    cohort_pattern = "^[^_]+") {
+                    #cohort_pattern = "^[^_]+") {
   fname <- basename(file)
   sample_id <- strip_suffix(fname, suffix)
 
   tibble::tibble(
-    cohort_id  = extract_id(sample_id, cohort_pattern),
-    patient_id = extract_id(sample_id, patient_pattern),
+    #cohort_id  = get_id(sample_id, cohort_pattern),
+    patient_id = get_id(sample_id, patient_pattern),
     sample_id  = sample_id
   )
 }
+
+get_n_karyotype <- function(qc, sample_id = NULL) {
+  sid <- sample_id
+  if (is.null(sid)) {
+    sid <- if (!is.null(qc[["sample"]])) qc[["sample"]] else NA_character_
+  }
+
+  nk <- qc[["n_karyotype"]]
+
+  if (is.null(nk) || length(nk) == 0) {
+    return(tibble::tibble(
+      sample_id = character(),
+      karyotype = character(),
+      n_mutations = numeric()
+    ))
+  }
+
+  tibble::tibble(
+    sample_id = sid,
+    karyotype = names(nk),
+    n_mutations = as.numeric(nk)
+  )
+}
+
 
 # TIN classification
 classify_tin <- function(x) {
@@ -108,9 +132,6 @@ get_cnaqc_summary <- function(qc, sample_id = NULL) {
   mut_pass <- sum(mut_qc == TRUE, na.rm = TRUE)
   mut_fail <- sum(mut_qc == FALSE, na.rm = TRUE)
   mut_na <- sum(is.na(mut_qc))
-  mutation_pass_rate <- if (mut_tested > 0) mut_pass / mut_tested else NA_real_
-  mutation_fail_rate <- if (mut_tested > 0) mut_fail / mut_tested else NA_real_
-  mutation_na_fraction <- if (length(mut_qc) > 0) mut_na / length(mut_qc) else NA_real_
   
   # CNA QC
   cna_qc <- qc[["cna"]][["QC_PASS"]]
@@ -132,9 +153,7 @@ get_cnaqc_summary <- function(qc, sample_id = NULL) {
     n_peaks_pass <- sum(matches[["QC"]] == "PASS", na.rm = TRUE)
     n_peaks_fail <- sum(matches[["QC"]] == "FAIL", na.rm = TRUE)
     peak_pass_rate <- n_peaks_pass / n_peaks
-    mean_delta_vaf <- safe_mean(matches[["delta_vaf"]])
-    median_counts_per_bin <- safe_median(matches[["counts_per_bin"]])
-    
+   
     dominant_karyotype <- matches[["karyotype"]][which.max(matches[["weight"]])][1]
     dominant_karyotype_weight <- max(matches[["weight"]], na.rm = TRUE)
   } else {
@@ -142,8 +161,6 @@ get_cnaqc_summary <- function(qc, sample_id = NULL) {
     n_peaks_pass <- NA_integer_
     n_peaks_fail <- NA_integer_
     peak_pass_rate <- NA_real_
-    mean_delta_vaf <- NA_real_
-    median_counts_per_bin <- NA_real_
     dominant_karyotype <- NA_character_
     dominant_karyotype_weight <- NA_real_
   }
@@ -151,34 +168,30 @@ get_cnaqc_summary <- function(qc, sample_id = NULL) {
   # CN structure
   n_mutations <- qc[["n_mutations"]]
   n_cna <- qc[["n_cna"]]
-  n_cna_clonal <- qc[["n_cna_clonal"]]
-  n_cna_subclonal <- qc[["n_cna_subclonal"]] 
   purity <- qc[["purity"]]
   ploidy <- qc[["ploidy"]]
   most_prevalent_karyotype <- qc[["most_prevalent_karyotype"]]
-   
-  # Assign QC class
+  
+  # CNAqc-oriented QC classification
   qc_class <- dplyr::case_when(
-    !is.na(mutation_pass_rate) && !is.na(cna_pass_rate) &&
-      mutation_pass_rate >= 0.80 && cna_pass_rate >= 0.80 &&
+    !is.na(cna_pass_rate) &&
+      cna_pass_rate >= 0.80 &&
       (is.na(peak_pass_rate) || peak_pass_rate >= 0.50) ~ "PASS",
-    !is.na(mutation_pass_rate) && !is.na(cna_pass_rate) &&
-      (mutation_pass_rate < 0.50 || cna_pass_rate < 0.50 ||
+    
+    !is.na(cna_pass_rate) &&
+      (cna_pass_rate < 0.50 ||
          (!is.na(peak_pass_rate) && peak_pass_rate < 0.50)) ~ "FAIL",
+    
     TRUE ~ "WARN"
   )
   
-  data.frame(
+  tibble::tibble(
     sample_id = sid,
     n_mutations = n_mutations,
     purity = purity,
     ploidy = ploidy,
     n_cna = n_cna,
-    n_cna_clonal = n_cna_clonal,
-    n_cna_subclonal = n_cna_subclonal,
     most_prevalent_karyotype = most_prevalent_karyotype,
-    mutation_pass_rate = mutation_pass_rate,
-    mutation_fail_rate = mutation_fail_rate,
     mutation_na_fraction = mutation_na_fraction,
     cna_pass_rate = cna_pass_rate,
     cna_fail_rate = cna_fail_rate,
@@ -189,13 +202,12 @@ get_cnaqc_summary <- function(qc, sample_id = NULL) {
     n_peaks_pass = n_peaks_pass,
     n_peaks_fail = n_peaks_fail,
     peak_pass_rate = peak_pass_rate,
-    mean_delta_vaf = mean_delta_vaf,
-    median_counts_per_bin = median_counts_per_bin,
     dominant_karyotype = dominant_karyotype,
     dominant_karyotype_weight = dominant_karyotype_weight,
     qc_class = qc_class
   )
 }
+
 
 
 ### RDS file loader ###
@@ -214,6 +226,17 @@ load_qc_objects <- function(files, suffix, extractor_fun) {
   })
 }
 
+load_karyotype_objects <- function(files, suffix) {
+  purrr::map_dfr(files, function(f) {
+    obj <- readRDS(f)
+    ids <- get_ids(f, suffix = suffix)
+
+    get_n_karyotype(obj, sample_id = ids[["sample_id"]]) %>%
+      dplyr::mutate(patient_id = ids[["patient_id"]]) %>%
+      dplyr::select(patient_id, sample_id, karyotype, n_mutations)
+  })
+}
+
 ### Load TINC and CNAqc objects and get cohort summary ###
 
 cohort_qc_tinc <- load_qc_objects(
@@ -227,6 +250,39 @@ cohort_qc_cnaqc <- load_qc_objects(
   suffix = "_qc.rds",
   extractor_fun = get_cnaqc_summary
 )
+
+cohort_karyotype <- load_karyotype_objects(
+  files = cnaqc_rds_files,
+  suffix = "_qc.rds"
+)
+
+# Simmarize across samples
+all_samples <- unique(cohort_karyotype$sample_id)
+all_karyotypes <- unique(cohort_karyotype$karyotype)
+
+cohort_karyotype_complete <- tidyr::expand_grid(
+  sample_id = all_samples,
+  karyotype = all_karyotypes
+) %>%
+  dplyr::left_join(
+    cohort_karyotype,
+    by = c("sample_id", "karyotype")
+  ) %>%
+  dplyr::mutate(
+    n_mutations = dplyr::coalesce(n_mutations, 0)
+  )
+
+karyotype_summary <- cohort_karyotype_complete %>%
+  dplyr::group_by(karyotype) %>%
+  dplyr::summarise(
+    total_mutations = sum(n_mutations, na.rm = TRUE),
+    mean_mutations = mean(n_mutations, na.rm = TRUE),
+    median_mutations = median(n_mutations, na.rm = TRUE),
+    n_samples = dplyr::n(),
+    n_nonzero_samples = sum(n_mutations > 0, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  dplyr::arrange(dplyr::desc(total_mutations))
 
 # Merge into unified cohort summary 
 
@@ -261,24 +317,23 @@ theme_dash <- ggplot2::theme_bw(base_size = 11) +
 # Summary strip
 
 summary_df <- cohort_qc %>%
-  dplyr::summarise(
-    n_samples = dplyr::n(),
-    n_pass = sum(qc_class == "PASS", na.rm = TRUE),
-    n_warn = sum(qc_class == "WARN", na.rm = TRUE),
-    n_fail = sum(qc_class == "FAIL", na.rm = TRUE),
-    med_purity = median(purity, na.rm = TRUE),
-    med_ploidy = median(ploidy, na.rm = TRUE),
-    med_tin = median(TIN_pct, na.rm = TRUE)
+  summarise(
+    n_samples = n(),
+    mean_purity = mean(purity, na.rm = TRUE),
+    mean_ploidy = mean(ploidy, na.rm = TRUE),
+    mean_tin = mean(TIN_pct, na.rm = TRUE)
   )
+
+# summary strip
 
 summary_text <- paste0(
   "Samples: ", summary_df["n_samples"],
-  "    |    PASS: ", summary_df[["n_pass"]],
-  "    |    WARN: ", summary_df[["n_warn"]],
-  "    |    FAIL: ", summary_df[["n_fail"]],
-  "\nMedian purity: ", round(summary_df[["med_purity"]], 2),
-  "    |    Median ploidy: ", round(summary_df[["med_ploidy"]], 2),
-  "    |    Median TIN: ", round(summary_df[["med_tin"]], 2), "%"
+  "    |    PASS: ", summary_df["n_pass"],
+  "    |    WARN: ", summary_df["n_warn"],
+  "    |    FAIL: ", summary_df["n_fail"],
+  "\nMean purity: ", round(summary_df["mean_purity"], 3),
+  "    |    Mean ploidy: ", round(summary_df["mean_ploidy"], 3),
+  "    |    Mean TIN: ", round(summary_df["mean_tin"], 2), "%"
 )
 
 summary_plot <- ggplot2::ggplot() +
@@ -296,36 +351,75 @@ summary_plot <- ggplot2::ggplot() +
 
 ### Main plots ###
 
-p1 <- ggplot2::ggplot(cohort_qc, ggplot2::aes(qc_class, fill = qc_class)) +
-  ggplot2::geom_bar() +
-  ggplot2::scale_fill_manual(values = qc_colors) +
-  ggplot2::geom_text(
+# QC classification
+p1 <- ggplot(cohort_qc, aes(qc_class, fill = qc_class)) +
+  geom_bar() +
+  scale_fill_manual(
+    values = qc_colors
+  ) +
+  geom_text(
     stat = "count",
-    ggplot2::aes(label = after_stat(count)),
+    aes(label = after_stat(count)),
     vjust = -0.3,
     size = 4
   ) +
   theme_dash +
-  ggplot2::labs(
+  labs(
     title = "QC classification",
     x = "QC class",
     y = "Number of samples"
   )
 
-p2 <- ggplot2::ggplot(cohort_qc, ggplot2::aes(n_mutations)) +
-  ggplot2::geom_histogram(bins = 30, fill = "#4682B4") +
-  ggplot2::scale_x_log10(
+# Mutation burden
+p2 <- ggplot(cohort_qc, aes(n_mutations)) +
+  geom_histogram(bins = 30,
+                 fill = "#4682B4") +
+  scale_x_log10(
     breaks = 10^(0:7),
-    labels = scales::trans_format("log10", scales::math_format(10^.x))
+    labels = trans_format("log10", math_format(10^.x))
   ) +
   theme_dash +
-  ggplot2::labs(
+  labs(
     title = "Mutation burden",
     x = "Mutations (log scale)",
     y = "Number of samples"
   )
 
-  p3 <- ggplot2::ggplot(cohort_qc, ggplot2::aes(purity, fill = qc_class)) +
+# Purity
+p3 <- ggplot(cohort_qc, aes(purity, fill = qc_class)) +
+  geom_histogram(
+    bins = 30,
+    position = "stack",
+    alpha = 0.7,
+    color = "grey20",
+    linewidth = 0.2
+  ) +
+  scale_fill_manual(values = qc_colors,
+                    name = "QC class") +
+  theme_dash +
+  labs(
+    title = "Purity",
+    x = "Purity",
+    y = "Number of samples"
+  )
+
+# Ploidy
+p4 <- ggplot(cohort_qc, aes(ploidy)) +
+  geom_histogram(
+    bins = 30,
+    fill = "#6A6599FF",
+    color = "grey20",
+    linewidth = 0.2
+  ) +
+  theme_dash +
+  labs(
+    title = "Ploidy",
+    x = "Ploidy",
+    y = "Number of samples"
+  )
+
+# CNA segments per sample
+p5 <- ggplot2::ggplot(cohort_qc, ggplot2::aes(n_cna, fill = qc_class)) +
   ggplot2::geom_histogram(
     bins = 30,
     position = "stack",
@@ -336,82 +430,83 @@ p2 <- ggplot2::ggplot(cohort_qc, ggplot2::aes(n_mutations)) +
   ggplot2::scale_fill_manual(values = qc_colors, name = "QC class") +
   theme_dash +
   ggplot2::labs(
-    title = "Purity",
-    x = "Purity",
+    title = "CNA segments per sample",
+    x = "Number of CNA segments",
     y = "Number of samples"
   )
 
-p4 <- ggplot2::ggplot(cohort_qc, ggplot2::aes(ploidy)) +
-  ggplot2::geom_histogram(
-    bins = 30,
-    fill = "#6A6599FF",
-    color = "grey20",
-    linewidth = 0.2
-  ) +
-  theme_dash +
-  ggplot2::labs(
-    title = "Ploidy",
-    x = "Ploidy",
-    y = "Number of samples"
-  )
-
-
-p5 <- ggplot2::ggplot(cohort_qc, ggplot2::aes(mutation_pass_rate, cna_pass_rate)) +
-  ggplot2::annotate("rect", xmin = 0, xmax = 0.5, ymin = 0, ymax = 1, fill = qc_colors["FAIL"], alpha = 0.08) +
-  ggplot2::annotate("rect", xmin = 0, xmax = 1, ymin = 0, ymax = 0.5, fill = qc_colors["FAIL"], alpha = 0.08) +
-  ggplot2::annotate("rect", xmin = 0.5, xmax = 0.8, ymin = 0.5, ymax = 0.8, fill = qc_colors["WARN"], alpha = 0.08) +
-  ggplot2::annotate("rect", xmin = 0.8, xmax = 1, ymin = 0.8, ymax = 1, fill = qc_colors["PASS"], alpha = 0.1) +
-  ggplot2::geom_point(ggplot2::aes(color = qc_class), alpha = 0.9, size = 1.6) +
+# CNA QC vs Peak QC
+p6 <- ggplot2::ggplot(cohort_qc, ggplot2::aes(cna_pass_rate, peak_pass_rate)) +
+  ggplot2::annotate("rect", xmin = 0, xmax = 0.5, ymin = 0, ymax = 1,
+                    fill = qc_colors["FAIL"], alpha = 0.08) +
+  ggplot2::annotate("rect", xmin = 0.5, xmax = 0.8, ymin = 0.5, ymax = 1,
+                    fill = qc_colors["WARN"], alpha = 0.08) +
+  ggplot2::annotate("rect", xmin = 0.8, xmax = 1, ymin = 0.5, ymax = 1,
+                    fill = qc_colors["PASS"], alpha = 0.10) +
+  ggplot2::geom_point(ggplot2::aes(color = qc_class), alpha = 0.9, size = 1.8) +
   ggplot2::geom_vline(xintercept = c(0.5, 0.8), linetype = c("dotted", "dashed"), color = "grey30") +
-  ggplot2::geom_hline(yintercept = c(0.5, 0.8), linetype = c("dotted", "dashed"), color = "grey30") +
+  ggplot2::geom_hline(yintercept = 0.5, linetype = "dashed", color = "grey30") +
   ggplot2::scale_color_manual(values = qc_colors, name = "QC class") +
   ggplot2::coord_equal(xlim = c(0, 1), ylim = c(0, 1)) +
   theme_dash +
   ggplot2::labs(
-    title = "Mutation QC vs CNA QC",
-    subtitle = "FAIL (<0.5), WARN (0.5–0.8), PASS (>0.8)",
-    x = "Mutation QC pass rate",
-    y = "CNA QC pass rate"
+    title = "CNA QC vs peak QC",
+    x = "CNA QC pass rate",
+    y = "Peak pass rate"
   )
 
-p6 <- ggplot(cohort_qc, aes(peak_pass_rate)) +
-  geom_histogram(bins = 30, fill = "#B07AA1") +
-  geom_vline(xintercept = 0.49, linetype = "dashed", color = "grey40") +
-  theme_dash +
-  labs(title = "Peak pass rate", x = "Pass rate", y = "Number of samples")
-
- 
-
-p7 <- ggplot2::ggplot(cohort_qc, ggplot2::aes(peak_pass_rate)) +
-  ggplot2::geom_histogram(bins = 30, fill = "#B07AA1") +
-  ggplot2::geom_vline(xintercept = 0.49, linetype = "dashed", color = "grey40") +
-  theme_dash +
-  ggplot2::labs(title = "Peak pass rate", x = "Pass rate", y = "Number of samples")
-
-  p8 <- ggplot2::ggplot(cohort_qc, ggplot2::aes(TIN_pct)) +
-  ggplot2::geom_histogram(bins = 40, fill = "#D95F02", color = "white") +
-  ggplot2::geom_vline(xintercept = c(1, 7, 15), linetype = "dashed", color = "grey40") +
-  ggplot2::annotate("text", x = 0.5, y = Inf, label = "No contamination", vjust = 2, size = 3.5) +
-  ggplot2::annotate("text", x = 4, y = Inf, label = "Low", vjust = 2, size = 3.5) +
-  ggplot2::annotate("text", x = 11, y = Inf, label = "Contamination", vjust = 2, size = 3.5) +
-  ggplot2::annotate("text", x = 20, y = Inf, label = "High", vjust = 2, size = 3.5) +
+# Karyotype stats
+p7 <- ggplot2::ggplot(
+  karyotype_summary,
+  ggplot2::aes(
+    x = reorder(karyotype, total_mutations),
+    y = total_mutations
+  )
+) +
+  ggplot2::geom_col(fill = "#CC6677") +
+  ggplot2::coord_flip() +
   theme_dash +
   ggplot2::labs(
+    title = "Mutations per karyotype",
+    x = "Karyotype",
+    y = "Total mutations across cohort"
+  )
+
+# TIN distribution
+p8 <- ggplot(cohort_qc, aes(TIN_pct)) +
+  geom_histogram(bins = 40, fill = "#D95F02", color = "white") +
+  
+  geom_vline(xintercept = c(1, 7, 15),
+             linetype = "dashed", color = "grey40") +
+  
+  # labels
+  annotate("text", x = 0.5, y = Inf, label = "No contamination",
+           vjust = 2, size = 3.5) +
+  annotate("text", x = 4, y = Inf, label = "Low",
+           vjust = 2, size = 3.5) +
+  annotate("text", x = 11, y = Inf, label = "Contamination",
+           vjust = 2, size = 3.5) +
+  annotate("text", x = 20, y = Inf, label = "High",
+           vjust = 2, size = 3.5) +
+  
+  theme_dash +
+  labs(
     title = "Tumour-in-normal contamination",
     subtitle = "TIN classification: <1%, 1–7%, 7–15%, >15%",
     x = "TIN (%)",
     y = "Number of samples"
   )
 
-### Wrap plots ###
+# Wrap plots
 
-first_grid  <- (p1 | p5 | p6)
-second_grid <- (p2 | p3 | p4 | p7)
+first_grid  <- (p1 | p6)
+second_grid <- (p2 | p3 | p4)
+third_grid  <- (p5 | p7 | p8)
 
-dashboard <- summary_plot / first_grid / second_grid +
-  patchwork::plot_layout(heights = c(0.08, 0.45, 0.45)) +
+dashboard <- summary_plot / first_grid / second_grid / third_grid +
+  patchwork::plot_layout(heights = c(0.10, 0.28, 0.30, 0.32)) +
   patchwork::plot_annotation(
-    title = paste0(cohort_id, " cohort QC summary"),
+    title = paste0(cohort_id, " cohort CNAqc / TINC summary"),
     theme = ggplot2::theme(
       plot.title = ggplot2::element_text(size = 16, face = "bold", hjust = 0.5)
     )
