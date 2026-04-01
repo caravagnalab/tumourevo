@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 
-pkgs <- c("tidyverse", "ComplexHeatmap", "circlize", "scales", "grid", "patchwork")
+pkgs <- c("tidyverse", "circlize", "scales", "grid", "patchwork")
 sapply(pkgs, require, character.only = TRUE)
 
 parse_args <- function(x) {
@@ -53,13 +53,12 @@ get_id <- function(x, pattern, default = NA_character_) {
 
 get_ids <- function(file,
                     suffix,
-                    patient_pattern = "U[0-9]+",
-                    #cohort_pattern = "^[^_]+") {
+                    patient_pattern = "U[0-9]+"
+		    ){
   fname <- basename(file)
   sample_id <- strip_suffix(fname, suffix)
 
   tibble::tibble(
-    #cohort_id  = get_id(sample_id, cohort_pattern),
     patient_id = get_id(sample_id, patient_pattern),
     sample_id  = sample_id
   )
@@ -132,6 +131,7 @@ get_cnaqc_summary <- function(qc, sample_id = NULL) {
   mut_pass <- sum(mut_qc == TRUE, na.rm = TRUE)
   mut_fail <- sum(mut_qc == FALSE, na.rm = TRUE)
   mut_na <- sum(is.na(mut_qc))
+  mut_na_fraction <- if (length(mut_qc) > 0) mut_na / length(mut_qc) else NA_real_
   
   # CNA QC
   cna_qc <- qc[["cna"]][["QC_PASS"]]
@@ -192,7 +192,7 @@ get_cnaqc_summary <- function(qc, sample_id = NULL) {
     ploidy = ploidy,
     n_cna = n_cna,
     most_prevalent_karyotype = most_prevalent_karyotype,
-    mutation_na_fraction = mutation_na_fraction,
+    mut_na_fraction = mut_na_fraction,
     cna_pass_rate = cna_pass_rate,
     cna_fail_rate = cna_fail_rate,
     cna_na_fraction = cna_na_fraction,
@@ -257,8 +257,8 @@ cohort_karyotype <- load_karyotype_objects(
 )
 
 # Simmarize across samples
-all_samples <- unique(cohort_karyotype$sample_id)
-all_karyotypes <- unique(cohort_karyotype$karyotype)
+all_samples <- unique(cohort_karyotype[["sample_id"]])
+all_karyotypes <- unique(cohort_karyotype[["karyotype"]])
 
 cohort_karyotype_complete <- tidyr::expand_grid(
   sample_id = all_samples,
@@ -328,9 +328,6 @@ summary_df <- cohort_qc %>%
 
 summary_text <- paste0(
   "Samples: ", summary_df["n_samples"],
-  "    |    PASS: ", summary_df["n_pass"],
-  "    |    WARN: ", summary_df["n_warn"],
-  "    |    FAIL: ", summary_df["n_fail"],
   "\nMean purity: ", round(summary_df["mean_purity"], 3),
   "    |    Mean ploidy: ", round(summary_df["mean_ploidy"], 3),
   "    |    Mean TIN: ", round(summary_df["mean_tin"], 2), "%"
@@ -506,7 +503,7 @@ third_grid  <- (p5 | p7 | p8)
 dashboard <- summary_plot / first_grid / second_grid / third_grid +
   patchwork::plot_layout(heights = c(0.10, 0.28, 0.30, 0.32)) +
   patchwork::plot_annotation(
-    title = paste0(cohort_id, " cohort CNAqc / TINC summary"),
+    title = paste0(prefix, " cohort CNAqc / TINC summary"),
     theme = ggplot2::theme(
       plot.title = ggplot2::element_text(size = 16, face = "bold", hjust = 0.5)
     )
