@@ -477,7 +477,7 @@ p8 <- ggplot(cohort_qc, aes(TIN_pct)) +
              linetype = "dashed", color = "grey40") +
   
   # labels
-  annotate("text", x = 0.5, y = Inf, label = "No contamination",
+  annotate("text", x = 0.5, y = Inf, label = "No",
            vjust = 2, size = 3.5) +
   annotate("text", x = 4, y = Inf, label = "Low",
            vjust = 2, size = 3.5) +
