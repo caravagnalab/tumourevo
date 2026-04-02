@@ -32,7 +32,7 @@ workflow SUBCLONAL_DECONVOLUTION {
         ch_versions = ch_versions.mix(MOBSTER.out.versions_mobster)
 
         CTREE_MOBSTER(MOBSTER.out.mobster_best_rds)
-        ch_versions = ch_versions.mix(CTREE_MOBSTER.out.versions_ctree)
+        ch_versions = ch_versions.mix(CTREE_MOBSTER.out.versions)
 
         mobster_pdf = MOBSTER.out.mobster_report_pdf
         ctree_mobster_pdf = CTREE_MOBSTER.out.ctree_report_pdf
