@@ -44,7 +44,7 @@ workflow SUBCLONAL_DECONVOLUTION {
         ch_versions = ch_versions.mix(VIBER.out.versions_viber)
 
         CTREE_VIBER(VIBER.out.viber_rds)
-        ch_versions = ch_versions.mix(CTREE_VIBER.out.versions_ctree)
+        ch_versions = ch_versions.mix(CTREE_VIBER.out.versions)
 
         viber_pdf = VIBER.out.viber_report_pdf
         ctree_viber_pdf = CTREE_VIBER.out.ctree_report_pdf
@@ -57,7 +57,7 @@ workflow SUBCLONAL_DECONVOLUTION {
 
         ch_versions = ch_versions.mix(FORMATTER.out.versions)
         ch_versions = ch_versions.mix(PYCLONEVI.out.versions_pyclonevi)
-        ch_versions = ch_versions.mix(CTREE_PYCLONEVI.out.versions_ctree)
+        ch_versions = ch_versions.mix(CTREE_PYCLONEVI.out.versions)
 
         pyclone_fits = PYCLONEVI.out.pyclone_all_fits
         pyclone_best = PYCLONEVI.out.pyclone_best_fit
