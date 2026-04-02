@@ -23,7 +23,7 @@
                     },
                     "ctree": {
                         "branch": "master",
-                        "git_sha": "dd038876340e01159091a82a9765a4017ab9012a",
+                        "git_sha": "53eeb1294892d1248a94a576479bff0922ca0df0",
                         "installed_by": ["modules"],
                         "patch": "modules/nf-core/ctree/ctree.diff"
                     },
