@@ -9,6 +9,7 @@ include { FORMATTER as FORMATTER_CNA } from "../subworkflows/local/formatter/mai
 include { FORMATTER as FORMATTER_VCF} from "../subworkflows/local/formatter/main"
 include { LIFTER } from "../subworkflows/local/lifter/main"
 include { ANNOTATE_DRIVER } from "../modules/local/annotate_driver/main"
+include { SAMPLE_MUTATIONS_ANALYSIS } from "../modules/local/sample_mutations_analysis/main"
 include { FORMATTER as FORMATTER_RDS} from "../subworkflows/local/formatter/main"
 include { QC } from "../subworkflows/local/qc/main"
 include { SUBCLONAL_DECONVOLUTION } from "../subworkflows/local/subclonal_deconvolution/main"
@@ -118,6 +119,12 @@ main:
     vcf_rds = rds_input.concat(out_lifter)
     ANNOTATE_DRIVER(vcf_rds.combine(drivers_table))
     ch_versions = ch_versions.mix(ANNOTATE_DRIVER.out.versions)
+    
+    input_muts = ANNOTATE_DRIVER.out.rds.map { meta, rds -> 
+        [meta, rds, meta.tumour_sample]  
+        }
+    SAMPLE_MUTATIONS_ANALYSIS(input_muts)
+    ch_versions = ch_versions.mix(SAMPLE_MUTATIONS_ANALYSIS.out.versions)
 
     in_cnaqc = cna_file.join(ANNOTATE_DRIVER.out.rds)
     QC(in_cnaqc)
