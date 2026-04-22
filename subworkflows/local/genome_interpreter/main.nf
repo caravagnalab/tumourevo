@@ -11,6 +11,12 @@ workflow GENOME_INTERPRETER {
     tinc_out    // tuple val(meta), path(file)
     join_cnaqc_out
     tmb_rds
+    // table_pyclone
+    // table_mobster
+    // table_viber
+    // assign_pyclone
+    // assign_mobster
+    // assign_viber
 
     main:
     ch_versions = Channel.empty()
@@ -18,8 +24,7 @@ workflow GENOME_INTERPRETER {
     summary_plot_rds = null
     summary_report_pdf = null
     oncoprint = null
-   
-    
+
     // cnaqc_qc_rds = cnaqc_out
     //     .filter { meta, file ->
     //         file.name.endsWith('_qc.rds')
@@ -57,6 +62,28 @@ workflow GENOME_INTERPRETER {
     cohort_qc_input = cohort_cnaqc.join(cohort_tinc)
 
     COHORT_QC(cohort_qc_input)
+
+    // // Prepare inputs for subclonal interpretation
+    // mutation_tables_ch = table_pyclone
+    //     .mix(table_mobster)
+    //     .mix(table_viber)
+    //     .groupTuple(by: 0)
+
+    // results_sigprofiler_ch = assign_pyclone
+    //     .mix(assign_mobster)
+    //     .mix(assign_viber)
+    //     .groupTuple(by: 0)
+
+    // subclonal_input = mutation_tables_ch
+    //     .join(results_sigprofiler_ch)
+    //     .map { meta, tables, results ->
+    //         tuple(meta, tables, results)
+    //     }
+
+    // SUBCLONAL_INTERPRETATION(subclonal_input)
+
+    // summary_subclonal_pdf = SUBCLONAL_INTERPRETATION.out.report_pdf
+
 
     ch_versions = ch_versions.mix(COHORT_QC.out.versions)
     summary_table_rds  = COHORT_QC.out.summary_table_rds
@@ -105,6 +132,7 @@ workflow GENOME_INTERPRETER {
     summary_plot_rds
     summary_report_pdf
     oncoprint
+    // summary_subclonal_pdf
     versions = ch_versions
 
 }

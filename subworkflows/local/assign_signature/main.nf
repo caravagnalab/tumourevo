@@ -10,8 +10,6 @@ include { ASSIGN_CLUSTER as ASSIGN_CLUSTER_VIBER } from '../../../modules/local/
 include { ASSIGN_CLUSTER as ASSIGN_CLUSTER_MOBSTER } from '../../../modules/local/assign_cluster/main'
 include { ASSIGN_CLUSTER as ASSIGN_CLUSTER_PYCLONE } from '../../../modules/local/assign_cluster/main'
 
-
-
 workflow ASSIGN_SIGNATURE {
     take:
         pyclone_fit
@@ -35,7 +33,6 @@ workflow ASSIGN_SIGNATURE {
             genome_path = params.genome_installed_path
         }
 
-
         if (params.tools && params.tools.split(",").contains("mobster")) {
             mobster_combined = mobster_fit.map { meta, fit -> tuple(meta, fit, []) }
             PREPARE_CLUSTER_MOBSTER(mobster_combined)
@@ -46,7 +43,6 @@ workflow ASSIGN_SIGNATURE {
             ASSIGN_CLUSTER_MOBSTER(input, 'mobster')
             assign_mobster = ASSIGN_CLUSTER_MOBSTER.out.results_sigprofiler
         }
-
 
         if (params.tools && params.tools.split(",").contains("viber")) {
             viber_combined = viber_fit.map { meta, fit -> tuple(meta, fit, []) }
@@ -71,7 +67,6 @@ workflow ASSIGN_SIGNATURE {
             ASSIGN_CLUSTER_PYCLONE(input, 'pyclonevi')
             assign_pyclone = ASSIGN_CLUSTER_PYCLONE.out.results_sigprofiler
         }
-
 
     emit:
         table_pyclone

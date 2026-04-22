@@ -152,14 +152,28 @@ main:
         GENOME_INTERPRETER(QC.out.rds_cnaqc,
                         QC.out.rds_tinc, 
                         QC.out.join_cnaqc_PASS,
-                        SAMPLE_MUTATIONS_ANALYSIS.out.tmb_rds)
+                        SAMPLE_MUTATIONS_ANALYSIS.out.tmb_rds,
+                        // ASSIGN_SIGNATURE.out.table_pyclone,
+                        // ASSIGN_SIGNATURE.out.table_mobster,
+                        // ASSIGN_SIGNATURE.out.table_viber,
+                        // ASSIGN_SIGNATURE.out.assign_pyclone,
+                        // ASSIGN_SIGNATURE.out.assign_mobster,
+                        // ASSIGN_SIGNATURE.out.assign_viber
+                        )
     } else {
         GENOME_INTERPRETER(QC.out.rds_cnaqc,
                         QC.out.rds_tinc, 
                         QC.out.join_cnaqc_ALL,
-                        SAMPLE_MUTATIONS_ANALYSIS.out.tmb_rds)
+                        SAMPLE_MUTATIONS_ANALYSIS.out.tmb_rds,
+                        // ASSIGN_SIGNATURE.out.table_pyclone,
+                        // ASSIGN_SIGNATURE.out.table_mobster,
+                        // ASSIGN_SIGNATURE.out.table_viber,
+                        // ASSIGN_SIGNATURE.out.assign_pyclone,
+                        // ASSIGN_SIGNATURE.out.assign_mobster,
+                        // ASSIGN_SIGNATURE.out.assign_viber
+                        )
     }
-                  
+
 
     softwareVersionsToYAML(ch_versions)
         .collectFile(storeDir: "${params.outdir}/pipeline_info", name: 'nf_core_tumourevo_software_mqc_versions.yml', sort: true, newLine: true)
