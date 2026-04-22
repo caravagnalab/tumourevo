@@ -232,12 +232,12 @@ page1 = wrap_plots(list(
   vaf_chr, p_chr, p_consequence, p_mut_type
 ), design = design)
 
-ggplot2::ggsave(plot = page1, paste0(opt[['prefix']], '_mutations_report.pdf'), width = 210, height = 297, units="mm", dpi = 200)
+ggplot2::ggsave(plot = page1, paste0(opt[['prefix']], '_mutations_report.pdf'), width = 260, height = 297, units="mm", dpi = 200)
 
 # draw the oncoprint 
 
-pdf(paste0(opt[['prefix']], '_driver_oncoprint.pdf'), width = 210, height = 297)
- draw(ht, heatmap_legend_side = "bottom")
+pdf(paste0(opt[['prefix']], '_driver_oncoprint.pdf'), width = 15, height = 8)
+draw(ht, heatmap_legend_side = "bottom")
 dev.off()
 
 # save all the rds plots

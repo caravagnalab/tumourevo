@@ -148,8 +148,17 @@ main:
                     SUBCLONAL_DECONVOLUTION.out.viber_results,
                     SIGNATURE_DECONVOLUTION.out.sigprofiler_out)
 
-    GENOME_INTERPRETER(QC.out.rds_cnaqc,
-                    QC.out.rds_tinc)
+    if (params.filter == true) {
+        GENOME_INTERPRETER(QC.out.rds_cnaqc,
+                        QC.out.rds_tinc, 
+                        QC.out.join_cnaqc_PASS,
+                        SAMPLE_MUTATIONS_ANALYSIS.out.tmb_rds)
+    } else {
+        GENOME_INTERPRETER(QC.out.rds_cnaqc,
+                        QC.out.rds_tinc, 
+                        QC.out.join_cnaqc_ALL,
+                        SAMPLE_MUTATIONS_ANALYSIS.out.tmb_rds)
+    }
                   
 
     softwareVersionsToYAML(ch_versions)
