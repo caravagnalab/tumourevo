@@ -12,6 +12,7 @@ process SUBCLONAL_INTERPRETATION {
 
     output:
     tuple val(meta), path("*.pdf"), emit: report_pdf
+    tuple val(meta), path("*.rds"), emit: rds
 
     when:
     task.ext.when == null || task.ext.when

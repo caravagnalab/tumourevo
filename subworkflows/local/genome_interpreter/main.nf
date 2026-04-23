@@ -64,40 +64,56 @@ workflow GENOME_INTERPRETER {
     cohort_qc_input = cohort_cnaqc.join(cohort_tinc)
 
     COHORT_QC(cohort_qc_input)
-
-    // Prepare inputs for subclonal interpretation
-    mutation_tables_ch = table_mobster.map {meta, table ->
-        meta = meta + [id: "${meta.dataset}_${meta.patient}"]
-        [meta.subMap('dataset', 'patient', 'id'), table]
-    }.groupTuple(by: 0)
-    .join(table_pyclone)
-    .join(table_viber)
-    .map { tuple ->
-        def meta = tuple[0]
-        def mobster_files = tuple[1]
-        def pyclone_file = tuple[2]
-        def viber_file = tuple[3]
-        [meta, mobster_files + [pyclone_file, viber_file]]
-    }
-
-    results_sigprofiler_ch = assign_pyclone
-        .join(assign_viber)
-        .map { tuple ->
-            def meta = tuple[0]
-            def sigprofiler_files = tuple[1..-1]
-            [meta, sigprofiler_files]
-        }
-
-    subclonal_input = mutation_tables_ch
-        .combine(results_sigprofiler_ch, by: 0)
-
-    SUBCLONAL_INTERPRETATION(subclonal_input)
-    // summary_subclonal_pdf = SUBCLONAL_INTERPRETATION.out.report_pdf
-
     ch_versions = ch_versions.mix(COHORT_QC.out.versions)
     summary_table_rds  = COHORT_QC.out.summary_table_rds
     summary_plot_rds  = COHORT_QC.out.summary_plot_rds
     summary_report_pdf = COHORT_QC.out.summary_report_pdf
+
+    // Prepare inputs for subclonal interpretation
+    if (params.tools && params.tools.split(",").contains("mobster") && params.tools.split(",").contains("sigprofiler")) {
+        if (params.tools && params.tools.split(",").contains("viber") && params.tools.split(",").contains("pyclone-vi")) {
+            mutation_tables_ch = table_mobster.map { meta, table ->
+                meta = meta + [id: "${meta.dataset}_${meta.patient}"]
+                [meta.subMap('dataset', 'patient', 'id'), table]
+            }.groupTuple(by: 0)
+            .join(table_pyclone)
+            .join(table_viber)
+            .map { meta, mobster_files, pyclone_file, viber_file ->
+                [meta, mobster_files + [pyclone_file, viber_file]]
+            }
+        } else if (params.tools && params.tools.split(",").contains("viber") && !params.tools.split(",").contains("pyclone-vi")) {
+            mutation_tables_ch = table_mobster.map { meta, table ->
+                meta = meta + [id: "${meta.dataset}_${meta.patient}"]
+                [meta.subMap('dataset', 'patient', 'id'), table]
+            }.groupTuple(by: 0)
+            .join(table_viber)
+            .map { meta, mobster_files, viber_file ->
+                [meta, mobster_files + [viber_file]]
+            }
+        } else if (params.tools && params.tools.split(",").contains("pyclone-vi") && !params.tools.split(",").contains("viber")) {
+            mutation_tables_ch = table_mobster.map { meta, table ->
+                meta = meta + [id: "${meta.dataset}_${meta.patient}"]
+                [meta.subMap('dataset', 'patient', 'id'), table]
+            }.groupTuple(by: 0)
+            .join(table_pyclone)
+            .map { meta, mobster_files, pyclone_file ->
+                [meta, mobster_files + [pyclone_file]]
+            }
+        }
+
+        results_sigprofiler_ch = assign_pyclone
+            .join(assign_viber)
+            .map { meta, file1, file2 ->
+                [meta, [file1, file2]]
+            }
+
+        subclonal_input = mutation_tables_ch
+            .combine(results_sigprofiler_ch, by: 0)
+
+        SUBCLONAL_INTERPRETATION(subclonal_input)
+        summary_subclonal_pdf = SUBCLONAL_INTERPRETATION.out.report_pdf
+        summary_subclonal_rds = SUBCLONAL_INTERPRETATION.out.rds
+    }
 
     join_cnaqc_out = join_cnaqc_out.map{ meta, rds, samples ->
         def patient = meta.patient
@@ -140,7 +156,8 @@ workflow GENOME_INTERPRETER {
     summary_plot_rds
     summary_report_pdf
     oncoprint
-    // summary_subclonal_pdf
+    summary_subclonal_pdf
+    summary_subclonal_rds
     versions = ch_versions
 
 }

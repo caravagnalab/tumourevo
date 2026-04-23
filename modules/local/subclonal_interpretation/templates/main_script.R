@@ -232,3 +232,4 @@ pl_signature <- table_signatures %>%
 
 ggsave(pl_scores, filename=paste0(opt[["prefix"]], "_scores_clusters.pdf"))
 ggsave(pl_signature, filename=paste0(opt[["prefix"]], "_signature_clusters.pdf"))
+saveRDS(object = score_table, file = paste0(opt[["prefix"]], "_scores.rds"))
