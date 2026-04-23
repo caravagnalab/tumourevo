@@ -27,12 +27,14 @@ cosine_similarity = function(vec1, vec2) {
 }
 
 compare_signatures = function(df1, df2) {
-  df1_f = df1 %>% filter(Exposure>.1)
-  df2_f = df2 %>% filter(Exposure>.1)
+  df1_f = df1 %>% filter(Exposure>.05)
+  df2_f = df2 %>% filter(Exposure>.05)
 
   # Check if signatures are identical
   sigs_match = setequal(df1_f[["Signature"]], df2_f[["Signature"]])
-  ndiff = length(setdiff(df1_f[["Signature"]], df2_f[["Signature"]]))
+  ndiff_1 = length(setdiff(df2_f[["Signature"]], df1_f[["Signature"]]))
+  ndiff_2 = length(setdiff(df1_f[["Signature"]], df2_f[["Signature"]]))
+  ndiff = sum(ndiff_1 + ndiff_2)
   ntot = length(c(df1_f[["Signature"]], df2_f[["Signature"]]) %>% unique())
 
   comparison = full_join(df1 %>% select(Signature, Exposure, n_sig),
@@ -167,24 +169,30 @@ score_table = lapply(c("viber", "pyclonevi"), function(tool) {
     final_table_subclonal %>%
       left_join(final_table_signature) %>%
       mutate(driver=ifelse(is_driver == F, 0, 1),
-              bg_cs=1 - bg_cs_exp,
+              bg_cs= 1 - bg_cs_exp,
               cs_sign=1 - cs_exp,
               cs_sign=ifelse(is.na(cs_exp) & is_clonal == T, 1, cs_sign),
               bg_sign=ifelse(is.na(bg_cs) & is_clonal == T, 1, bg_cs),
               n_rel=ifelse(is.na(cs_exp) & is_clonal == T, 1, n_rel)) %>%
-      rowwise() %>%
-      mutate(
-        score_all=(driver + n_never_tail + ((cs_sign+n_rel+bg_sign)/3))/3,
-        score_driver=driver,
-        score_sign=(cs_sign+n_rel+bg_sign)/3,
-        score_tail=n_never_tail,
-        score_no_tail=(driver + ((cs_sign+n_rel+bg_sign)/3))/2,
-        score_no_driver=(((cs_sign+n_rel+bg_sign)/3) + n_never_tail)/2,
-        score_no_sign=(driver + n_never_tail)/2) %>%
-      ungroup() %>%
       mutate(tool=tool, signature_type=sign_type, patient_id=patient_id)
   }) %>% bind_rows()
 }) %>% bind_rows() %>% select(patient_id, cluster_tool, everything())
+
+
+score_table = score_table %>%
+  group_by(patient_id, cluster_tool, tool, is_clonal, is_driver, n_never_tail, driver) %>%
+  summarize(cs_sign = ifelse(is_clonal == T, 1, min(cs_sign)),
+            n_rel = ifelse(is_clonal == T, 1, max(n_rel)),
+            bg_sign =  ifelse(is_clonal == T, 1, min(bg_sign))) %>%
+  rowwise() %>%
+  mutate(
+    score_driver=driver,
+    score_sign=(cs_sign+n_rel+bg_sign)/3,
+    score_tail=n_never_tail,
+    score_no_tail=(score_driver + score_sign)/2,
+    score_no_driver=(score_sign + score_tail)/2,
+    score_no_sign=(score_driver + score_tail)/2,
+    score_all=(score_driver + score_tail + score_sign)/3)
 
 pl_scores = score_table %>%
   pivot_longer(cols=c(score_driver, score_all, score_tail, score_no_driver, score_no_tail, score_no_sign, score_sign)) %>%
