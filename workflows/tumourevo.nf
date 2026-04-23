@@ -119,9 +119,9 @@ main:
     vcf_rds = rds_input.concat(out_lifter)
     ANNOTATE_DRIVER(vcf_rds.combine(drivers_table))
     ch_versions = ch_versions.mix(ANNOTATE_DRIVER.out.versions)
-    
-    input_muts = ANNOTATE_DRIVER.out.rds.map { meta, rds -> 
-        [meta, rds, meta.tumour_sample]  
+
+    input_muts = ANNOTATE_DRIVER.out.rds.map { meta, rds ->
+        [meta, rds, meta.tumour_sample]
         }
     SAMPLE_MUTATIONS_ANALYSIS(input_muts)
     ch_versions = ch_versions.mix(SAMPLE_MUTATIONS_ANALYSIS.out.versions)
@@ -150,27 +150,27 @@ main:
 
     if (params.filter == true) {
         GENOME_INTERPRETER(QC.out.rds_cnaqc,
-                        QC.out.rds_tinc, 
+                        QC.out.rds_tinc,
                         QC.out.join_cnaqc_PASS,
                         SAMPLE_MUTATIONS_ANALYSIS.out.tmb_rds,
-                        // ASSIGN_SIGNATURE.out.table_pyclone,
-                        // ASSIGN_SIGNATURE.out.table_mobster,
-                        // ASSIGN_SIGNATURE.out.table_viber,
-                        // ASSIGN_SIGNATURE.out.assign_pyclone,
-                        // ASSIGN_SIGNATURE.out.assign_mobster,
-                        // ASSIGN_SIGNATURE.out.assign_viber
+                        ASSIGN_SIGNATURE.out.table_pyclone,
+                        ASSIGN_SIGNATURE.out.table_mobster,
+                        ASSIGN_SIGNATURE.out.table_viber,
+                        ASSIGN_SIGNATURE.out.assign_pyclone,
+                        ASSIGN_SIGNATURE.out.assign_mobster,
+                        ASSIGN_SIGNATURE.out.assign_viber
                         )
     } else {
         GENOME_INTERPRETER(QC.out.rds_cnaqc,
-                        QC.out.rds_tinc, 
+                        QC.out.rds_tinc,
                         QC.out.join_cnaqc_ALL,
                         SAMPLE_MUTATIONS_ANALYSIS.out.tmb_rds,
-                        // ASSIGN_SIGNATURE.out.table_pyclone,
-                        // ASSIGN_SIGNATURE.out.table_mobster,
-                        // ASSIGN_SIGNATURE.out.table_viber,
-                        // ASSIGN_SIGNATURE.out.assign_pyclone,
-                        // ASSIGN_SIGNATURE.out.assign_mobster,
-                        // ASSIGN_SIGNATURE.out.assign_viber
+                        ASSIGN_SIGNATURE.out.table_pyclone,
+                        ASSIGN_SIGNATURE.out.table_mobster,
+                        ASSIGN_SIGNATURE.out.table_viber,
+                        ASSIGN_SIGNATURE.out.assign_pyclone,
+                        ASSIGN_SIGNATURE.out.assign_mobster,
+                        ASSIGN_SIGNATURE.out.assign_viber
                         )
     }
 

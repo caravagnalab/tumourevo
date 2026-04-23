@@ -9,11 +9,6 @@ process SUBCLONAL_INTERPRETATION {
 
     input:
     tuple val(meta), path(mutation_tables), path(results_sigprofiler)
-    // one element in the tuple for dataset
-    // { (meta1, [mutation tables list], [sigprofiler folders list]),
-    //   (meta2, [mutation tables list], [sigprofiler folders list]), ... }
-    // mutation_tables -> list of tables output from `prepare_cluster`
-    // results_sigprofiler -> path to sigprofiler folder output from `assign_cluster`
 
     output:
     tuple val(meta), path("*.pdf"), emit: report_pdf
@@ -22,10 +17,14 @@ process SUBCLONAL_INTERPRETATION {
     task.ext.when == null || task.ext.when
 
     script:
+    def prefix = task.ext.prefix ?: "${meta.id}"
     template "main_script.R"
 
     stub:
     def prefix = task.ext.prefix ?: "${meta.id}"
+
     """
+    touch ${prefix}_scores_clusters.pdf
+    touch ${prefix}_signature_clusters.pdf
     """
 }

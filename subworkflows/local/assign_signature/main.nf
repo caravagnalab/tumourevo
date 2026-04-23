@@ -52,6 +52,7 @@ workflow ASSIGN_SIGNATURE {
 
             input = table_viber.combine(sigprofiler_fit).combine(genome_path)
             ASSIGN_CLUSTER_VIBER(input, 'viber')
+            assign_viber = ASSIGN_CLUSTER_VIBER.out.results_sigprofiler
         }
 
         if (params.tools && params.tools.split(",").contains("pyclone-vi")) {
