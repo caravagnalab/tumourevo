@@ -14,11 +14,11 @@ process SUBCLONAL_INTERPRETATION {
     tuple val(meta), path("*.pdf"), emit: report_pdf
     tuple val(meta), path("*.rds"), emit: rds
 
-    when:
-    task.ext.when == null || task.ext.when
-
     script:
+    def args = task.ext.args ?: ""
     def prefix = task.ext.prefix ?: "${meta.id}"
+    def tools = args!="" && args.tools ? "$args.tools" : ""
+
     template "main_script.R"
 
     stub:
@@ -27,5 +27,6 @@ process SUBCLONAL_INTERPRETATION {
     """
     touch ${prefix}_scores_clusters.pdf
     touch ${prefix}_signature_clusters.pdf
+    touch ${prefix}_scores.rds
     """
 }

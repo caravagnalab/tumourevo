@@ -3,9 +3,31 @@
 library(tidyverse)
 library(ggplot2)
 
+
+parse_args = function(x) {
+  x = gsub("\\\\[","",x)
+  x = gsub("\\\\]","",x)
+  # giving errors when we have lists like c(xxx, xxx) since it will separate it
+  # args_list = unlist(strsplit(x, ', ')[[1]])
+  args_list = unlist(strsplit(x, ", (?=[^)]*(?:\\\\(|\$))", perl=TRUE))
+  args_vals = lapply(args_list, function(x) {
+    x_splt = strsplit(x, split=":")[[1]]
+    c(x_splt[1],  paste(x_splt[2:length(x_splt)], collapse=":"))
+  })
+
+  # Ensure the option vectors are length 2 (key/ value) to catch empty ones
+  args_vals = lapply(args_vals, function(z){ length(z) = 2; z})
+
+  parsed_args = structure(lapply(args_vals, function(x) x[2]), names = lapply(args_vals, function(x) x[1]))
+  parsed_args[! is.na(parsed_args)]
+}
+
 opt = list(
-    prefix = ifelse('$task.ext.prefix' == 'null', '$meta.id', '$task.ext.prefix')
+  prefix = ifelse('$task.ext.prefix' == 'null', '$meta.id', '$task.ext.prefix')
 )
+args_opt = parse_args('$task.ext.args')
+for ( ao in names(args_opt)) opt[[ao]] = args_opt[[ao]]
+
 
 mutation_tables = strsplit("$mutation_tables", " ")[[1]]
 results_sigprofiler = strsplit("$results_sigprofiler", " ")[[1]]
@@ -15,7 +37,7 @@ signature_colors = c("#f1696bff", "#8fbd8cff", "#87c7d6ff", "#bac3deff",
                      "#9a4564ff", "#fbcb5bff", "#c2b280ff", "#d47e2dff",
                      "#5f8676ff", "forestgreen", "orange", "brown4")
 
-colors_cluster = c("indianred", "steelblue", "forestgreen", "goldenrod",
+colors_cluster = c("indianred", "steelblue2", "forestgreen", "goldenrod",
                    "darkorange3", "palevioletred", "mediumpurple", "cornsilk4",
                    "olivedrab3", "steelblue4", "indianred4", "aquamarine3",
                    "saddlebrown", "deeppink2", "cornflowerblue", "black") %>%
@@ -73,9 +95,12 @@ mutations_mobster = lapply(mobster_files, readr::read_tsv) %>%
           -pos_end, -ref, -alt, -Type, -ID, -Genome, -mut_type) %>%
   rename(cluster_mobster=Sample)
 
-
 table_signatures <- tibble()
-score_table = lapply(c("viber", "pyclonevi"), function(tool) {
+tool_list <- strsplit(opt[['tools']], ",")[[1]]
+tool_list <- tool_list[tool_list %in% c("viber", "pyclone-vi")]
+tool_list <- gsub("pyclone-vi", "pyclonevi", tool_list)
+
+score_table = lapply(tool_list, function(tool) {
   lapply(c("SBS", "ID"), function(sign_type) {
     mutations_file = grep(mutation_tables, pattern=tool, value=T)
 
@@ -206,7 +231,7 @@ pl_scores = score_table %>%
   geom_line(data=~filter(.x, !is.na(value)),
             aes(x=name, y=value, color=cluster_tool, group=cluster_tool), linewidth=.6)  +
   geom_text(data=~filter(.x, is_clonal & name=="score_all"),
-            aes(x=name, y=value, color=cluster_tool, group=cluster_tool, label="Clonal"), vjust=0.07) +
+            aes(x=name, y=value, color=cluster_tool, group=cluster_tool, label="Clonal"), vjust=0.07, show.legend = F) +
   scale_color_manual("Cluster", values=colors_cluster) +
   scale_shape_manual('Contains Driver', values = c(4, 20)) +
   scale_x_discrete(labels=c("score_driver"="Driver",
@@ -217,7 +242,8 @@ pl_scores = score_table %>%
                             "score_no_sign"="Driver\nTail",
                             "score_all"="All")) +
   facet_grid(.~tool) +
-  theme_bw() + theme(axis.title.x=element_blank())
+  theme_bw() +
+  theme(axis.title.x=element_blank())
 
 pl_signature <- table_signatures %>%
   ggplot(aes(fill=Signature, y=Exposure, x=as.factor(cluster_tool))) +
@@ -228,8 +254,9 @@ pl_signature <- table_signatures %>%
   xlab("Cluster")+
   ylab("Exposures")+
   facet_grid(tool ~ signature_type, scales = 'free_y') +
-  theme_bw() + theme(axis.title.x=element_blank())
+  theme_bw() +
+  theme(axis.title.x=element_blank())
 
-ggsave(pl_scores, filename=paste0(opt[["prefix"]], "_scores_clusters.pdf"))
-ggsave(pl_signature, filename=paste0(opt[["prefix"]], "_signature_clusters.pdf"))
+ggsave(pl_scores, filename=paste0(opt[["prefix"]], "_scores_clusters.pdf"), width = 10, height = 4, units = 'in')
+ggsave(pl_signature, filename=paste0(opt[["prefix"]], "_signature_clusters.pdf"), width = 10, height = 8, units = 'in')
 saveRDS(object = score_table, file = paste0(opt[["prefix"]], "_scores.rds"))
