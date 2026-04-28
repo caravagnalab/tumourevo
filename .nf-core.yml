@@ -1,8 +1,4 @@
-lint:
-  files_exist:
-    - conf/modules.config
-  modules_config: false
-nf_core_version: 3.5.1
+nf_core_version: 4.0.0
 repository_type: pipeline
 template:
   author: Nicola Calonaci, Elena Buscaroli, Katsiaryna Davydzenka, Giorgia Gandolfi,
