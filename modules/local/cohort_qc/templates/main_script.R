@@ -120,6 +120,7 @@ get_tinc_summary <- function(fit, sample_id = NULL) {
 ### CNAqc summary extractor ###
 
 get_cnaqc_summary <- function(qc, sample_id = NULL) {
+  
   sid <- sample_id
   if (is.null(sid)) {
     sid <- if (!is.null(qc[["sample"]])) qc[["sample"]] else NA_character_
@@ -131,29 +132,42 @@ get_cnaqc_summary <- function(qc, sample_id = NULL) {
   mut_pass <- sum(mut_qc == TRUE, na.rm = TRUE)
   mut_fail <- sum(mut_qc == FALSE, na.rm = TRUE)
   mut_na <- sum(is.na(mut_qc))
-  mut_na_fraction <- if (length(mut_qc) > 0) mut_na / length(mut_qc) else NA_real_
+  mutation_na_fraction <- if (length(mut_qc) > 0) mut_na / length(mut_qc) else NA_real_
   
   # CNA QC
-  cna_qc <- qc[["cna"]][["QC_PASS"]]
+  cna_tbl <- qc[["cna"]]
+  cna_qc <- cna_tbl[["QC_PASS"]]
+  
   cna_tested <- sum(cna_qc %in% c(TRUE, FALSE), na.rm = TRUE)
   cna_pass <- sum(cna_qc == TRUE, na.rm = TRUE)
   cna_fail <- sum(cna_qc == FALSE, na.rm = TRUE)
   cna_na <- sum(is.na(cna_qc))
+  
   cna_pass_rate <- if (cna_tested > 0) cna_pass / cna_tested else NA_real_
   cna_fail_rate <- if (cna_tested > 0) cna_fail / cna_tested else NA_real_
   cna_na_fraction <- if (length(cna_qc) > 0) cna_na / length(cna_qc) else NA_real_
   
   # peaks analysis
-  peak_score <- if (!is.null(qc[["peaks_analysis"]][["score"]])) qc[["peaks_analysis"]][["score"]] else NA_real_
-  peak_qc <- if (!is.null(qc[["peaks_analysis"]][["QC"]])) qc[["peaks_analysis"]][["QC"]] else NA_character_
+  peak_score <- if (!is.null(qc[["peaks_analysis"]][["score"]])) {
+    qc[["peaks_analysis"]][["score"]]
+  } else {
+    NA_real_
+  }
+  
+  peak_qc <- if (!is.null(qc[["peaks_analysis"]][["QC"]])) {
+    qc[["peaks_analysis"]][["QC"]]
+  } else {
+    NA_character_
+  }
   
   matches <- qc[["peaks_analysis"]][["matches"]]
+  
   if (!is.null(matches) && nrow(matches) > 0) {
     n_peaks <- nrow(matches)
     n_peaks_pass <- sum(matches[["QC"]] == "PASS", na.rm = TRUE)
     n_peaks_fail <- sum(matches[["QC"]] == "FAIL", na.rm = TRUE)
     peak_pass_rate <- n_peaks_pass / n_peaks
-   
+    
     dominant_karyotype <- matches[["karyotype"]][which.max(matches[["weight"]])][1]
     dominant_karyotype_weight <- max(matches[["weight"]], na.rm = TRUE)
   } else {
@@ -167,20 +181,94 @@ get_cnaqc_summary <- function(qc, sample_id = NULL) {
   
   # CN structure
   n_mutations <- qc[["n_mutations"]]
-  n_cna <- qc[["n_cna"]]
+  n_cna_total <- qc[["n_cna"]]
   purity <- qc[["purity"]]
   ploidy <- qc[["ploidy"]]
-  most_prevalent_karyotype <- qc[["most_prevalent_karyotype"]]
+  most_prev_karyotype <- qc[["most_prevalent_karyotype"]]
+  n_karyotype <- qc[["n_karyotype"]]
   
-  # CNAqc-oriented QC classification
+  # mutation-based karyotype dominance
+  if (!is.null(n_karyotype) &&
+      length(n_karyotype) > 0 &&
+      !is.null(most_prev_karyotype) &&
+      !is.na(most_prev_karyotype) &&
+      most_prev_karyotype %in% names(n_karyotype)) {
+    
+    n_mutations_prev_karyotype <- as.numeric(
+      n_karyotype[[most_prev_karyotype]]
+    )
+    
+    mutation_karyotype_fraction <- if (!is.na(n_mutations) && n_mutations > 0) {
+      n_mutations_prev_karyotype / n_mutations
+    } else {
+      NA_real_
+    }
+    
+  } else {
+    n_mutations_prev_karyotype <- NA_real_
+    mutation_karyotype_fraction <- NA_real_
+  }
+  
+  # CNA segment / length dominance for the mutation-defined prevalent karyotype
+  if (!is.null(cna_tbl) &&
+      nrow(cna_tbl) > 0 &&
+      all(c("Major", "minor") %in% names(cna_tbl)) &&
+      !is.null(most_prev_karyotype) &&
+      !is.na(most_prev_karyotype)) {
+    
+    cna_tbl <- cna_tbl %>%
+      dplyr::mutate(
+        segment_karyotype = paste0(.data[["Major"]], ":", .data[["minor"]])
+      )
+    
+    n_cna_observed <-  n_cna_total
+    
+    n_cna_prev_karyotype <- sum(
+      cna_tbl[["segment_karyotype"]] == most_prev_karyotype,
+      na.rm = TRUE
+    )
+    
+    cna_karyotype_frac <- n_cna_prev_karyotype / n_cna_observed
+    
+    if ("length" %in% names(cna_tbl)) {
+      cna_total_length <- sum(cna_tbl[["length"]], na.rm = TRUE)
+      
+      cna_length_prev_karyotype <- sum(
+        cna_tbl[["length"]][cna_tbl[["segment_karyotype"]] == most_prev_karyotype],
+        na.rm = TRUE
+      )
+      
+      cna_length_karyotype_frac <- if (cna_total_length > 0) {
+        cna_length_prev_karyotype / cna_total_length
+      } else {
+        NA_real_
+      }
+    } else {
+      cna_total_length <- NA_real_
+      cna_length_prev_karyotype <- NA_real_
+      cna_length_karyotype_frac <- NA_real_
+    }
+    
+  } else {
+    n_cna_observed <- NA_integer_
+    n_cna_prev_karyotype <- NA_integer_
+    cna_karyotype_frac <- NA_real_
+    cna_total_length <- NA_real_
+    cna_length_prev_karyotype <- NA_real_
+    cna_length_karyotype_frac <- NA_real_
+  }
+  
+  # QC classification
   qc_class <- dplyr::case_when(
     !is.na(cna_pass_rate) &&
       cna_pass_rate >= 0.80 &&
       (is.na(peak_pass_rate) || peak_pass_rate >= 0.50) ~ "PASS",
     
     !is.na(cna_pass_rate) &&
-      (cna_pass_rate < 0.50 ||
-         (!is.na(peak_pass_rate) && peak_pass_rate < 0.50)) ~ "FAIL",
+      (
+        cna_pass_rate < 0.50 ||
+          (!is.na(peak_pass_rate) && peak_pass_rate < 0.50)
+      ) ~ "FAIL",
     
     TRUE ~ "WARN"
   )
@@ -190,9 +278,16 @@ get_cnaqc_summary <- function(qc, sample_id = NULL) {
     n_mutations = n_mutations,
     purity = purity,
     ploidy = ploidy,
-    n_cna = n_cna,
-    most_prevalent_karyotype = most_prevalent_karyotype,
-    mut_na_fraction = mut_na_fraction,
+    n_cna_total = n_cna_total,
+    most_prev_karyotype = most_prev_karyotype,
+    n_mutations_prev_karyotype = n_mutations_prev_karyotype,
+    mutation_karyotype_fraction = mutation_karyotype_fraction,
+    n_cna_prev_karyotype = n_cna_prev_karyotype,
+    cna_karyotype_frac = cna_karyotype_frac,
+    cna_length_prev_karyotype = cna_length_prev_karyotype,
+    cna_total_length = cna_total_length,
+    cna_length_karyotype_frac = cna_length_karyotype_frac,
+    mutation_na_fraction = mutation_na_fraction,
     cna_pass_rate = cna_pass_rate,
     cna_fail_rate = cna_fail_rate,
     cna_na_fraction = cna_na_fraction,
@@ -226,16 +321,6 @@ load_qc_objects <- function(files, suffix, extractor_fun) {
   })
 }
 
-load_karyotype_objects <- function(files, suffix) {
-  purrr::map_dfr(files, function(f) {
-    obj <- readRDS(f)
-    ids <- get_ids(f, suffix = suffix)
-
-    get_n_karyotype(obj, sample_id = ids[["sample_id"]]) %>%
-      dplyr::mutate(patient_id = ids[["patient_id"]]) %>%
-      dplyr::select(patient_id, sample_id, karyotype, n_mutations)
-  })
-}
 
 ### Load TINC and CNAqc objects and get cohort summary ###
 
@@ -250,39 +335,6 @@ cohort_qc_cnaqc <- load_qc_objects(
   suffix = "_qc.rds",
   extractor_fun = get_cnaqc_summary
 )
-
-cohort_karyotype <- load_karyotype_objects(
-  files = cnaqc_rds_files,
-  suffix = "_qc.rds"
-)
-
-# Simmarize across samples
-all_samples <- unique(cohort_karyotype[["sample_id"]])
-all_karyotypes <- unique(cohort_karyotype[["karyotype"]])
-
-cohort_karyotype_complete <- tidyr::expand_grid(
-  sample_id = all_samples,
-  karyotype = all_karyotypes
-) %>%
-  dplyr::left_join(
-    cohort_karyotype,
-    by = c("sample_id", "karyotype")
-  ) %>%
-  dplyr::mutate(
-    n_mutations = dplyr::coalesce(n_mutations, 0)
-  )
-
-karyotype_summary <- cohort_karyotype_complete %>%
-  dplyr::group_by(karyotype) %>%
-  dplyr::summarise(
-    total_mutations = sum(n_mutations, na.rm = TRUE),
-    mean_mutations = mean(n_mutations, na.rm = TRUE),
-    median_mutations = median(n_mutations, na.rm = TRUE),
-    n_samples = dplyr::n(),
-    n_nonzero_samples = sum(n_mutations > 0, na.rm = TRUE),
-    .groups = "drop"
-  ) %>%
-  dplyr::arrange(dplyr::desc(total_mutations))
 
 # Merge into unified cohort summary 
 
@@ -303,15 +355,21 @@ saveRDS(cohort_qc, sprintf("%s.qc_summary.rds", prefix))
 ### Plot settings ###
 
 qc_colors <- c(
-  PASS = "#1b9e77",
-  WARN = "#e6ab02",
-  FAIL = "#F8766D"
+  PASS = "#79AF97FF",
+  WARN = "#DF8F44FF",
+  FAIL = "#B24745FF"
 )
 
-theme_dash <- ggplot2::theme_bw(base_size = 11) +
+
+theme_dash <- theme_bw(base_size = 12) +
   ggplot2::theme(
-    plot.title = ggplot2::element_text(face = "bold", size = 11),
-    axis.title = ggplot2::element_text(size = 10)
+    plot.title = element_text(size = 14, face = "plain", color = "black"),
+    plot.subtitle = element_text(size = 12, face = "plain", color = "black"),
+    axis.title = element_text(size = 12, color = "black"),
+    axis.text = element_text(size = 10),
+    legend.title = element_text(size = 12, color = "black"),
+    legend.text = element_text(size = 10, color = "black"),
+    strip.text = element_text(size = 14, face = "plain")
   )
 
 # Summary strip
@@ -349,38 +407,69 @@ summary_plot <- ggplot2::ggplot() +
 ### Main plots ###
 
 # QC classification
-p1 <- ggplot(cohort_qc, aes(qc_class, fill = qc_class)) +
-  geom_bar() +
-  scale_fill_manual(
-    values = qc_colors
-  ) +
+qc_counts <- cohort_qc %>%
+  count(qc_class) %>%
+  dplyr::mutate(
+    pct = 100 * n / sum(n),
+    label = paste0(n, "\n", round(pct, 1), "%")
+  )
+
+
+p1 <- ggplot(qc_counts, aes(x = qc_class, y = n, fill = qc_class)) +
+  geom_col(width = 0.7, color = "grey30") +
   geom_text(
-    stat = "count",
-    aes(label = after_stat(count)),
+    aes(label = label),
     vjust = -0.3,
     size = 4
   ) +
+  scale_fill_manual(values = qc_colors,
+		    name = "QC class", 
+		    drop = FALSE) +
   theme_dash +
   labs(
     title = "QC classification",
     x = "QC class",
     y = "Number of samples"
-  )
+  )  
 
-# Mutation burden
-p2 <- ggplot(cohort_qc, aes(n_mutations)) +
-  geom_histogram(bins = 30,
-                 fill = "#4682B4") +
-  scale_x_log10(
-    breaks = 10^(0:7),
-    labels = trans_format("log10", math_format(10^.x))
+
+# Mutation burden vs most prevalent karyotype
+
+p2 <- cohort_qc %>%
+  dplyr::filter(
+    !is.na(most_prev_karyotype),
+    !is.na(n_mutations),
+    n_mutations > 0
+  ) %>%
+  ggplot(aes(
+    x = reorder(most_prev_karyotype, n_mutations, FUN = median),
+    y = n_mutations,
+    color = qc_class
+  )) +
+  geom_boxplot(
+    aes(group = most_prev_karyotype),
+    outlier.shape = NA,
+    color = "black",
+    fill = "grey90",
+    linewidth = 0.5
   ) +
+  geom_jitter(
+    width = 0.2,
+    alpha = 0.5,
+    size = 1.4
+  ) +
+  scale_y_log10(labels = scales::comma) +
+  scale_color_manual(values = qc_colors,
+		     name = "QC class",
+		     drop = FALSE) +
+  coord_flip() +
   theme_dash +
   labs(
-    title = "Mutation burden",
-    x = "Mutations (log scale)",
-    y = "Number of samples"
+    title = "Mutation burden by most prevalent karyotype",
+    x = "Most prevalent karyotype",
+    y = "Number of mutations per sample"
   )
+
 
 # Purity
 p3 <- ggplot(cohort_qc, aes(purity, fill = qc_class)) +
@@ -404,7 +493,7 @@ p3 <- ggplot(cohort_qc, aes(purity, fill = qc_class)) +
 p4 <- ggplot(cohort_qc, aes(ploidy)) +
   geom_histogram(
     bins = 30,
-    fill = "#6A6599FF",
+    fill = "#925E9FB2",
     color = "grey20",
     linewidth = 0.2
   ) +
@@ -415,22 +504,44 @@ p4 <- ggplot(cohort_qc, aes(ploidy)) +
     y = "Number of samples"
   )
 
-# CNA segments per sample
-p5 <- ggplot2::ggplot(cohort_qc, ggplot2::aes(n_cna, fill = qc_class)) +
-  ggplot2::geom_histogram(
-    bins = 30,
-    position = "stack",
-    alpha = 0.7,
-    color = "grey20",
-    linewidth = 0.2
+# CNA segment number vs most prevalent karyotype
+
+p5 <- cohort_qc %>%
+  filter(
+    !is.na(most_prev_karyotype),
+    !is.na(n_cna_total),
+    n_cna_total > 0
+  ) %>%
+  ggplot(aes(
+    x = reorder(most_prev_karyotype, n_cna_total, FUN = median),
+    y = n_cna_total,
+    color = qc_class
+  )) +
+  geom_boxplot(
+    aes(group = most_prev_karyotype),
+    outlier.shape = NA,
+    color = "black",
+    fill = "grey90",
+    linewidth = 0.5
   ) +
-  ggplot2::scale_fill_manual(values = qc_colors, name = "QC class") +
+  geom_jitter(
+    width = 0.2,
+    alpha = 0.5,
+    size = 1.4
+  ) +
+  scale_y_log10(labels = scales::comma) +
+  scale_color_manual(values = qc_colors,
+		     name = "QC class",
+		     drop = FALSE) +
+  coord_flip() +
   theme_dash +
-  ggplot2::labs(
-    title = "CNA segments per sample",
-    x = "Number of CNA segments",
-    y = "Number of samples"
+  labs(
+    title = "CNA segments by most prevalent karyotype",
+    x = "Most prevalent karyotype",
+    y = "Number of CNA segments"
   )
+
+
 
 # CNA QC vs Peak QC
 p6 <- ggplot2::ggplot(cohort_qc, ggplot2::aes(cna_pass_rate, peak_pass_rate)) +
@@ -453,21 +564,40 @@ p6 <- ggplot2::ggplot(cohort_qc, ggplot2::aes(cna_pass_rate, peak_pass_rate)) +
   )
 
 # Karyotype stats
-p7 <- ggplot2::ggplot(
-  karyotype_summary,
-  ggplot2::aes(
-    x = reorder(karyotype, total_mutations),
-    y = total_mutations
-  )
-) +
-  ggplot2::geom_col(fill = "#CC6677") +
-  ggplot2::coord_flip() +
+
+top_n_karyotypes <- 15
+
+karyotype_freq <- cohort_qc %>%
+  dplyr::filter(!is.na(most_prev_karyotype)) %>%
+  count(most_prev_karyotype, name = "n_samples") %>%
+  dplyr::mutate(
+    pct_samples = 100 * n_samples / sum(n_samples)
+  ) %>%
+  dplyr::arrange(desc(pct_samples))
+
+top_karyotype_freq <- karyotype_freq %>%
+  slice_head(n = top_n_karyotypes)
+
+p7 <- ggplot(top_karyotype_freq, aes(
+  x = reorder(most_prev_karyotype, pct_samples),
+  y = pct_samples
+)) +
+  geom_col(fill = "#4C78A8") +
+  geom_text(
+    aes(label = paste0(round(pct_samples, 1), "%")),
+    hjust = -0.1,
+    size = 3
+  ) +
+  coord_flip() +
+  expand_limits(y = max(top_karyotype_freq[["pct_samples"]], na.rm = TRUE) * 1.15) +
   theme_dash +
-  ggplot2::labs(
-    title = "Mutations per karyotype",
-    x = "Karyotype",
-    y = "Total mutations across cohort"
+  labs(
+    title = "Most prevalent karyotypes",
+    #subtitle = paste0("Top ", top_n_karyotypes, " karyotypes by percentage of samples"),
+    x = "Most prevalent karyotype",
+    y = "Samples (%)"
   )
+
 
 # TIN distribution
 p8 <- ggplot(cohort_qc, aes(TIN_pct)) +
@@ -497,13 +627,13 @@ p8 <- ggplot(cohort_qc, aes(TIN_pct)) +
 # Wrap plots
 
 first_grid  <- (p1 | p6)
-second_grid <- (p2 | p3 | p4)
-third_grid  <- (p5 | p7 | p8)
+second_grid <- (p7 | p2 | p5)
+third_grid  <- (p4 | p3 | p8)
 
 dashboard <- summary_plot / first_grid / second_grid / third_grid +
-  patchwork::plot_layout(heights = c(0.10, 0.28, 0.30, 0.32)) +
+  patchwork::plot_layout(heights = c(0.10, 0.30, 0.28, 0.28)) +
   patchwork::plot_annotation(
-    title = paste0(prefix, " cohort CNAqc / TINC summary"),
+    title = paste0(prefix, " cohort QC summary"),
     theme = ggplot2::theme(
       plot.title = ggplot2::element_text(size = 16, face = "bold", hjust = 0.5)
     )
