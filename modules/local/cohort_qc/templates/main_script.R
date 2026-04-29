@@ -64,30 +64,6 @@ get_ids <- function(file,
   )
 }
 
-get_n_karyotype <- function(qc, sample_id = NULL) {
-  sid <- sample_id
-  if (is.null(sid)) {
-    sid <- if (!is.null(qc[["sample"]])) qc[["sample"]] else NA_character_
-  }
-
-  nk <- qc[["n_karyotype"]]
-
-  if (is.null(nk) || length(nk) == 0) {
-    return(tibble::tibble(
-      sample_id = character(),
-      karyotype = character(),
-      n_mutations = numeric()
-    ))
-  }
-
-  tibble::tibble(
-    sample_id = sid,
-    karyotype = names(nk),
-    n_mutations = as.numeric(nk)
-  )
-}
-
-
 # TIN classification
 classify_tin <- function(x) {
   x <- 100 * x

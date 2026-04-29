@@ -25,8 +25,8 @@ process SPARSESIGNATURE_ASSIGN {
     #!/usr/bin/env Rscript
     library(dplyr)
     
-    url_reference <- paste0("https://raw.githubusercontent.com/SigProfilerSuite/SigProfilerAssignment/main/SigProfilerAssignment/data/Reference_Signatures/",${genome},"/COSMIC_v3.5_SBS_",${genome},".txt")
-    destfile_path <- paste0("COSMIC_v3.5_SBS_",${genome},".txt")
+    url_reference <- paste0("https://raw.githubusercontent.com/SigProfilerSuite/SigProfilerAssignment/main/SigProfilerAssignment/data/Reference_Signatures/","${genome}","/COSMIC_v3.5_SBS_","${genome}",".txt")
+    destfile_path <- paste0("COSMIC_v3.5_SBS_","${genome}",".txt")
     download.file(
      url = url_reference,
      destfile = destfile_path,

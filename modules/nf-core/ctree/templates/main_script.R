@@ -64,21 +64,20 @@ add_dummy_driver = function(input_table, variant_colname, is_driver_colname) {
 
 initialize_ctree_obj_pyclone = function(ctree_input) {
   ctree_input = add_dummy_driver(ctree_input, variant_colname="variantID", is_driver_colname="is.driver")
-
-
-  # the CCF table must report CCF values for each cluster and sample
-  # cluster | nMuts | is.driver | is.clonal | sample1 | sample2 | ...
-  CCF_table = ctree_input %>%
-    dplyr::select(sample_id, cluster, nMuts, is.driver, is.clonal, CCF) %>%
-    dplyr::mutate(is.driver=replace(is.driver, is.driver=="", "FALSE")) %>%
-    dplyr::mutate(is.driver=as.logical(is.driver)) %>%
-    dplyr::filter(cluster!="Tail") %>%
-    dplyr::mutate(cluster=as.character(cluster)) %>%
-    dplyr::group_by(cluster) %>%
-    dplyr::mutate(is.driver=any(is.driver)) %>%
-    dplyr::filter(any(CCF>0)) %>%
-    dplyr::ungroup() %>% unique() %>%
-    tidyr::pivot_wider(names_from="sample_id", values_from="CCF", values_fill=0)
+    driver_cluster = unique(ctree_input[which(ctree_input["is.driver"]==TRUE),c("cluster")])
+    # the CCF table must report CCF values for each cluster and sample
+    # cluster | nMuts | is.driver | is.clonal | sample1 | sample2 | ...
+    CCF_table = ctree_input %>%
+      dplyr::select(sample_id, cluster, nMuts, is.driver, is.clonal, CCF) %>%
+      dplyr::mutate(is.driver=replace(is.driver, is.driver=="", "FALSE")) %>%
+      dplyr::mutate(is.driver=as.logical(is.driver)) %>%
+      dplyr::filter(cluster!="Tail") %>%
+      dplyr::mutate(cluster=as.character(cluster)) %>%
+      dplyr::group_by(cluster) %>%
+      dplyr::mutate(is.driver=any(is.driver)) %>%
+      dplyr::filter(any(CCF>0)) %>%
+      dplyr::ungroup() %>% unique() %>%
+      tidyr::pivot_wider(names_from="sample_id", values_from="CCF", values_fill=0)
 
   # the driver table must contain patient and variant IDs and report clonality and driver status
   # patientID | variantID | is.driver | is.clonal | cluster | sample1 | sample2 | ...
@@ -200,3 +199,4 @@ writeLines(paste("    tidyr:", tidyr_version), f)
 writeLines(paste("    ggplot2:", ggplot2_version), f)
 writeLines(paste("    ggpubr:", ggpubr_version), f)
 close(f)
+
