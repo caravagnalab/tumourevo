@@ -46,7 +46,7 @@
                     },
                     "pyclonevi": {
                         "branch": "master",
-                        "git_sha": "a039cea3fd78c17219897cf2f78d254b43ef33a8",
+                        "git_sha": "8fe128307485abf3a6ce76b7ee426b3612348ac9",
                         "installed_by": ["modules"]
                     },
                     "sigprofiler": {
@@ -78,7 +78,7 @@
                     },
                     "viber": {
                         "branch": "master",
-                        "git_sha": "642d6c5c0b7a4fbd7122fd00cbbb9a4a671d6d0a",
+                        "git_sha": "92502f57f03d9e3557253d1513f2dc9fc7e1f29f",
                         "installed_by": ["modules"],
                         "patch": "modules/nf-core/viber/viber.diff"
                     }
