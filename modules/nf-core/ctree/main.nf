@@ -1,6 +1,7 @@
 process CTREE {
     tag "$meta.id"
     label "process_medium"
+    label "error_ignore"
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
