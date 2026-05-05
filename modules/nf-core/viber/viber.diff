@@ -9,7 +9,7 @@ Changes in 'viber/main.nf':
 +    label "error_ignore"
  
      conda "${moduleDir}/environment.yml"
-     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+     container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
 
 'modules/nf-core/viber/environment.yml' is unchanged
 'modules/nf-core/viber/meta.yml' is unchanged
