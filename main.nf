@@ -28,14 +28,6 @@ include { UNTAR } from './modules/nf-core/untar'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    PARSE INPUT FILE
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
-
-input = params.input ? Channel.fromList(samplesheetToList(params.input, "assets/schema_input.json")) : Channel.empty()
-
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     NAMED WORKFLOWS FOR PIPELINE
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
@@ -60,10 +52,10 @@ workflow NFCORE_TUMOUREVO {
 
     } else {
         if (params.vep_cache.endsWith("tar.gz")){
-            path = params.vep_cache ? Channel.fromPath(params.vep_cache).map{ it -> [ [id:it.baseName], it ] }.collect() : Channel.empty()
-            UNTAR(path) //[meta, path]
-            vep_cache = UNTAR.out.untar.map{meta, path ->
-                [path]}
+            def vep_tar = params.vep_cache ? Channel.fromPath(params.vep_cache).map{ it -> [ [id:it.baseName], it ] }.collect() : Channel.empty()
+            UNTAR(vep_tar) //[meta, path]
+            vep_cache = UNTAR.out.untar.map{meta, cache_path ->
+                [cache_path]}
 
         } else {
 
@@ -100,6 +92,10 @@ workflow NFCORE_TUMOUREVO {
 workflow {
 
     main:
+    def input = params.input
+      ? Channel.fromList(samplesheetToList(params.input, "assets/schema_input.json"))
+      : Channel.empty()
+
     //
     // WORKFLOW: Run main workflow
     //

@@ -36,7 +36,7 @@ main:
             [meta.dataset + meta.patient, meta, vcf, tbi, bam, bai, cna_segs, cna_extra] }
             .groupTuple()
             .map { id, meta, vcf, tbi, bam, bai, cna_segs, cna_extra ->
-                n = vcf.baseName.unique().size()
+                def n = vcf.baseName.unique().size()
                 [id, meta, vcf, tbi, bam, bai, cna_segs, cna_extra, n ]}
             .transpose()
             .map { id, meta, vcf, tbi, bam, bai, cna_segs, cna_extra, n  ->
