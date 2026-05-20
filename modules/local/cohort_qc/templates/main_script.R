@@ -185,54 +185,44 @@ get_cnaqc_summary <- function(qc, sample_id = NULL) {
     mutation_karyotype_fraction <- NA_real_
   }
   
-  # CNA segment / length dominance for the mutation-defined prevalent karyotype
+  # CNA genome-level metrics
+  
   if (!is.null(cna_tbl) &&
       nrow(cna_tbl) > 0 &&
-      all(c("Major", "minor") %in% names(cna_tbl)) &&
-      !is.null(most_prev_karyotype) &&
-      !is.na(most_prev_karyotype)) {
+      all(c("Major", "minor", "length") %in% names(cna_tbl))) {
     
-    cna_tbl <- cna_tbl %>%
-      dplyr::mutate(
-        segment_karyotype = paste0(.data[["Major"]], ":", .data[["minor"]])
-      )
+    cna_total_length <- sum(cna_tbl[["length"]], na.rm = TRUE)
     
-    n_cna_observed <-  n_cna_total
-    
-    n_cna_prev_karyotype <- sum(
-      cna_tbl[["segment_karyotype"]] == most_prev_karyotype,
+    cna_altered_length <- sum(
+      cna_tbl[["length"]][
+        !(cna_tbl[["Major"]] == 1 & cna_tbl[["minor"]] == 1)
+      ],
       na.rm = TRUE
     )
     
-    cna_karyotype_frac <- n_cna_prev_karyotype / n_cna_observed
-    
-    if ("length" %in% names(cna_tbl)) {
-      cna_total_length <- sum(cna_tbl[["length"]], na.rm = TRUE)
-      
-      cna_length_prev_karyotype <- sum(
-        cna_tbl[["length"]][cna_tbl[["segment_karyotype"]] == most_prev_karyotype],
-        na.rm = TRUE
-      )
-      
-      cna_length_karyotype_frac <- if (cna_total_length > 0) {
-        cna_length_prev_karyotype / cna_total_length
-      } else {
-        NA_real_
-      }
+    fga <- if (cna_total_length > 0) {
+      cna_altered_length / cna_total_length
     } else {
-      cna_total_length <- NA_real_
-      cna_length_prev_karyotype <- NA_real_
-      cna_length_karyotype_frac <- NA_real_
+      NA_real_
     }
     
   } else {
-    n_cna_observed <- NA_integer_
-    n_cna_prev_karyotype <- NA_integer_
-    cna_karyotype_frac <- NA_real_
     cna_total_length <- NA_real_
-    cna_length_prev_karyotype <- NA_real_
-    cna_length_karyotype_frac <- NA_real_
+    cna_altered_length <- NA_real_
+    fga <- NA_real_
   }
+  
+  cna_tbl <- cna_tbl %>%
+    dplyr::mutate(
+      segment_karyotype = paste0(.data[["Major"]], ":", .data[["minor"]])
+    )
+  
+  cna_length_prev_karyotype <- sum(
+    cna_tbl[["length"]][cna_tbl[["segment_karyotype"]] == most_prev_karyotype],
+    na.rm = TRUE
+  )
+  
+  cna_length_karyotype_frac <- cna_length_prev_karyotype / cna_total_length
   
   # QC classification
   qc_class <- dplyr::case_when(
@@ -255,14 +245,14 @@ get_cnaqc_summary <- function(qc, sample_id = NULL) {
     purity = purity,
     ploidy = ploidy,
     n_cna_total = n_cna_total,
-    most_prev_karyotype = most_prev_karyotype,
+    mutation_dominant_karyotype = most_prev_karyotype,
     n_mutations_prev_karyotype = n_mutations_prev_karyotype,
     mutation_karyotype_fraction = mutation_karyotype_fraction,
-    n_cna_prev_karyotype = n_cna_prev_karyotype,
-    cna_karyotype_frac = cna_karyotype_frac,
-    cna_length_prev_karyotype = cna_length_prev_karyotype,
     cna_total_length = cna_total_length,
-    cna_length_karyotype_frac = cna_length_karyotype_frac,
+    cna_altered_length = cna_altered_length,
+    fga = fga,
+    cna_length_dominant_karyotype = cna_length_prev_karyotype,
+    cna_length_karyotype_fraction = cna_length_karyotype_frac,
     mutation_na_fraction = mutation_na_fraction,
     cna_pass_rate = cna_pass_rate,
     cna_fail_rate = cna_fail_rate,
@@ -413,17 +403,17 @@ p1 <- ggplot(qc_counts, aes(x = qc_class, y = n, fill = qc_class)) +
 
 p2 <- cohort_qc %>%
   dplyr::filter(
-    !is.na(most_prev_karyotype),
+    !is.na(mutation_dominant_karyotype),
     !is.na(n_mutations),
     n_mutations > 0
   ) %>%
   ggplot(aes(
-    x = reorder(most_prev_karyotype, n_mutations, FUN = median),
+    x = reorder(mutation_dominant_karyotype, n_mutations, FUN = median),
     y = n_mutations,
     color = qc_class
   )) +
   geom_boxplot(
-    aes(group = most_prev_karyotype),
+    aes(group = mutation_dominant_karyotype),
     outlier.shape = NA,
     color = "black",
     fill = "grey90",
@@ -442,7 +432,7 @@ p2 <- cohort_qc %>%
   theme_dash +
   labs(
     title = "Mutation burden by most prevalent karyotype",
-    x = "Most prevalent karyotype",
+    x = "Mutation dominant karyotype",
     y = "Number of mutations per sample"
   )
 
@@ -483,18 +473,17 @@ p4 <- ggplot(cohort_qc, aes(ploidy)) +
 # CNA segment number vs most prevalent karyotype
 
 p5 <- cohort_qc %>%
-  filter(
-    !is.na(most_prev_karyotype),
-    !is.na(n_cna_total),
-    n_cna_total > 0
+  dplyr::filter(
+    !is.na(mutation_dominant_karyotype),
+    !is.na(fga)
   ) %>%
   ggplot(aes(
-    x = reorder(most_prev_karyotype, n_cna_total, FUN = median),
-    y = n_cna_total,
+    x = reorder(mutation_dominant_karyotype, fga, FUN = median),
+    y = fga,
     color = qc_class
   )) +
   geom_boxplot(
-    aes(group = most_prev_karyotype),
+    aes(group = mutation_dominant_karyotype),
     outlier.shape = NA,
     color = "black",
     fill = "grey90",
@@ -505,21 +494,23 @@ p5 <- cohort_qc %>%
     alpha = 0.5,
     size = 1.4
   ) +
-  scale_y_log10(labels = scales::comma) +
-  scale_color_manual(values = qc_colors,
-		     name = "QC class",
-		     drop = FALSE) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+  scale_color_manual(
+    values = qc_colors,
+    name = "QC class",
+    drop = FALSE
+  ) +
   coord_flip() +
   theme_dash +
   labs(
-    title = "CNA segments by most prevalent karyotype",
-    x = "Most prevalent karyotype",
-    y = "Number of CNA segments"
+    title = "FGA by karyotype",
+    x = "Mutation dominant karyotype",
+    y = "FGA"
   )
 
 
-
 # CNA QC vs Peak QC
+
 p6 <- ggplot2::ggplot(cohort_qc, ggplot2::aes(cna_pass_rate, peak_pass_rate)) +
   ggplot2::annotate("rect", xmin = 0, xmax = 0.5, ymin = 0, ymax = 1,
                     fill = qc_colors["FAIL"], alpha = 0.08) +
@@ -544,8 +535,8 @@ p6 <- ggplot2::ggplot(cohort_qc, ggplot2::aes(cna_pass_rate, peak_pass_rate)) +
 top_n_karyotypes <- 15
 
 karyotype_freq <- cohort_qc %>%
-  dplyr::filter(!is.na(most_prev_karyotype)) %>%
-  count(most_prev_karyotype, name = "n_samples") %>%
+  dplyr::filter(!is.na(mutation_dominant_karyotype)) %>%
+  count(mutation_dominant_karyotype, name = "n_samples") %>%
   dplyr::mutate(
     pct_samples = 100 * n_samples / sum(n_samples)
   ) %>%
@@ -555,7 +546,7 @@ top_karyotype_freq <- karyotype_freq %>%
   slice_head(n = top_n_karyotypes)
 
 p7 <- ggplot(top_karyotype_freq, aes(
-  x = reorder(most_prev_karyotype, pct_samples),
+  x = reorder(mutation_dominant_karyotype, pct_samples),
   y = pct_samples
 )) +
   geom_col(fill = "#4C78A8") +
@@ -568,9 +559,8 @@ p7 <- ggplot(top_karyotype_freq, aes(
   expand_limits(y = max(top_karyotype_freq[["pct_samples"]], na.rm = TRUE) * 1.15) +
   theme_dash +
   labs(
-    title = "Most prevalent karyotypes",
-    #subtitle = paste0("Top ", top_n_karyotypes, " karyotypes by percentage of samples"),
-    x = "Most prevalent karyotype",
+    title = "Mutation dominant karyotypes",
+    x = "Mutation dominant karyotype",
     y = "Samples (%)"
   )
 
