@@ -5,7 +5,7 @@
 include { COHORT_QC } from "../../../modules/local/cohort_qc/main"
 include { COHORT_MUTATIONS } from "../../../modules/local/cohort_mutations_analysis/main"
 include { SUBCLONAL_INTERPRETATION } from "../../../modules/local/subclonal_interpretation/main"
-
+include { COHORT_SIGNATURES } from "../../../modules/local/cohort_signatures/main"
 
 workflow GENOME_INTERPRETER {
     take:
@@ -19,13 +19,20 @@ workflow GENOME_INTERPRETER {
     assign_pyclone
     assign_mobster
     assign_viber
+    sigprofiler_out
+    sparsesignature_assign_cosmic
+    
 
     main:
     ch_versions = Channel.empty()
     summary_table_rds = null
     summary_plot_rds = null
     summary_report_pdf = null
+    summary_subclonal_pdf = null
+    summary_subclonal_rds = null
     oncoprint = null
+    cohort_signatures_pdf = null
+    cohort_signatures_rds = null
 
     // cnaqc_qc_rds = cnaqc_out
     //     .filter { meta, file ->
@@ -150,7 +157,33 @@ workflow GENOME_INTERPRETER {
     // summary_plot_rds  = COHORT_MUTATIONS.out.summary_plot_rds
     // summary_report_pdf = COHORT_MUTATIONS.out.summary_report_pdf
 
-
+    if (params.tools && params.tools.split(",").contains("sigprofiler") && !params.tools.split(",").contains("sparsesignatures")) {
+        cohort_sigprofiler = sigprofiler_out.map { meta, file ->
+            meta = meta + [ id: "${meta.dataset}" ]
+            [meta.subMap('dataset', 'id'), file]}
+        cohort_signatures_input = cohort_sigprofiler
+    } else if (params.tools && params.tools.split(",").contains("sparsesignatures") && !params.tools.split(",").contains("sigprofiler")) {
+        cohort_sparsesig = sparsesignature_assign_cosmic.map { meta, file ->
+            meta = meta + [ id: "${meta.dataset}" ]
+            [meta.subMap('dataset', 'id'), file]}
+        cohort_signatures_input = cohort_sparsesig
+    } else {
+        cohort_sigprofiler = SIGNATURE_DECONVOLUTION.out.sigprofiler_out.map { meta, file ->
+            meta = meta + [ id: "${meta.dataset}" ]
+            [meta.subMap('dataset', 'id'), file]}
+        cohort_sparsesig = SIGNATURE_DECONVOLUTION.out.sparsesignature_assign_cosmic.map { meta, file ->
+            meta = meta + [ id: "${meta.dataset}" ]
+            [meta.subMap('dataset', 'id'), file]}
+        cohort_signatures_input  = cohort_sigprofiler.join(cohort_sparsesig, remainder: true).map { meta, file1, file2 ->
+            [meta, [file1, file2]]}.map { meta, file -> [meta, file.flatten()]}
+    }
+    
+    cohort_signatures_input.view()
+    COHORT_SIGNATURES(cohort_signatures_input)
+    cohort_signatures_pdf = COHORT_SIGNATURES.out.report_cohort_signatures
+    cohort_signatures_rds = COHORT_SIGNATURES.out.rds_cohort_signatures
+    ch_versions = ch_versions.mix(COHORT_SIGNATURES.out.versions)
+    
     emit:
     summary_table_rds
     summary_plot_rds
@@ -158,6 +191,8 @@ workflow GENOME_INTERPRETER {
     oncoprint
     summary_subclonal_pdf
     summary_subclonal_rds
+    cohort_signatures_pdf
+    cohort_signatures_rds
     versions = ch_versions
 
 }
