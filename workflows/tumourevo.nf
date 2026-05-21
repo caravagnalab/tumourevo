@@ -147,7 +147,7 @@ main:
                     SUBCLONAL_DECONVOLUTION.out.mobster_results,
                     SUBCLONAL_DECONVOLUTION.out.viber_results,
                     SIGNATURE_DECONVOLUTION.out.sigprofiler_out)
-
+    
     if (params.filter == true) {
         GENOME_INTERPRETER(QC.out.rds_cnaqc,
                         QC.out.rds_tinc,
@@ -158,7 +158,9 @@ main:
                         ASSIGN_SIGNATURE.out.table_viber,
                         ASSIGN_SIGNATURE.out.assign_pyclone,
                         ASSIGN_SIGNATURE.out.assign_mobster,
-                        ASSIGN_SIGNATURE.out.assign_viber
+                        ASSIGN_SIGNATURE.out.assign_viber,
+                        SIGNATURE_DECONVOLUTION.out.sigprofiler_out,
+                        SIGNATURE_DECONVOLUTION.out.sparsesignature_assign_cosmic
                         )
     } else {
         GENOME_INTERPRETER(QC.out.rds_cnaqc,
@@ -170,7 +172,9 @@ main:
                         ASSIGN_SIGNATURE.out.table_viber,
                         ASSIGN_SIGNATURE.out.assign_pyclone,
                         ASSIGN_SIGNATURE.out.assign_mobster,
-                        ASSIGN_SIGNATURE.out.assign_viber
+                        ASSIGN_SIGNATURE.out.assign_viber,
+                        SIGNATURE_DECONVOLUTION.out.sigprofiler_out,
+                        SIGNATURE_DECONVOLUTION.out.sparsesignature_assign_cosmic
                         )
     }
 
