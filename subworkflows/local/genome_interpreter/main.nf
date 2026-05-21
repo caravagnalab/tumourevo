@@ -168,10 +168,10 @@ workflow GENOME_INTERPRETER {
             [meta.subMap('dataset', 'id'), file]}
         cohort_signatures_input = cohort_sparsesig
     } else {
-        cohort_sigprofiler = SIGNATURE_DECONVOLUTION.out.sigprofiler_out.map { meta, file ->
+        cohort_sigprofiler = sigprofiler_out.map { meta, file ->
             meta = meta + [ id: "${meta.dataset}" ]
             [meta.subMap('dataset', 'id'), file]}
-        cohort_sparsesig = SIGNATURE_DECONVOLUTION.out.sparsesignature_assign_cosmic.map { meta, file ->
+        cohort_sparsesig = sparsesignature_assign_cosmic.map { meta, file ->
             meta = meta + [ id: "${meta.dataset}" ]
             [meta.subMap('dataset', 'id'), file]}
         cohort_signatures_input  = cohort_sigprofiler.join(cohort_sparsesig, remainder: true).map { meta, file1, file2 ->

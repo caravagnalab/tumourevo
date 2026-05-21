@@ -94,25 +94,25 @@ compute_fga = function(cnaqc, sequenced) {
 
 # loading patients names
 
-cnaqc_patients = substr("[Set07, Set06]", 2, nchar("[Set07, Set06]")-1)
+cnaqc_patients = substr("$cnaqc_patients", 2, nchar("$cnaqc_patients")-1)
 cnaqc_patients = strsplit(cnaqc_patients, ", ")[[1]]
 
 print(cnaqc_patients)
 
-tmb_patients = substr("[Set06, Set06, Set06, Set06, Set06, Set06, Set07, Set07, Set07, Set07]", 2, nchar("[Set06, Set06, Set06, Set06, Set06, Set06, Set07, Set07, Set07, Set07]")-1)
+tmb_patients = substr("$tmb_patients", 2, nchar("$tmb_patients")-1)
 tmb_patients = strsplit(tmb_patients, ", ")[[1]]
 
 print(tmb_patients)
 
 # load data
 
-cnaqc_list = lapply(strsplit("MSeq_Set07_multi_cnaqc_ALL.rds MSeq_Set06_multi_cnaqc_ALL.rds", " ")[[1]], FUN = function(file){
+cnaqc_list = lapply(strsplit("$join_cnaqc",, " ")[[1]], FUN = function(file){
   readRDS(file)
 })
 names(cnaqc_list) = cnaqc_patients
 
 # get the tmb results 
-tmb = lapply(strsplit("MSeq_Set06_Set6_44_tmb.rds MSeq_Set06_Set6_46_tmb.rds MSeq_Set06_Set6_42_tmb.rds MSeq_Set06_Set6_45_tmb.rds MSeq_Set06_Set6_48_tmb.rds MSeq_Set06_Set6_47_tmb.rds MSeq_Set07_Set7_62_tmb.rds MSeq_Set07_Set7_59_tmb.rds MSeq_Set07_Set7_55_tmb.rds MSeq_Set07_Set7_57_tmb.rds", " ")[[1]], FUN = function(file){
+tmb = lapply(strsplit('$tmb_rds', " ")[[1]], FUN = function(file){
   readRDS(file)
 })
 names(tmb) = tmb_patients
