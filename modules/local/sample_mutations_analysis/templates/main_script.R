@@ -48,7 +48,8 @@ compute_tmb = function(x, seq_length) {
   
   coding_muts = x %>% 
     separate(Consequence, into = "Consequence", sep = "&") %>% 
-    filter(Consequence != 'synonymous_variant')
+    filter(Consequence != 'synonymous_variant') %>% 
+    filter(VAF > 0)
   
   coding_tmb = coding_muts %>% 
     group_by(sample) %>% 
