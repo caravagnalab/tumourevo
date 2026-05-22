@@ -206,7 +206,7 @@ score_table = lapply(tool_list, function(tool) {
 
 score_table = score_table %>%
   group_by(patient_id, cluster_tool, tool, is_clonal, is_driver, n_never_tail, driver) %>%
-  summarize(cs_sign = ifelse(is_clonal == T, 1, min(cs_sign)),
+  reframe(cs_sign = ifelse(is_clonal == T, 1, min(cs_sign)),
             n_rel = ifelse(is_clonal == T, 1, max(n_rel)),
             bg_sign =  ifelse(is_clonal == T, 1, min(bg_sign))) %>%
   rowwise() %>%
