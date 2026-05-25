@@ -14,42 +14,45 @@ workflow LIFTER {
         fasta
 
     main:
-        out = Channel.empty()
-        ch_versions = Channel.empty()
+        def ch_out      = channel.empty()
+        def ch_versions = channel.empty()
 
-        bam = data.map{ meta, rds, bam, bai ->
-            [meta, bam]
+        def bam = data.map{ meta, _rds, _bam, _bai ->
+            [meta, _bam]
         }
 
-        rds = data.map{ meta, rds, bam, bai ->
-                [meta, rds]
+        def rds = data.map{ meta, _rds, _bam, _bai ->
+            [meta, _rds]
         }
 
-        all_rds = data.map{ meta, rds, bam, bai ->
-            meta = meta + [id: "${meta.dataset}_${meta.patient}"]
-            [meta.subMap('dataset', 'patient', 'id', 'normal_sample'), rds] }
-            .groupTuple()
+        def all_rds = data.map{ meta, _rds, _bam, _bai ->
+            def new_meta = meta + [id: "${meta.dataset}_${meta.patient}"]
+            [new_meta.subMap('dataset', 'patient', 'id', 'normal_sample'), _rds]
+        }.groupTuple()
 
         GET_POSITIONS_ALL(all_rds)
         ch_versions = ch_versions.mix(GET_POSITIONS_ALL.out.versions)
-        all_pos = GET_POSITIONS_ALL.out.all_pos.transpose().map{ meta, rds ->
-                [rds]
+
+        def all_pos = GET_POSITIONS_ALL.out.all_pos.transpose().map{ meta, _rds ->
+            [_rds]
         }
 
         GET_POSITIONS_REL(rds.combine(all_pos))
         ch_versions = ch_versions.mix(GET_POSITIONS_REL.out.versions)
-        in_pileup = bam.join(GET_POSITIONS_REL.out.bed, by: [0])
+
+        def in_pileup = bam.join(GET_POSITIONS_REL.out.bed, by: [0])
 
         BCFTOOLS_MPILEUP(in_pileup, fasta, false)
         ch_versions = ch_versions.mix(BCFTOOLS_MPILEUP.out.versions)
-        join = rds.join(BCFTOOLS_MPILEUP.out.vcf, by:[0])
 
-        JOIN_POSITIONS(join.combine(all_pos))
+        def ch_join = rds.join(BCFTOOLS_MPILEUP.out.vcf, by: [0])
+
+        JOIN_POSITIONS(ch_join.combine(all_pos))
         ch_versions = ch_versions.mix(JOIN_POSITIONS.out.versions)
-        out = JOIN_POSITIONS.out.rds
+        ch_out = JOIN_POSITIONS.out.rds
 
     emit:
-        out_data = out
+        out_data = ch_out
         versions = ch_versions
 
 }
