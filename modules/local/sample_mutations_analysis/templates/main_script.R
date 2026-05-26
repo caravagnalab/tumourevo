@@ -95,8 +95,14 @@ print(opt)
 sequenced_mb = as.numeric(opt[['sequenced_mb']])/10^6
 
 # compute TMB
+t_type = data %>% 
+  filter(!is.na(TUMOUR_TYPE)) %>%
+  pull(TUMOUR_TYPE) %>% 
+  unique
+  
 tmb_stats = compute_tmb(data, seq_length = sequenced_mb) %>% 
-  mutate(status = ifelse(TMB >= 10, 'Hyper-mutant (TMB >= 10)', 'TMB < 10'))
+  mutate(status = ifelse(TMB >= 10, 'Hyper-mutant (TMB >= 10)', 'TMB < 10')) %>% 
+  mutate(TUMOUR_TYPE = t_type)
 
 # plots
 # plot number of mutations per chromosome

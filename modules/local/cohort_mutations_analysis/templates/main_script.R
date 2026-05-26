@@ -1,3 +1,4 @@
+#!/usr/bin/env Rscript
 
 # parse arguments
 parse_args <- function(x){
