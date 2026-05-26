@@ -106,7 +106,7 @@ print(tmb_patients)
 
 # load data
 
-cnaqc_list = lapply(strsplit("$join_cnaqc",, " ")[[1]], FUN = function(file){
+cnaqc_list = lapply(strsplit("$join_cnaqc", " ")[[1]], FUN = function(file){
   readRDS(file)
 })
 names(cnaqc_list) = cnaqc_patients
@@ -343,14 +343,12 @@ ht = oncoPrint(matrix_drivers,
                name = 'Copy number status and quality control'
 )
 
+pdf(paste0(opt[['prefix']],'_oncoprint.pdf'), width = 15, height = 12)
 draw(ht, 
      heatmap_legend_side = 'bottom', 
      annotation_legend_side = 'bottom', 
      annotation_legend_list = c(list(lgd_tmb), list(lgs_fga)),
      merge_legend = TRUE)
-
-
-pdf(paste0(opt[['prefix']],'_oncoprint.pdf'), width = 15, height = 12)
 dev.off()
 
 # version export
