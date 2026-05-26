@@ -562,7 +562,7 @@
                 "variant_annotation/vep/SCOUT/SPN01_SS_nobam/SPN01_100X_0.9p_Sample_C/SCOUT_SPN01_SS_nobam_SPN01_100X_0.9p_Sample_C.annotated_summary.html"
             ]
         ],
-        "timestamp": "2026-04-30T16:22:25.833507817",
+        "timestamp": "2026-05-26T12:18:32.084060819",
         "meta": {
             "nf-test": "0.9.4",
             "nextflow": "25.10.0"
