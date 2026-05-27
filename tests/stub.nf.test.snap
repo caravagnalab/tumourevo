@@ -79,9 +79,9 @@
                     "pyclonevi": "0.2.0"
                 },
                 "TINC": {
-                    "CNAqc": "1.1.2",
+                    "TINC": "0.1.0",
                     "tidyverse": "2.0.0",
-                    "TINC": "0.1.0"
+                    "CNAqc": "1.1.2"
                 },
                 "VCF2CNAQC": {
                     "cnaqc": "1.1.2",
