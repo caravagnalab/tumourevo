@@ -76,7 +76,7 @@
                     "ggplot2": "3.5.2"
                 },
                 "PYCLONEVI": {
-                    "pyclonevi": "0.1.6"
+                    "pyclonevi": "0.2.0"
                 },
                 "TINC": {
                     "bioconductor-rtinc": "0.1.0"
