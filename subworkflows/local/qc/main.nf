@@ -14,7 +14,7 @@ workflow QC {
     main:
         ch_versions = Channel.empty()
         TINC(input)
-        ch_versions = ch_versions.mix(TINC.out.versions)
+        ch_versions = ch_versions.mix(TINC.out.versions_tinc)
 
         input_cnaqc = input.map{meta, cna, snv ->
                 def sample =  meta.tumour_sample

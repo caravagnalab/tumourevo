@@ -76,10 +76,12 @@
                     "ggplot2": "3.5.2"
                 },
                 "PYCLONEVI": {
-                    "pyclonevi": "0.1.6"
+                    "pyclonevi": "0.2.0"
                 },
                 "TINC": {
-                    "bioconductor-rtinc": "0.1.0"
+                    "TINC": "0.1.0",
+                    "tidyverse": "2.0.0",
+                    "CNAqc": "1.1.2"
                 },
                 "VCF2CNAQC": {
                     "cnaqc": "1.1.2",
