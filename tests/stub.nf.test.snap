@@ -79,7 +79,9 @@
                     "pyclonevi": "0.2.0"
                 },
                 "TINC": {
-                    "bioconductor-rtinc": "0.1.0"
+                    "CNAqc": "1.1.2",
+                    "tidyverse": "2.0.0",
+                    "TINC": "0.1.0"
                 },
                 "VCF2CNAQC": {
                     "cnaqc": "1.1.2",
