@@ -53,7 +53,7 @@ parse_Mutect = function(vcf, tumour_id, normal_id){
     if (normal_id == '[]'){
       samples = c(tumour_id)
     } else{
-      samples = c(tumour_id, normal_id) 
+      samples = c(tumour_id, normal_id)
     }
     calls = calls[samples]
 
@@ -76,7 +76,7 @@ parse_Mutect = function(vcf, tumour_id, normal_id){
             tidyr::unnest(CSQ) %>%
             tidyr::separate(CSQ, vep_field, sep = "\\\\|") %>%
             dplyr::select(chr, from, to, ref, alt, IMPACT, SYMBOL, Gene, dplyr::everything())  #can add other thing, CSQ, HGSP
-        
+
         if (normal_id != '[]'){
           calls[[normal_id]][['mutations']] = calls[[normal_id]][['mutations']] %>% dplyr::select(-CSQ) %>% dplyr::distinct()
         }
@@ -156,7 +156,7 @@ parse_Strelka = function(vcf, tumour_id, normal_id){
     if (normal_id == '[]'){
       samples = c(tumour_id)
     } else{
-      samples = c(tumour_id, normal_id) 
+      samples = c(tumour_id, normal_id)
     }
     names(calls) = samples
 
@@ -233,7 +233,7 @@ parse_Platypus = function(vcf, tumour_id, normal_id){
     if (normal_id == '[]'){
       samples = c(tumour_id)
     } else{
-      samples = c(tumour_id, normal_id) 
+      samples = c(tumour_id, normal_id)
     }
     calls = calls[samples]
 
@@ -314,7 +314,7 @@ parse_TNscope = function(vcf, tumour_id, normal_id){
   if (normal_id == '[]'){
     samples = c(tumour_id)
   } else{
-    samples = c(tumour_id, normal_id) 
+    samples = c(tumour_id, normal_id)
   }
   calls = calls[samples]
 
