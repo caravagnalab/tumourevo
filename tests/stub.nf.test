@@ -9,7 +9,7 @@ nextflow_pipeline {
 
         when {
             params {
-                tools = "mobster,pyclone-vi,viber"
+                tools = "tinc,mobster,pyclone-vi,viber"
                 outdir = "$outputDir"
 
             }

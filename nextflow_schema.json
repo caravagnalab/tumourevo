@@ -49,9 +49,9 @@
                 },
                 "tools": {
                     "type": "string",
-                    "default": "mobster,viber,pyclone-vi,sparsesignatures,sigprofiler",
+                    "default": "tinc,mobster,viber,pyclone-vi,sparsesignatures,sigprofiler",
                     "description": "List of tools for running the pipeline.",
-                    "pattern": "^((mobster|viber|pyclone-vi|sparsesignatures|sigprofiler)?,?)*(?<!,)$"
+                    "pattern": "^((tinc|mobster|viber|pyclone-vi|sparsesignatures|sigprofiler)?,?)*(?<!,)$"
                 },
                 "filter": {
                     "type": "boolean",
