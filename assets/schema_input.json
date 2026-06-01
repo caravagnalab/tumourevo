@@ -86,7 +86,7 @@
                         "type": "string",
                         "pattern": "^Battenberg$"
                     },
-                                        {
+                    {
                         "type": "string",
                         "pattern": "^facets$"
                     }
@@ -183,14 +183,6 @@
                 "exists": true
             }
         },
-        "required": [
-            "dataset",
-            "patient",
-            "tumour_sample",
-            "vcf",
-            "tbi",
-            "cna_segments",
-            "cna_caller"
-        ]
+        "required": ["dataset", "patient", "tumour_sample", "vcf", "tbi", "cna_segments", "cna_caller"]
     }
 }
