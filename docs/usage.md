@@ -12,7 +12,7 @@ Through the analysis of variant and copy-number calls, it reconstructs the evolu
 
 ## Samplesheet input
 
-You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 10 columns, and a header row as shown in the examples below.
+You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 8 columns, and a header row as shown in the examples below.
 
 ```bash
 --input '[path to samplesheet file]'
@@ -20,13 +20,13 @@ You will need to create a samplesheet with information about the samples you wou
 
 ### Full samplesheet
 
-The samplesheet can have as many columns as you desire, however, there is a strict requirement for the first 10 columns to match those defined in the table below.
+The samplesheet can have as many columns as you desire, however, there is a strict requirement for the first 8 columns to match those defined in the table below.
 
 It is recommended to use the absolute path of the files, but a relative path should also work.
 
 For the joint analysis of multiple samples, a tumour BAM/CRAM (with its corresponding BAI/CRAI) file is required for each sample, such that the number of reads of a private mutation can be retrieved for all the samples thorugh `mpileup`.
 
-Multiple samples from the same patient must be specified with the same `dataset` ID, `patient` ID, and a different `tumour_sample` ID. The `normal_sample` ID column is also required.
+Multiple samples from the same patient must be specified with the same `dataset` ID, `patient` ID, and a different `tumour_sample` ID. The `normal_sample `column is required for tumour-normal mode, and must be omitted for tumour-only mode.
 
 Multiple patients from the same dataset must be specified with the same `dataset` ID, and a different `patient` ID.
 
@@ -49,12 +49,12 @@ dataset1,patient1,sample2,N1,patient1_sample2.vcf.gz,patient1_sample2.vcf.gz.tbi
 | `dataset` <br /> _Required_                | **Dataset ID**; when sequencing data from multiple datasets is analysed, it designates the source dataset of each patient; must be unique for each dataset, but one dataset can contain samples from multiple patients. |
 | `patient` <br /> _Required_                | **Patient ID**; designates the patient/subject; must be unique for each patient, but one patient can have multiple samples (e.g. from multiple regions or multiple time points).                                        |
 | `tumour_sample` <br /> _Required_          | **Sample ID** for each sample; more than one sample for each subject is possible. Must match the sample ID present in the VCF.                                                                                          |
-| `normal_sample` <br /> _Required_          | **Normal sample ID** of each sample. Must match the normal sample ID present in the VCF.                                                                                                                                |
-| `vcf` <br /> _Required_                    | Full path to the vcf file from supported vcf callers (Mutect2, Strelka, Platypus).                                                                                                                                      |
-| `tbi` <br /> _Required_                    | Full path to the vcf `tabix` index file.                                                                                                                                                                                |
-| `cna_caller` <br /> _Required_             | Name of the copy number caller used to generate your data (ASCAT, sequenza, Battenberg).                                                                                                                                |
+| `normal_sample` <br /> _Optional_           | **Normal sample ID** of each sample. Must match the normal sample ID present in the VCF.                                                                                                                                |
+| `vcf` <br /> _Required_                    | Full path to the vcf file from supported vcf callers (Mutect2, Strelka, Platypus, TNscope).                                                                                                                                      |
+| `tbi` <br /> _Required_               | Full path to the vcf index (csi or tbi) file.                                                                                                                                                                                |
+| `cna_caller` <br /> _Required_             | Name of the copy number caller used to generate your data (ASCAT, sequenza, Battenberg, facets).                                                                                                                                |
 | `cna_segments` <br /> _Required_           | Full path to the segmentation files and copy number state from the supported allele-specific copy-number caller.                                                                                                        |
-| `cna_extra` <br /> _Required_              | Full path to files including the ploidy and purity estimate from the supported copy-number caller.                                                                                                                      |
+| `cna_extra` <br /> _Optional_               | Full path to files including the ploidy and purity estimate from the supported copy-number caller.                                                                                                                      |
 | `cancer_type` <br /> _Required_            | Tumour type (either `PANCANCER` or one of the tumour type present in the driver table).                                                                                                                                 |
 | `tumour_alignment` <br /> _Optional_       | Full path to the tumour bam/cram file.                                                                                                                                                                                  |
 | `tumour_alignment_index` <br /> _Optional_ | Full path to the tumour bam/cram index file.                                                                                                                                                                            |
@@ -81,7 +81,7 @@ nextflow run nf-core/tumourevo \
  -profile <PROFILE> \
  --input <INPUT CSV> \
  --outdir results \
- --tools pyclonevi,mobster,viber,sparsesignature,sigprofiler
+ --tools tinc,pyclonevi,mobster,viber,sparsesignature,sigprofiler
 ```
 
 Minimal input file, two samples from the same patient with joint variant calling vcf file:
@@ -123,7 +123,30 @@ For this step, we currently refer to [IntOGen latest release](https://www.nature
 
 Please note that the tumour types reported in the input file must correspond to those present in the table used for the annotation (default driver table used can be found [here](https://raw.githubusercontent.com/nf-core/test-datasets/refs/heads/tumourevo/data/DRIVER_ANNOTATION/ANNOTATE_DRIVER/Compendium_Cancer_Genes.tsv))
 
-### 5. Available tools
+#### 5. Tumour-only mode
+
+The pipeline supports tumour-only mode when allele-specific copy number calls and tumour-only variant calls are available. Compared to the standard setup, two adjustments are required:
+
+- omit the `normal_sample` ID column from the sample sheet
+- remove `tinc` from the `--tools` parameter
+
+
+Tumour-only input:
+```csv
+dataset,patient,tumour_sample,vcf,tbi,cna_segments,cna_extra,cna_caller,cancer_type
+dataset1,patient1,sample1,patient1_sample1.vcf.gz,patient1_sample1.vcf.gz.tbi,/CNA/patient1/sample1/segments.txt,CNA/patient1/sample2/purity_ploidy.txt
+dataset1,patient1,sample2,patient1_sample2.vcf.gz,patient1_sample2.vcf.gz.tbi,/CNA/patient1/sample2/segments.txt,CNA/patient1/sample2/purity_ploidy.txt
+```
+
+Running the pipeline in tumour-only mode:
+```bash
+ --tools pyclonevi,mobster,viber,sparsesignature,sigprofiler
+```
+
+#### Whole exome sequencing
+
+
+### 6. Available tools
 
 1. **Gene annotation**
    - [EnsemblVEP](https://www.ensembl.org/info/docs/tools/vep/index.html)

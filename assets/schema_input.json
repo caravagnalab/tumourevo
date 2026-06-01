@@ -85,6 +85,10 @@
                     {
                         "type": "string",
                         "pattern": "^Battenberg$"
+                    },
+                                        {
+                        "type": "string",
+                        "pattern": "^facets$"
                     }
                 ]
             },
@@ -104,11 +108,11 @@
                 "exists": true
             },
             "tbi": {
-                "errorMessage": "VCF index file cannot contain spaces and must have extension '.tbi'",
+                "errorMessage": "VCF index file cannot contain spaces and must have extension .tbi or .csi",
                 "anyOf": [
                     {
                         "type": "string",
-                        "pattern": "^\\S+\\.tbi$"
+                        "pattern": "^\\S+\\.(tbi|csi)$"
                     },
                     {
                         "type": "string",
@@ -153,7 +157,7 @@
                 "anyOf": [
                     {
                         "type": "string",
-                        "pattern": "Seg|segments|subclones"
+                        "pattern": "Seg|segments|subclones|vcf"
                     },
                     {
                         "type": "string",
@@ -183,11 +187,9 @@
             "dataset",
             "patient",
             "tumour_sample",
-            "normal_sample",
             "vcf",
             "tbi",
             "cna_segments",
-            "cna_extra",
             "cna_caller"
         ]
     }

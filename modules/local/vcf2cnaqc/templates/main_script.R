@@ -50,7 +50,11 @@ parse_Mutect = function(vcf, tumour_id, normal_id){
     })
 
     names(calls) = samples_list
-    samples = c(tumour_id, normal_id)
+    if (normal_id == '[]'){
+      samples = c(tumour_id)
+    } else{
+      samples = c(tumour_id, normal_id) 
+    }
     calls = calls[samples]
 
     # check if VCF is annotated with VEP
@@ -72,8 +76,10 @@ parse_Mutect = function(vcf, tumour_id, normal_id){
             tidyr::unnest(CSQ) %>%
             tidyr::separate(CSQ, vep_field, sep = "\\\\|") %>%
             dplyr::select(chr, from, to, ref, alt, IMPACT, SYMBOL, Gene, dplyr::everything())  #can add other thing, CSQ, HGSP
-
-        calls[[normal_id]][['mutations']] = calls[[normal_id]][['mutations']] %>% dplyr::select(-CSQ) %>% dplyr::distinct()
+        
+        if (normal_id != '[]'){
+          calls[[normal_id]][['mutations']] = calls[[normal_id]][['mutations']] %>% dplyr::select(-CSQ) %>% dplyr::distinct()
+        }
     }
     return(calls)
 }
@@ -147,6 +153,11 @@ parse_Strelka = function(vcf, tumour_id, normal_id){
     })
 
     samples = c(normal_id, tumour_id)
+    if (normal_id == '[]'){
+      samples = c(tumour_id)
+    } else{
+      samples = c(tumour_id, normal_id) 
+    }
     names(calls) = samples
 
     if ("CSQ" %in% tb[['meta']][['ID']]){
@@ -168,7 +179,9 @@ parse_Strelka = function(vcf, tumour_id, normal_id){
             tidyr::separate(CSQ, vep_field, sep = "\\\\|") %>%
             dplyr::select(chr, from, to, ref, alt, IMPACT, SYMBOL, Gene, dplyr::everything())  #can add other thing, CSQ, HGSP
 
-        calls[[normal_id]][['mutations']] = calls[[normal_id]][['mutations']] %>% dplyr::select(-CSQ) %>% dplyr::distinct()
+        if (normal_id != '[]'){
+          calls[[normal_id]][['mutations']] = calls[[normal_id]][['mutations']] %>% dplyr::select(-CSQ) %>% dplyr::distinct()
+        }
     }
     return(calls)
 }
@@ -217,7 +230,11 @@ parse_Platypus = function(vcf, tumour_id, normal_id){
     )
 
     names(calls) = samples_list
-    samples = c(tumour_id, normal_id)
+    if (normal_id == '[]'){
+      samples = c(tumour_id)
+    } else{
+      samples = c(tumour_id, normal_id) 
+    }
     calls = calls[samples]
 
     if ("CSQ" %in% tb[['meta']][['ID']]){
@@ -239,9 +256,93 @@ parse_Platypus = function(vcf, tumour_id, normal_id){
             tidyr::separate(CSQ, vep_field, sep = "\\\\|") %>%
             dplyr::select(chr, from, to, ref, alt, IMPACT, SYMBOL, Gene, dplyr::everything())  #can add other thing, CSQ, HGSP
 
-        calls[[normal_id]][['mutations']] = calls[[normal_id]][['mutations']] %>% dplyr::select(-CSQ) %>% dplyr::distinct()
+        if (normal_id != '[]'){
+          calls[[normal_id]][['mutations']] = calls[[normal_id]][['mutations']] %>% dplyr::select(-CSQ) %>% dplyr::distinct()
+        }
     }
     return(calls)
+}
+
+
+parse_TNscope = function(vcf, tumour_id, normal_id){
+  # Transform vcf to tidy
+  tb = vcfR::vcfR2tidy(vcf)
+
+  # Extract gt field and obtain coverage (DP) and variant allele frequency (VAF) fields
+  gt_field = tb[["gt"]] %>%
+    tidyr::separate(gt_AD, sep = ",", into = c("NR", "NV")) %>%
+    dplyr::mutate(
+      NR = as.numeric(NR),
+      NV = as.numeric(NV),
+      DP = NV + NR,
+      VAF = NV/DP) %>%
+    dplyr::rename(sample = Indiv)
+
+  fix_field = tb[["fix"]] %>%
+    dplyr::rename(
+      chr = CHROM,
+      from = POS,
+      ref = REF,
+      alt = ALT) %>%
+    dplyr::rowwise() %>%
+    dplyr::mutate(
+      from = as.numeric(from),
+      to = from + nchar(alt)) %>%
+    dplyr::ungroup() %>%
+    dplyr::select(chr, from, to, ref, alt, dplyr::everything(),
+                  -ChromKey, -ID, -QUAL, -FILTER, -TVAF, -TDP, -NVAF, -NDP, -TAL)
+
+  # Extract sample names
+  samples_list = gt_field[["sample"]] %>% unique
+
+  calls = lapply(
+    samples_list,
+    function(s){
+      gt_field_s = gt_field %>% dplyr::filter(sample == s)
+
+      if(nrow(fix_field) != nrow(gt_field_s))
+        stop("Mismatch between the VCF fixed fields and the genotypes, will not process this file.")
+
+      fits = list()
+      fits[["sample"]] = s
+      fits[["mutations"]] = dplyr::bind_cols(fix_field, gt_field_s) %>%
+        dplyr::select(chr, from, to, ref, alt, NV, DP, VAF, dplyr::everything())
+      fits
+    })
+
+  names(calls) = samples_list
+  if (normal_id == '[]'){
+    samples = c(tumour_id)
+  } else{
+    samples = c(tumour_id, normal_id) 
+  }
+  calls = calls[samples]
+
+  # check if VCF is annotated with VEP
+  if ("CSQ" %in% tb[["meta"]][["ID"]]){
+    # VEP specific field extraction
+    # Take CSQ field names and split by |
+
+    vep_field = tb[['meta']] %>%
+      dplyr::filter(ID == "CSQ") %>%
+      dplyr::select(Description) %>%
+      dplyr::pull()
+
+    tmp_vep_field = strsplit(vep_field, split = "|", fixed = TRUE) %>% unlist()
+    vep_field = tmp_vep_field[1:length(tmp_vep_field)-1]
+
+    # Tranform the fix field by splittig the CSQ and select the columns needed
+    calls[[tumour_id]][['mutations']] = calls[[tumour_id]][['mutations']] %>%
+      dplyr::mutate(CSQ = strsplit(CSQ, ",")) %>%
+      tidyr::unnest(CSQ) %>%
+      tidyr::separate(CSQ, vep_field, sep = "\\\\|") %>%
+      dplyr::select(chr, from, to, ref, alt, IMPACT, SYMBOL, Gene, dplyr::everything())  #can add other thing, CSQ, HGSP
+
+    if (normal_id != '[]'){
+      calls[[normal_id]][['mutations']] = calls[[normal_id]][['mutations']] %>% dplyr::select(-CSQ) %>% dplyr::distinct()
+    }
+  }
+  return(calls)
 }
 
 
@@ -254,22 +355,22 @@ library(vcfR)
 vcf = vcfR::read.vcfR("$vcf")
 
 # Check from which caller the .vcf has been produced
-source = vcfR::queryMETA(vcf, element = 'source')[[1]]
+caller_sig <- if (length(vcf@meta)) paste(vcf@meta, collapse = "\n") else ""
 
-if (TRUE %in% grepl(pattern = 'Mutect', x = source)){
-    calls = parse_Mutect(vcf, tumour_id = "$meta.tumour_sample", normal_id = "$meta.normal_sample")
+if (grepl(pattern = 'TNscope|TNhaplotyper2', x = caller_sig, ignore.case = TRUE)) {
+  calls <- parse_TNscope(vcf, tumour_id = "$meta.tumour_sample", normal_id = "$meta.normal_sample")
 
-} else if (TRUE %in% grepl(pattern = 'strelka', x = source)){
-    calls = parse_Strelka(vcf, tumour_id = "$meta.tumour_sample", normal_id = "$meta.normal_sample")
+} else if (grepl(pattern = 'Mutect', x = caller_sig, ignore.case = TRUE)) {
+  calls <- parse_Mutect(vcf, tumour_id = "$meta.tumour_sample", normal_id = "$meta.normal_sample")
 
-} else if (TRUE %in% grepl(pattern = 'Platypus', x = source)){
-    calls = parse_Platypus(vcf, tumour_id = "$meta.tumour_sample", normal_id = "$meta.normal_sample")
+} else if (grepl(pattern = 'strelka', x = caller_sig, ignore.case = TRUE)) {
+  calls <- parse_Strelka(vcf, tumour_id = "$meta.tumour_sample", normal_id = "$meta.normal_sample")
 
-} else if (TRUE %in% grepl(pattern = 'freeBayes', x = source)){
-    calls = parse_FreeBayes(vcf, tumour_id = "$meta.tumour_sample", normal_id = "$meta.normal_sample")
+} else if (grepl(pattern = 'Platypus', x = caller_sig, ignore.case = TRUE)) {
+  calls <- parse_Platypus(vcf, tumour_id = "$meta.tumour_sample", normal_id = "$meta.normal_sample")
 
 } else {
-    stop('Variant Caller not supported.')
+  stop('Variant Caller not supported.')
 }
 
 saveRDS(object = calls, file = paste0(opt[["prefix"]], "_snv.rds"))

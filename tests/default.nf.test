@@ -8,7 +8,7 @@ nextflow_pipeline {
 
         when {
             params {
-                tools = "mobster,pyclone-vi"
+                tools = "tinc,mobster,pyclone-vi"
                 outdir = "$outputDir"
             }
         }

@@ -57,6 +57,38 @@ parse_Battenberg = function(segments_file, extra_file){
     return(list(segments = segments, purity = purity_ploidy[['purity']], ploidy = purity_ploidy[['ploidy']]))
 }
 
+parse_facets = function(segments_file, extra_file){
+    data = vcfR::read.vcfR(segments_file, verbose = FALSE)
+    meta = data@meta
+    purity_line = meta[grep("^##purity=", meta)]
+    ploidy_line = meta[grep("^##ploidy=", meta)]
+
+    purity_d = if (length(purity_line)) as.numeric(sub("^##purity=", "", purity_line[1]))
+    ploidy_d = if (length(ploidy_line)) as.numeric(sub("^##ploidy=", "", ploidy_line[1]))
+
+    fix = as.data.frame(vcfR::getFIX(data), stringsAsFactors = FALSE)
+    # INFO fields
+    endpos = as.integer(vcfR::extract.info(data, "END"))
+    tcn_em = as.integer(vcfR::extract.info(data, "TCN_EM"))
+    lcn_em = as.integer(vcfR::extract.info(data, "LCN_EM"))
+
+    seg = data.frame(
+        chr      = fix[["CHROM"]],
+        from = as.integer(fix[["POS"]]),
+        to   = endpos,
+        Major   = ifelse(is.na(tcn_em) | is.na(lcn_em), NA_integer_, tcn_em - lcn_em),
+        minor   = lcn_em
+    )
+
+    seg = seg[
+        !is.na(seg[["to"]]) &
+        !is.na(seg[["Major"]]) &
+        !is.na(seg[["minor"]]),
+    ]
+
+    return(list(segments = seg, purity = purity_d, ploidy = ploidy_d))
+}
+
 if ("$meta.cna_caller" == 'sequenza'){
 CNA = parse_Sequenza(segments = "$cna_segs", extra = "$cna_extra")
 
@@ -65,6 +97,9 @@ CNA = parse_ASCAT(segments = "$cna_segs", extra = "$cna_extra")
 
 } else if ("$meta.cna_caller" == 'Battenberg'){
 CNA = parse_Battenberg(segments = "$cna_segs", extra = "$cna_extra")
+
+} else if ("$meta.cna_caller" == 'facets'){
+CNA = parse_facets(segments = "$cna_segs", extra = "$cna_extra")
 
 } else {
 stop('Copy Number Caller not supported.')
