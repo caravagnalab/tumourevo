@@ -326,17 +326,11 @@ library(dplyr)
 library(tidyr)
 library(vcfR)
 
+# Read vcf file
 vcf = vcfR::read.vcfR("$vcf")
 
-# Read vcf file
 # Check from which caller the .vcf has been produced
-#source = vcfR::queryMETA(vcf, element = 'source')[[1]]
-
-meta_txt <- if (length(vcf@meta)) paste(vcf@meta, collapse = "\n") else ""
-src <- vcfR::queryMETA(vcf, element = "source")
-source <- if (!is.null(src) && length(src) > 0 && !is.null(src[[1]])) as.character(src[[1]]) else NA_character_
-
-caller_sig <- if (!is.na(source) && nzchar(source)) source else meta_txt
+caller_sig <- if (length(vcf@meta)) paste(vcf@meta, collapse = "\n") else ""
 
 if (grepl(pattern = 'TNscope|TNhaplotyper2', x = caller_sig, ignore.case = TRUE)) {
   calls <- parse_TNscope(vcf, tumour_id = "$meta.tumour_sample", normal_id = "$meta.normal_sample")
