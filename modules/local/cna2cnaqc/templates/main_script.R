@@ -19,8 +19,8 @@ parse_Sequenza = function(segments_file, extra_file){
         dplyr::select(chr, from, to, Major, minor, dplyr::everything())
 
     solutions = readr::read_tsv(extra_file, col_types = readr::cols())
-    purity = solutions[["cellularity"]][2]
-    ploidy = solutions[["ploidy.estimate"]][2]
+    purity = solutions[["cellularity"]][1]
+    ploidy = solutions[["ploidy.estimate"]][1]
     return(list(segments = segments, purity = purity, ploidy = ploidy))
 }
 
