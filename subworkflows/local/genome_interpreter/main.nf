@@ -56,66 +56,76 @@ workflow GENOME_INTERPRETER {
     summary_plot_rds  = COHORT_QC.out.summary_plot_rds
     summary_report_pdf = COHORT_QC.out.summary_report_pdf
 
-    // Prepare inputs for subclonal interpretation
+
     if (params.tools && params.tools.split(",").contains("mobster") && params.tools.split(",").contains("sigprofiler")) {
-        if (params.tools && params.tools.split(",").contains("viber") && params.tools.split(",").contains("pyclone-vi")) {
-            mutation_tables_ch = table_mobster.map { meta, table ->
-                meta = meta + [id: "${meta.dataset}_${meta.patient}"]
-                [meta.subMap('dataset', 'patient', 'id'), table]
+      def requested_tools = params.tools.split(",")
+
+      ch_mobster = requested_tools.contains("mobster")
+          ? table_mobster.map { meta, table ->
+              def key = meta.subMap('dataset', 'patient') + [id: "${meta.dataset}_${meta.patient}"]
+              [key, table]
             }.groupTuple(by: 0)
-            .join(table_pyclone)
-            .join(table_viber)
-            .map { meta, mobster_files, pyclone_file, viber_file ->
-                [meta, mobster_files + [pyclone_file, viber_file]]
-            }
-        } else if (params.tools && params.tools.split(",").contains("viber") && !params.tools.split(",").contains("pyclone-vi")) {
-            mutation_tables_ch = table_mobster.map { meta, table ->
-                meta = meta + [id: "${meta.dataset}_${meta.patient}"]
-                [meta.subMap('dataset', 'patient', 'id'), table]
-            }.groupTuple(by: 0)
-            .join(table_viber)
-            .map { meta, mobster_files, viber_file ->
-                [meta, mobster_files + [viber_file]]
-            }
-        } else if (params.tools && params.tools.split(",").contains("pyclone-vi") && !params.tools.split(",").contains("viber")) {
-            mutation_tables_ch = table_mobster.map { meta, table ->
-                meta = meta + [id: "${meta.dataset}_${meta.patient}"]
-                [meta.subMap('dataset', 'patient', 'id'), table]
-            }.groupTuple(by: 0)
-            .join(table_pyclone)
-            .map { meta, mobster_files, pyclone_file ->
-                [meta, mobster_files + [pyclone_file]]
-            }
-        }
+          : channel.empty()
 
-        results_sigprofiler_ch = assign_pyclone
-            .join(assign_viber)
-            .map { meta, file1, file2 ->
-                [meta, [file1, file2]]
+      ch_pyclone = requested_tools.contains("pyclone-vi")
+          ? table_pyclone.map { meta, table ->
+              [meta, [table]]
             }
+          : channel.empty()
 
-        subclonal_input = mutation_tables_ch
-            .combine(results_sigprofiler_ch, by: 0)
+      ch_viber = requested_tools.contains("viber")
+          ? table_viber.map { meta, table ->
+              [meta, [table]]
+            }
+          : channel.empty()
 
-        SUBCLONAL_INTERPRETATION(subclonal_input)
-        report_score = SUBCLONAL_INTERPRETATION.out.report_score
-        report_signature = SUBCLONAL_INTERPRETATION.out.report_signature
-
-        input_clone_tree = SUBCLONAL_INTERPRETATION.out.rds_score
-          .join(SUBCLONAL_INTERPRETATION.out.rds_signature)
-          .join(ctree_viber, remainder: true)
-          .join(ctree_pyclone)
-          .map { tuple ->
-              def meta = tuple[0]
-              def rds_score = tuple[1]
-              def rds_sig = tuple[2]
-              def viber = tuple[3] ?: []
-              def pyclone = tuple[4]
-              [meta, rds_score, rds_sig, viber, pyclone]
+      mutation_tables_ch = ch_mobster
+          .map { meta, files -> [meta, files] }          // [key, [file1, file2, ...]]
+          .mix(ch_pyclone)                                // [key, [file]]
+          .mix(ch_viber)                                  // [key, [file]]
+          .groupTuple(by: 0)                              // [key, [[files...], [file], [file]]]
+          .map { meta, file_lists ->
+              [meta, file_lists.flatten()]                 // [key, [all files flat]]
           }
-        PLOT_CLONE_TREE(input_clone_tree)
 
-    }
+      ch_assign_pyclone = requested_tools.contains("pyclone-vi")
+          ? assign_pyclone.map { meta, file -> [meta, [file]] }
+          : channel.empty()
+
+      ch_assign_viber = requested_tools.contains("viber")
+          ? assign_viber.map { meta, file -> [meta, [file]] }
+          : channel.empty()
+
+      results_sigprofiler_ch = ch_assign_pyclone
+          .mix(ch_assign_viber)
+          .groupTuple(by: 0)
+          .map { meta, file_lists ->
+              [meta, file_lists.flatten()]
+          }
+
+      subclonal_input = mutation_tables_ch
+          .combine(results_sigprofiler_ch, by: 0)
+
+      SUBCLONAL_INTERPRETATION(subclonal_input)
+      report_score = SUBCLONAL_INTERPRETATION.out.report_score
+      report_signature = SUBCLONAL_INTERPRETATION.out.report_signature
+
+    ctree_viber.view()
+    input_clone_tree = SUBCLONAL_INTERPRETATION.out.rds_score
+      .join(SUBCLONAL_INTERPRETATION.out.rds_signature)
+      .join(ctree_viber, remainder: true)
+      .join(ctree_pyclone)
+      .map { tuple ->
+          def meta = tuple[0]
+          def rds_score = tuple[1]
+          def rds_sig = tuple[2]
+          def viber = tuple[3] ?: []
+          def pyclone = tuple[4]
+          [meta, rds_score, rds_sig, viber, pyclone]
+      }
+    PLOT_CLONE_TREE(input_clone_tree)
+
+  }
 
     join_cnaqc_out = join_cnaqc_out.map{ meta, rds, samples ->
         def patient = meta.patient

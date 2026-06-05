@@ -76,13 +76,15 @@ compare_signatures = function(df1, df2) {
 patient_id = opt[["prefix"]]
 
 mobster_files = grep(mutation_tables, pattern="mobster", value=T)
-mutations_mobster = lapply(mobster_files, readr::read_tsv) %>%
-  bind_rows() %>%
-  mutate(patient_id=patient_id, tool="mobster",
-          mutation_id=paste(chrom, pos_start, pos_end, ref, alt, sep=":")) %>%
-  select(Project, patient_id, mutation_id, everything(), -chrom, -pos_start,
-          -pos_end, -ref, -alt, -Type, -ID, -Genome, -mut_type) %>%
-  rename(cluster_mobster=Sample)
+if (length(mobster_files)>0){
+  mutations_mobster = lapply(mobster_files, readr::read_tsv) %>%
+    bind_rows() %>%
+    mutate(patient_id=patient_id, tool="mobster",
+           mutation_id=paste(chrom, pos_start, pos_end, ref, alt, sep=":")) %>%
+    select(Project, patient_id, mutation_id, everything(), -chrom, -pos_start,
+           -pos_end, -ref, -alt, -Type, -ID, -Genome, -mut_type) %>%
+    rename(cluster_mobster=Sample)
+}
 
 table_signatures <- tibble()
 tool_list <- strsplit(opt[['tools']], ",")[[1]]
@@ -102,15 +104,23 @@ score_table = lapply(tool_list, function(tool) {
               -pos_end, -ref, -alt, -Type, -ID, -Genome, -mut_type) %>%
       rename(cluster_tool=Sample)
 
-    never_tail_muts = mutations_mobster %>%
-      group_by(mutation_id) %>%
-      summarise(never_tail=all(cluster_mobster != "Tail"))
+    if (length(mobster_files>0)){
+      never_tail_muts = mutations_mobster %>%
+        group_by(mutation_id) %>%
+        summarise(never_tail=all(cluster_mobster != "Tail"))
 
-    final_table_subclonal = mutations_tool %>%
-      left_join(never_tail_muts) %>%
-      group_by(cluster_tool) %>%
-      reframe(n_never_tail=sum(never_tail, na.rm=T) / n(),
-              is_driver=any(is_driver), is_clonal=all(is_clonal))
+      final_table_subclonal = mutations_tool %>%
+        left_join(never_tail_muts) %>%
+        group_by(cluster_tool) %>%
+        reframe(n_never_tail=sum(never_tail, na.rm=T) / n(),
+                is_driver=any(is_driver), is_clonal=all(is_clonal))
+    } else {
+      final_table_subclonal = mutations_tool %>%
+        group_by(cluster_tool) %>%
+        reframe(n_never_tail=NA,
+                is_driver=any(is_driver),
+                is_clonal=all(is_clonal))
+    }
 
     # one dir per sample
     dir_path = list.dirs(grep(results_sigprofiler, pattern=tool, value=T), recursive=T) %>%
@@ -200,13 +210,12 @@ score_table = score_table %>%
             bg_sign =  ifelse(is_clonal == T, 1, min(bg_sign))) %>%
   rowwise() %>%
   mutate(
-    score_driver=driver,
-    score_sign=(cs_sign+n_rel+bg_sign)/3,
-    score_tail=n_never_tail,
-    score_no_tail=(score_driver + score_sign)/2,
-    score_no_driver=(score_sign + score_tail)/2,
-    score_no_sign=(score_driver + score_tail)/2,
-    score_all=(score_driver + score_tail + score_sign)/3)
+    score_driver = driver,
+    score_sign = (cs_sign + n_rel + bg_sign) / 3,
+    score_tail = n_never_tail,
+    score_all = ifelse(is.na(n_never_tail),
+                       (score_driver + score_sign) / 2,
+                       (score_driver + score_tail + score_sign) / 3))
 
 get_signature_colors <- function(names) {
   n <- length(names)
@@ -243,8 +252,8 @@ cluster_names = unique(score_table[['cluster_tool']])
 cluster_colors <- get_cluster_colors(cluster_names)
 
 pl_scores = score_table %>%
-  pivot_longer(cols=c(score_driver, score_all, score_tail, score_no_driver, score_no_tail, score_no_sign, score_sign)) %>%
-  mutate(name=factor(name, levels=c("score_driver", "score_tail", "score_sign","score_no_driver", "score_no_tail", "score_no_sign", "score_all"))) %>%
+  pivot_longer(cols=c(score_driver, score_all, score_tail, score_sign)) %>%
+  mutate(name=factor(name, levels=c("score_driver", "score_tail", "score_sign", "score_all"))) %>%
   ggplot() +
   annotate("rect", xmin=-Inf, xmax=Inf, ymin=0.9, ymax=1, fill="palegreen4", alpha=0.2) +
   annotate("rect", xmin=-Inf, xmax=Inf, ymin=0.55, ymax=.9, fill="goldenrod", alpha=0.2) +
@@ -260,9 +269,6 @@ pl_scores = score_table %>%
   scale_x_discrete(labels=c("score_driver"="Driver",
                             "score_tail"="Tail",
                             "score_sign"="Signature",
-                            "score_no_driver"="Signature\nTail",
-                            "score_no_tail"="Driver\nSignature",
-                            "score_no_sign"="Driver\nTail",
                             "score_all"="All")) +
   facet_grid(.~tool) +
   theme_bw() +

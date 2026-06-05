@@ -38,12 +38,12 @@ plot_tree <- function(ctree, signature, score, sub_tool, s_type){
   }
 
   CCF <- ctree[['CCF']] %>%
-    left_join(score %>% filter(tool == sub_tool))
+    left_join(score %>% filter(tool == sub_tool) %>% distinct())
 
   ctree[['CCF']] <- CCF
 
   tb_tree = ctree[["tb_adj_mat"]] %>%
-    left_join(score %>% filter(tool == sub_tool))
+    left_join(score %>% filter(tool == sub_tool) %>% distinct())
 
   cex = 1
   clones_orderings = igraph::topo_sort(igraph::graph_from_adjacency_matrix(DataFrameToMatrix(ctree[["transfer"]][["clones"]])),
