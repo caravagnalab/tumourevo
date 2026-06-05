@@ -6,6 +6,7 @@ include { COHORT_QC } from "../../../modules/local/cohort_qc/main"
 include { COHORT_MUTATIONS } from "../../../modules/local/cohort_mutations_analysis/main"
 include { SUBCLONAL_INTERPRETATION } from "../../../modules/local/subclonal_interpretation/main"
 include { COHORT_SIGNATURES } from "../../../modules/local/cohort_signatures/main"
+include { PLOT_CLONE_TREE } from "../../../modules/local/plot_clone_tree/main"
 
 workflow GENOME_INTERPRETER {
     take:
@@ -21,31 +22,21 @@ workflow GENOME_INTERPRETER {
     assign_viber
     sigprofiler_out
     sparsesignature_assign_cosmic
-    
+    ctree_viber
+    ctree_pyclone
+
 
     main:
     ch_versions = Channel.empty()
     summary_table_rds = null
     summary_plot_rds = null
     summary_report_pdf = null
-    summary_subclonal_pdf = null
-    summary_subclonal_rds = null
+    report_score = null
+    report_signature = null
     oncoprint = null
     cohort_signatures_pdf = null
     cohort_signatures_rds = null
 
-    // cnaqc_qc_rds = cnaqc_out
-    //     .filter { meta, file ->
-    //         file.name.endsWith('_qc.rds')
-    //     }
-
-    // tinc_fit_rds = tinc_out
-    //     .filter { meta, file ->
-    //         file.name.endsWith('_fit.rds')
-    //     }
-
-    // Group CNAqc files per cohort
-    // Output shape: tuple(meta, [file1, file2, ...])
 
     cohort_cnaqc = cnaqc_out.map { meta, file ->
             meta = meta + [ id: "${meta.dataset}" ]
@@ -57,17 +48,6 @@ workflow GENOME_INTERPRETER {
             [meta.subMap('dataset', 'id'), file]}
         .groupTuple()
 
-    // cohort_tinc = tinc_out
-    //     .map { meta, file ->
-    //         def cohort_meta = meta + [ id: meta.dataset ]
-    //         tuple(cohort_meta.subMap('dataset', 'id'), file)
-    //     }
-    //     .groupTuple()
-
-    // Join grouped CNAqc and TINC inputs by cohort meta
-    // Output shape: tuple(meta, cnaqc_rds_files, tinc_rds_files)
-
-    // commenting it out temporarly
     cohort_qc_input = cohort_cnaqc.join(cohort_tinc)
 
     COHORT_QC(cohort_qc_input)
@@ -118,8 +98,23 @@ workflow GENOME_INTERPRETER {
             .combine(results_sigprofiler_ch, by: 0)
 
         SUBCLONAL_INTERPRETATION(subclonal_input)
-        summary_subclonal_pdf = SUBCLONAL_INTERPRETATION.out.report_pdf
-        summary_subclonal_rds = SUBCLONAL_INTERPRETATION.out.rds
+        report_score = SUBCLONAL_INTERPRETATION.out.report_score
+        report_signature = SUBCLONAL_INTERPRETATION.out.report_signature
+
+        input_clone_tree = SUBCLONAL_INTERPRETATION.out.rds_score
+          .join(SUBCLONAL_INTERPRETATION.out.rds_signature)
+          .join(ctree_viber, remainder: true)
+          .join(ctree_pyclone)
+          .map { tuple ->
+              def meta = tuple[0]
+              def rds_score = tuple[1]
+              def rds_sig = tuple[2]
+              def viber = tuple[3] ?: []
+              def pyclone = tuple[4]
+              [meta, rds_score, rds_sig, viber, pyclone]
+          }
+        PLOT_CLONE_TREE(input_clone_tree)
+
     }
 
     join_cnaqc_out = join_cnaqc_out.map{ meta, rds, samples ->
@@ -128,14 +123,6 @@ workflow GENOME_INTERPRETER {
         [meta.subMap('dataset', 'id'), rds, patient]}
         .groupTuple()
 
-    // join_cnaqc_out = join_cnaqc_out.map { meta, rds ->
-    //     def patient = meta.patient
-    //     // meta = (meta + [id: "${meta.dataset}"]).subMap(['dataset', 'id'])
-    //     // [meta, rds, patient]
-    //     def newMeta = [dataset: "${meta.dataset}", id: "${meta.dataset}"]
-    //     meta = newMeta
-    //     [meta, rds, patient]
-    // }.groupTuple()
 
     tmb_rds = tmb_rds.map { meta, rds ->
         def patient = meta.patient
@@ -143,19 +130,12 @@ workflow GENOME_INTERPRETER {
         [meta.subMap('dataset', 'id'), rds, patient]}
     .groupTuple()
 
-    // join_cnaqc_out.view()
-    // tmb_rds.view()
-
     oncoprint_input = join_cnaqc_out.join(tmb_rds)
-    // oncoprint_input.view()
 
     COHORT_MUTATIONS(oncoprint_input)
     ch_versions = ch_versions.mix(COHORT_MUTATIONS.out.versions)
 
     oncoprint = COHORT_MUTATIONS.out.cohort_oncoprint
-    // summary_table_rds  = COHORT_MUTATIONS.out.summary_table_rds
-    // summary_plot_rds  = COHORT_MUTATIONS.out.summary_plot_rds
-    // summary_report_pdf = COHORT_MUTATIONS.out.summary_report_pdf
 
     if (params.tools && params.tools.split(",").contains("sigprofiler") && !params.tools.split(",").contains("sparsesignatures")) {
         cohort_sigprofiler = sigprofiler_out.map { meta, file ->
@@ -177,20 +157,20 @@ workflow GENOME_INTERPRETER {
         cohort_signatures_input  = cohort_sigprofiler.join(cohort_sparsesig, remainder: true).map { meta, file1, file2 ->
             [meta, [file1, file2]]}.map { meta, file -> [meta, file.flatten()]}
     }
-    
-    cohort_signatures_input.view()
+
+    // cohort_signatures_input.view()
     COHORT_SIGNATURES(cohort_signatures_input)
     cohort_signatures_pdf = COHORT_SIGNATURES.out.report_cohort_signatures
     cohort_signatures_rds = COHORT_SIGNATURES.out.rds_cohort_signatures
     ch_versions = ch_versions.mix(COHORT_SIGNATURES.out.versions)
-    
+
     emit:
     summary_table_rds
     summary_plot_rds
     summary_report_pdf
     oncoprint
-    summary_subclonal_pdf
-    summary_subclonal_rds
+    report_score
+    report_signature
     cohort_signatures_pdf
     cohort_signatures_rds
     versions = ch_versions

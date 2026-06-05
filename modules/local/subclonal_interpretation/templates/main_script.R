@@ -2,6 +2,7 @@
 
 library(tidyverse)
 library(ggplot2)
+library(RColorBrewer)
 
 
 parse_args = function(x) {
@@ -31,18 +32,6 @@ for ( ao in names(args_opt)) opt[[ao]] = args_opt[[ao]]
 
 mutation_tables = strsplit("$mutation_tables", " ")[[1]]
 results_sigprofiler = strsplit("$results_sigprofiler", " ")[[1]]
-
-signature_colors = c("#f1696bff", "#8fbd8cff", "#87c7d6ff", "#bac3deff",
-                     "#d7bfd9ff", "#a8a2a1ff", "#cfadb3ff", "#3c609aff",
-                     "#9a4564ff", "#fbcb5bff", "#c2b280ff", "#d47e2dff",
-                     "#5f8676ff", "forestgreen", "orange", "brown4")
-
-colors_cluster = c("indianred", "steelblue2", "forestgreen", "goldenrod",
-                   "darkorange3", "palevioletred", "mediumpurple", "cornsilk4",
-                   "olivedrab3", "steelblue4", "indianred4", "aquamarine3",
-                   "saddlebrown", "deeppink2", "cornflowerblue", "black") %>%
-  setNames(paste0("C",0:15))
-
 
 cosine_similarity = function(vec1, vec2) {
   sum(vec1 * vec2) / (sqrt(sum(vec1^2)) * sqrt(sum(vec2^2)))
@@ -219,6 +208,40 @@ score_table = score_table %>%
     score_no_sign=(score_driver + score_tail)/2,
     score_all=(score_driver + score_tail + score_sign)/3)
 
+get_signature_colors <- function(names) {
+  n <- length(names)
+
+  color_pool <- unique(c(
+    brewer.pal(8, "Set1"),
+    brewer.pal(12, "Set3")
+  ))
+
+  if (n > length(color_pool)) {
+    color_pool <- colorRampPalette(color_pool)(n)
+  }
+
+  color_pool = setNames(color_pool[1:n], nm = names)
+  return(color_pool)
+}
+
+get_cluster_colors <- function(cluster_names) {
+  n <- length(cluster_names)
+
+  color_pool <- unique(c(
+    brewer.pal(8, "Dark2"),
+    brewer.pal(12, "Paired")
+  ))
+
+  if (n > length(color_pool)) {
+    color_pool <- colorRampPalette(color_pool)(n)
+  }
+
+  setNames(color_pool[1:n], nm = cluster_names)
+}
+
+cluster_names = unique(score_table[['cluster_tool']])
+cluster_colors <- get_cluster_colors(cluster_names)
+
 pl_scores = score_table %>%
   pivot_longer(cols=c(score_driver, score_all, score_tail, score_no_driver, score_no_tail, score_no_sign, score_sign)) %>%
   mutate(name=factor(name, levels=c("score_driver", "score_tail", "score_sign","score_no_driver", "score_no_tail", "score_no_sign", "score_all"))) %>%
@@ -232,7 +255,7 @@ pl_scores = score_table %>%
             aes(x=name, y=value, color=cluster_tool, group=cluster_tool), linewidth=.6)  +
   geom_text(data=~filter(.x, is_clonal & name=="score_all"),
             aes(x=name, y=value, color=cluster_tool, group=cluster_tool, label="Clonal"), vjust=0.07, show.legend = F) +
-  scale_color_manual("Cluster", values=colors_cluster) +
+  scale_color_manual("Cluster", values=cluster_colors) +
   scale_shape_manual('Contains Driver', values = c(4, 20)) +
   scale_x_discrete(labels=c("score_driver"="Driver",
                             "score_tail"="Tail",
@@ -244,6 +267,10 @@ pl_scores = score_table %>%
   facet_grid(.~tool) +
   theme_bw() +
   theme(axis.title.x=element_blank())
+
+
+names <- unique(table_signatures[["Signature"]])
+signature_colors <- get_signature_colors(names = names)
 
 pl_signature <- table_signatures %>%
   ggplot(aes(fill=Signature, y=Exposure, x=as.factor(cluster_tool))) +
@@ -260,3 +287,4 @@ pl_signature <- table_signatures %>%
 ggsave(pl_scores, filename=paste0(opt[["prefix"]], "_scores_clusters.pdf"), width = 10, height = 4, units = 'in')
 ggsave(pl_signature, filename=paste0(opt[["prefix"]], "_signature_clusters.pdf"), width = 10, height = 8, units = 'in')
 saveRDS(object = score_table, file = paste0(opt[["prefix"]], "_scores.rds"))
+saveRDS(object = table_signatures, file = paste0(opt[["prefix"]], "_table_signature.rds"))
