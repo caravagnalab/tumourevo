@@ -11,10 +11,11 @@ process COHORT_QC {
     tuple val(meta), path(cnaqc_rds_files), path(tinc_rds_files)
 
     output:
-    tuple val(meta), path("*.qc_summary.rds"), emit: summary_table_rds
-    tuple val(meta), path("*.qc_plot.rds"),    emit: summary_plot_rds
-    tuple val(meta), path("*.qc_report.pdf"),  emit: summary_report_pdf
-    path "versions.yml",                       emit: versions
+    tuple val(meta), path("*.qc_summary.rds"),   emit: summary_table_rds
+    tuple val(meta), path("*.cna_segments.rds"), emit: summary_cna_segments_rds
+    tuple val(meta), path("*.qc_plot.rds"),      emit: summary_plot_rds
+    tuple val(meta), path("*.qc_report.pdf"),    emit: summary_report_pdf
+    path "versions.yml",                         emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -29,6 +30,7 @@ process COHORT_QC {
     touch ${prefix}.qc_summary.rds
     touch ${prefix}.qc_plot.rds
     touch ${prefix}.qc_report.pdf
+    touch ${prefix}.cna_segments.rds
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

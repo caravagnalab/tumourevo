@@ -53,14 +53,18 @@ get_id <- function(x, pattern, default = NA_character_) {
 
 get_ids <- function(file,
                     suffix,
-                    patient_pattern = "U[0-9]+"
-		    ){
+                    patient_pattern = "U[0-9]+|UM[0-9]+",
+                    sample_pattern = "CRC-SW-[A-Za-z0-9]+-[A-Z]+") {
+  
   fname <- basename(file)
-  sample_id <- strip_suffix(fname, suffix)
-
+  raw_id <- strip_suffix(fname, suffix)
+  sample_id <- stringr::str_extract(raw_id, sample_pattern)
+  
+  if (is.na(sample_id)) sample_id <- raw_id
+  
   tibble::tibble(
-    patient_id = get_id(sample_id, patient_pattern),
-    sample_id  = sample_id
+    patient_id = get_id(raw_id, patient_pattern),
+    sample_id = sample_id
   )
 }
 
@@ -270,12 +274,43 @@ get_cnaqc_summary <- function(qc, sample_id = NULL) {
 }
 
 
+get_cna_segments <- function(qc, sample_id = NULL) {
+
+  sid <- sample_id
+  if (is.null(sid)) {
+    sid <- if (!is.null(qc[["sample"]])) qc[["sample"]] else NA_character_
+  }
+
+  cna_tbl <- qc[["cna"]]
+
+  if (is.null(cna_tbl) ||
+      nrow(cna_tbl) == 0 ||
+      !all(c("chr", "from", "to", "Major", "minor", "length") %in% names(cna_tbl))) {
+    return(tibble::tibble())
+  }
+
+  if (!"QC_PASS" %in% names(cna_tbl)) {
+    cna_tbl[["QC_PASS"]] <- NA
+  }
+
+  cna_tbl %>%
+    dplyr::mutate(
+      sample_id = sid,
+      segment_karyotype = paste0(.data[["Major"]], ":", .data[["minor"]]),
+      altered = !(.data[["Major"]] == 1 & .data[["minor"]] == 1)
+    ) %>%
+    dplyr::select(sample_id, chr, from, to, Major, minor, length, segment_karyotype, altered, QC_PASS
+    )
+}
+
+
 
 ### RDS file loader ###
 
 files <- list.files(".", full.names = TRUE)
 
-cnaqc_rds_files <- files[endsWith(files, "_qc.rds")]
+#cnaqc_rds_files <- files[endsWith(files, "_qc.rds")]
+joint_cnaqc_rds_files <- files[endsWith(files, "_multi_cnaqc_ALL.rds")]
 tinc_rds_files  <- files[endsWith(files, "_fit.rds")]
 
 load_qc_objects <- function(files, suffix, extractor_fun) {
@@ -284,6 +319,51 @@ load_qc_objects <- function(files, suffix, extractor_fun) {
     ids <- get_ids(f, suffix = suffix)
     summary <- extractor_fun(obj, sample_id = ids[["sample_id"]])
     dplyr::left_join(ids, summary, by = "sample_id")
+  })
+}
+
+load_joint_cnaqc_objects <- function(files, suffix, extractor_fun) {
+  purrr::map_dfr(files, function(f) {
+
+    multi_obj <- readRDS(f)
+    ids_file <- get_ids(f, suffix = suffix)
+    cnaqc_list <- multi_obj[["original_cnaqc_objc"]]
+
+    if (is.null(cnaqc_list) || length(cnaqc_list) == 0) {
+      return(tibble::tibble())
+    }
+
+    purrr::imap_dfr(cnaqc_list, function(qc_obj, sample_name) {
+      summary <- extractor_fun(qc_obj, sample_id = sample_name)
+
+      tibble::tibble(
+        patient_id = ids_file[["patient_id"]],
+        sample_id = sample_name
+      ) %>%
+        dplyr::left_join(summary, by = "sample_id")
+    })
+  })
+}
+
+load_joint_cna_segments <- function(files, suffix) {
+  purrr::map_dfr(files, function(f) {
+    
+    joint_obj <- readRDS(f)
+    ids_file <- get_ids(f, suffix = suffix)
+    
+    sample_objs <- joint_obj[["original_cnaqc_objc"]]
+    
+    if (is.null(sample_objs) || length(sample_objs) == 0) {
+      return(tibble::tibble())
+    }
+    
+    purrr::imap_dfr(sample_objs, function(qc_obj, sample_name) {
+      get_cna_segments(qc_obj, sample_id = sample_name) %>%
+        dplyr::mutate(
+          patient_id = ids_file[["patient_id"]],
+          .before = sample_id
+        )
+    })
   })
 }
 
@@ -296,10 +376,16 @@ cohort_qc_tinc <- load_qc_objects(
   extractor_fun = get_tinc_summary
 )
 
-cohort_qc_cnaqc <- load_qc_objects(
-  files = cnaqc_rds_files,
-  suffix = "_qc.rds",
+
+cohort_qc_cnaqc <- load_joint_cnaqc_objects(
+  files = joint_cnaqc_rds_files,
+  suffix = "_multi_cnaqc_ALL.rds",
   extractor_fun = get_cnaqc_summary
+)
+
+cohort_cna_segments <- load_joint_cna_segments(
+  files = joint_cnaqc_rds_files,
+  suffix = "_multi_cnaqc_ALL.rds"
 )
 
 # Merge into unified cohort summary 
@@ -316,7 +402,7 @@ cohort_qc <- cohort_qc_all %>%
   )
 
 saveRDS(cohort_qc, sprintf("%s.qc_summary.rds", prefix))
-
+saveRDS(cohort_cna_segments, sprintf("%s.cna_segments.rds", prefix))
 
 ### Plot settings ###
 

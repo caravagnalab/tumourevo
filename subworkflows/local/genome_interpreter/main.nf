@@ -10,7 +10,6 @@ include { PLOT_CLONE_TREE } from "../../../modules/local/plot_clone_tree/main"
 
 workflow GENOME_INTERPRETER {
     take:
-    cnaqc_out   // tuple val(meta), path(file)
     tinc_out    // tuple val(meta), path(file)
     join_cnaqc_out
     tmb_rds
@@ -24,11 +23,12 @@ workflow GENOME_INTERPRETER {
     sparsesignature_assign_cosmic
     ctree_viber
     ctree_pyclone
-
+    
 
     main:
     ch_versions = Channel.empty()
     summary_table_rds = null
+    summary_cna_segments_rds = null
     summary_plot_rds = null
     summary_report_pdf = null
     report_score = null
@@ -38,10 +38,11 @@ workflow GENOME_INTERPRETER {
     cohort_signatures_rds = null
 
 
-    cohort_cnaqc = cnaqc_out.map { meta, file ->
+    cohort_cnaqc = join_cnaqc_out.map { meta, file, samples ->
             meta = meta + [ id: "${meta.dataset}" ]
-            [meta.subMap('dataset', 'id'), file]}
-        .groupTuple()
+            [meta.subMap('dataset', 'id'), file]
+    }
+    .groupTuple()
 
     cohort_tinc = tinc_out.map { meta, file ->
             meta = meta + [ id: "${meta.dataset}" ]
@@ -55,6 +56,7 @@ workflow GENOME_INTERPRETER {
     summary_table_rds  = COHORT_QC.out.summary_table_rds
     summary_plot_rds  = COHORT_QC.out.summary_plot_rds
     summary_report_pdf = COHORT_QC.out.summary_report_pdf
+    summary_cna_segments_rds = COHORT_QC.out.summary_cna_segments_rds
 
 
     if (params.tools && params.tools.split(",").contains("mobster") && params.tools.split(",").contains("sigprofiler")) {
@@ -79,13 +81,13 @@ workflow GENOME_INTERPRETER {
             }
           : channel.empty()
 
-      mutation_tables_ch = ch_mobster
-          .map { meta, files -> [meta, files] }          // [key, [file1, file2, ...]]
+      mutation_tables_ch = ch_mobster              
+          .map { meta, files -> [meta, files] }           // [key, [file1, file2, ...]]
           .mix(ch_pyclone)                                // [key, [file]]
           .mix(ch_viber)                                  // [key, [file]]
           .groupTuple(by: 0)                              // [key, [[files...], [file], [file]]]
           .map { meta, file_lists ->
-              [meta, file_lists.flatten()]                 // [key, [all files flat]]
+              [meta, file_lists.flatten()]                // [key, [all files flat]]
           }
 
       ch_assign_pyclone = requested_tools.contains("pyclone-vi")
@@ -141,11 +143,13 @@ workflow GENOME_INTERPRETER {
     .groupTuple()
 
     oncoprint_input = join_cnaqc_out.join(tmb_rds)
+   
 
     COHORT_MUTATIONS(oncoprint_input)
     ch_versions = ch_versions.mix(COHORT_MUTATIONS.out.versions)
 
     oncoprint = COHORT_MUTATIONS.out.cohort_oncoprint
+    
 
     if (params.tools && params.tools.split(",").contains("sigprofiler") && !params.tools.split(",").contains("sparsesignatures")) {
         cohort_sigprofiler = sigprofiler_out.map { meta, file ->
@@ -157,27 +161,37 @@ workflow GENOME_INTERPRETER {
             meta = meta + [ id: "${meta.dataset}" ]
             [meta.subMap('dataset', 'id'), file]}
         cohort_signatures_input = cohort_sparsesig
-    } else {
+    } else if (params.tools && params.tools.split(",").contains("sigprofiler") && params.tools.split(",").contains("sparsesignatures")) {
+
         cohort_sigprofiler = sigprofiler_out.map { meta, file ->
             meta = meta + [ id: "${meta.dataset}" ]
-            [meta.subMap('dataset', 'id'), file]}
+            [meta.subMap('dataset', 'id'), file]
+        }
+
         cohort_sparsesig = sparsesignature_assign_cosmic.map { meta, file ->
             meta = meta + [ id: "${meta.dataset}" ]
-            [meta.subMap('dataset', 'id'), file]}
-        cohort_signatures_input  = cohort_sigprofiler.join(cohort_sparsesig, remainder: true).map { meta, file1, file2 ->
-            [meta, [file1, file2]]}.map { meta, file -> [meta, file.flatten()]}
-    }
+            [meta.subMap('dataset', 'id'), file]
+        }
 
-    // cohort_signatures_input.view()
+        cohort_signatures_input = cohort_sigprofiler
+            .join(cohort_sparsesig, remainder: true)
+            .map { meta, file1, file2 ->
+                [meta, [file1, file2].findAll { it != null }.flatten()]
+            }
+
+    }
+    
+    cohort_signatures_input.view()
     COHORT_SIGNATURES(cohort_signatures_input)
     cohort_signatures_pdf = COHORT_SIGNATURES.out.report_cohort_signatures
     cohort_signatures_rds = COHORT_SIGNATURES.out.rds_cohort_signatures
     ch_versions = ch_versions.mix(COHORT_SIGNATURES.out.versions)
-
+    
     emit:
     summary_table_rds
     summary_plot_rds
     summary_report_pdf
+    summary_cna_segments_rds
     oncoprint
     report_score
     report_signature
