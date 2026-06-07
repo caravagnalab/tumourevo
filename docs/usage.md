@@ -144,8 +144,6 @@ Running the pipeline in tumour-only mode:
  --tools pyclonevi,mobster,viber,sparsesignature,sigprofiler
 ```
 
-#### Whole exome sequencing
-
 ### 6. Available tools
 
 1. **Gene annotation**
