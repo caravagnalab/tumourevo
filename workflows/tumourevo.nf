@@ -148,9 +148,9 @@ main:
                     SUBCLONAL_DECONVOLUTION.out.mobster_results,
                     SUBCLONAL_DECONVOLUTION.out.viber_results,
                     SIGNATURE_DECONVOLUTION.out.sigprofiler_out)
-
+    
     if (params.filter == true) {
-        GENOME_INTERPRETER(QC.out.rds_cnaqc,
+        GENOME_INTERPRETER(
                         QC.out.rds_tinc,
                         QC.out.join_cnaqc_PASS,
                         SAMPLE_MUTATIONS_ANALYSIS.out.tmb_rds,
@@ -166,7 +166,7 @@ main:
                         SUBCLONAL_DECONVOLUTION.out.ctree_pyclone_rds
                         )
     } else {
-        GENOME_INTERPRETER(QC.out.rds_cnaqc,
+        GENOME_INTERPRETER(
                         QC.out.rds_tinc,
                         QC.out.join_cnaqc_ALL,
                         SAMPLE_MUTATIONS_ANALYSIS.out.tmb_rds,
