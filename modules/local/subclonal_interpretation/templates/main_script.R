@@ -188,17 +188,17 @@ score_table = lapply(tool_list, function(tool) {
         select(cluster_tool, match, cs_exp, n_rel) %>%
         distinct() %>%
         left_join(f_background)
-    }
 
-    final_table_subclonal %>%
-      left_join(final_table_signature) %>%
-      mutate(driver=ifelse(is_driver == F, 0, 1),
-              bg_cs= 1 - bg_cs_exp,
-              cs_sign=1 - cs_exp,
-              cs_sign=ifelse(is.na(cs_exp) & is_clonal == T, 1, cs_sign),
-              bg_sign=ifelse(is.na(bg_cs) & is_clonal == T, 1, bg_cs),
-              n_rel=ifelse(is.na(cs_exp) & is_clonal == T, 1, n_rel)) %>%
-      mutate(tool=tool, signature_type=sign_type, patient_id=patient_id)
+      final_table_subclonal %>%
+        left_join(final_table_signature) %>%
+        mutate(driver=ifelse(is_driver == F, 0, 1),
+               bg_cs= 1 - bg_cs_exp,
+               cs_sign=1 - cs_exp,
+               cs_sign=ifelse(is.na(cs_exp) & is_clonal == T, 1, cs_sign),
+               bg_sign=ifelse(is.na(bg_cs) & is_clonal == T, 1, bg_cs),
+               n_rel=ifelse(is.na(cs_exp) & is_clonal == T, 1, n_rel)) %>%
+        mutate(tool=tool, signature_type=sign_type, patient_id=patient_id)
+    }
   }) %>% bind_rows()
 }) %>% bind_rows() %>% select(patient_id, cluster_tool, everything())
 
@@ -290,7 +290,20 @@ pl_signature <- table_signatures %>%
   theme_bw() +
   theme(axis.title.x=element_blank())
 
-ggsave(pl_scores, filename=paste0(opt[["prefix"]], "_scores_clusters.pdf"), width = 10, height = 4, units = 'in')
-ggsave(pl_signature, filename=paste0(opt[["prefix"]], "_signature_clusters.pdf"), width = 10, height = 8, units = 'in')
+
+if (length(unique(table_signatures[['tool']])) == 2){
+  wd = 10
+} else {
+  wd = 5
+}
+
+if (length(unique(table_signatures[['signature_type']])) == 2){
+  hg = 8
+} else {
+  hg = 4
+}
+
+ggsave(pl_scores, filename=paste0(opt[["prefix"]], "_scores_clusters.pdf"), width = wd, height = 4, units = 'in')
+ggsave(pl_signature, filename=paste0(opt[["prefix"]], "_signature_clusters.pdf"), width = wd, height = hg, units = 'in')
 saveRDS(object = score_table, file = paste0(opt[["prefix"]], "_scores.rds"))
 saveRDS(object = table_signatures, file = paste0(opt[["prefix"]], "_table_signature.rds"))

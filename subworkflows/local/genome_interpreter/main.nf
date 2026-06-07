@@ -110,21 +110,19 @@ workflow GENOME_INTERPRETER {
       report_score = SUBCLONAL_INTERPRETATION.out.report_score
       report_signature = SUBCLONAL_INTERPRETATION.out.report_signature
 
-    ctree_viber.view()
-    input_clone_tree = SUBCLONAL_INTERPRETATION.out.rds_score
-      .join(SUBCLONAL_INTERPRETATION.out.rds_signature)
-      .join(ctree_viber, remainder: true)
-      .join(ctree_pyclone)
-      .map { tuple ->
-          def meta = tuple[0]
-          def rds_score = tuple[1]
-          def rds_sig = tuple[2]
-          def viber = tuple[3] ?: []
-          def pyclone = tuple[4]
-          [meta, rds_score, rds_sig, viber, pyclone]
-      }
-    PLOT_CLONE_TREE(input_clone_tree)
-
+      input_clone_tree = SUBCLONAL_INTERPRETATION.out.rds_score
+        .join(SUBCLONAL_INTERPRETATION.out.rds_signature)
+        .join(ctree_viber, remainder: true)
+        .join(ctree_pyclone)
+        .map { tuple ->
+            def meta = tuple[0]
+            def rds_score = tuple[1]
+            def rds_sig = tuple[2]
+            def viber = tuple[3] ?: []
+            def pyclone = tuple[4]
+            [meta, rds_score, rds_sig, viber, pyclone]
+        }
+      PLOT_CLONE_TREE(input_clone_tree)
   }
 
     join_cnaqc_out = join_cnaqc_out.map{ meta, rds, samples ->

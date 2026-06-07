@@ -139,6 +139,7 @@ main:
         SIGNATURE_DECONVOLUTION(QC.out.join_cnaqc_ALL)
     }
 
+
     ch_versions = ch_versions.mix(SUBCLONAL_DECONVOLUTION.out.versions)
     ch_versions = ch_versions.mix(SIGNATURE_DECONVOLUTION.out.versions)
 
