@@ -40,7 +40,7 @@ main:
             [meta.dataset + meta.patient, meta, vcf, tbi, bam, bai, cna_segs, cna_extra] }
             .groupTuple()
             .map { id, meta, vcf, tbi, bam, bai, cna_segs, cna_extra ->
-                n = vcf.baseName.unique().size()
+                def n = vcf.baseName.unique().size()
                 [id, meta, vcf, tbi, bam, bai, cna_segs, cna_extra, n ]}
             .transpose()
             .map { id, meta, vcf, tbi, bam, bai, cna_segs, cna_extra, n  ->
@@ -83,15 +83,6 @@ main:
         ch_extra_files,
     )
 
-    ch_ensemblvep_versions = ENSEMBLVEP_VEP.out.versions_ensemblvep
-                    .mix(ENSEMBLVEP_VEP.out.versions_tabix)
-                    .mix(ENSEMBLVEP_VEP.out.versions_perlmathcdf)
-                    .map { process_name, tool, version ->
-                        """${process_name}:
-                    ${tool}: ${version}"""
-                    }
-                    .collectFile(name: 'versions.yml', newLine: true, sort: false)
-    ch_versions = ch_versions.mix(ch_ensemblvep_versions)
     ch_vcf_tbi = ENSEMBLVEP_VEP.out.vcf.join(ENSEMBLVEP_VEP.out.tbi, failOnDuplicate: true, failOnMismatch: true)
 
     FORMATTER_VCF(ch_vcf_tbi, "vcf")
@@ -148,7 +139,7 @@ main:
                     SUBCLONAL_DECONVOLUTION.out.mobster_results,
                     SUBCLONAL_DECONVOLUTION.out.viber_results,
                     SIGNATURE_DECONVOLUTION.out.sigprofiler_out)
-    
+
     if (params.filter == true) {
         GENOME_INTERPRETER(
                         QC.out.rds_tinc,

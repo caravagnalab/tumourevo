@@ -18,12 +18,12 @@
                     },
                     "cnaqc": {
                         "branch": "master",
-                        "git_sha": "e753770db613ce014b3c4bc94f6cba443427b726",
+                        "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
                         "installed_by": ["modules"]
                     },
                     "ctree": {
                         "branch": "master",
-                        "git_sha": "53eeb1294892d1248a94a576479bff0922ca0df0",
+                        "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
                         "installed_by": ["modules"],
                         "patch": "modules/nf-core/ctree/ctree.diff"
                     },
@@ -40,12 +40,13 @@
                     },
                     "mobster": {
                         "branch": "master",
-                        "git_sha": "ee54577f78696e5fec045de8784bbfddf01d5e25",
-                        "installed_by": ["modules"]
+                        "git_sha": "be8d7a5227223396a308243db310379f329082e4",
+                        "installed_by": ["modules"],
+                        "patch": "modules/nf-core/mobster/mobster.diff"
                     },
                     "pyclonevi": {
                         "branch": "master",
-                        "git_sha": "a039cea3fd78c17219897cf2f78d254b43ef33a8",
+                        "git_sha": "60cd0533736e031a9e15b16ccc3459183abcef4b",
                         "installed_by": ["modules"]
                     },
                     "sigprofiler": {
@@ -55,13 +56,13 @@
                     },
                     "sparsesignatures": {
                         "branch": "master",
-                        "git_sha": "e753770db613ce014b3c4bc94f6cba443427b726",
+                        "git_sha": "ebb717c1ec96c97695b88a4a9c9d8c0e1b1b980b",
                         "installed_by": ["modules"],
                         "patch": "modules/nf-core/sparsesignatures/sparsesignatures.diff"
                     },
                     "tinc": {
                         "branch": "master",
-                        "git_sha": "e753770db613ce014b3c4bc94f6cba443427b726",
+                        "git_sha": "0d51a4601da86148964f3c6b28709f0f5d047719",
                         "installed_by": ["modules"]
                     },
                     "untar": {
@@ -77,8 +78,9 @@
                     },
                     "viber": {
                         "branch": "master",
-                        "git_sha": "642d6c5c0b7a4fbd7122fd00cbbb9a4a671d6d0a",
-                        "installed_by": ["modules"]
+                        "git_sha": "92502f57f03d9e3557253d1513f2dc9fc7e1f29f",
+                        "installed_by": ["modules"],
+                        "patch": "modules/nf-core/viber/viber.diff"
                     }
                 }
             },

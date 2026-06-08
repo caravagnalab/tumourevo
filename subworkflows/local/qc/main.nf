@@ -13,8 +13,20 @@ workflow QC {
 
     main:
         ch_versions = Channel.empty()
-        TINC(input)
-        ch_versions = ch_versions.mix(TINC.out.versions)
+
+        plot_rds_tinc = null
+        rds_tinc = null
+        pdf_tinc = null
+        csv_tinc = null
+
+        if (params.tools && params.tools.split(',').contains('tinc')) {
+            TINC(input)
+            ch_versions = ch_versions.mix(TINC.out.versions_tinc)
+            plot_rds_tinc = TINC.out.plot_rds
+            rds_tinc = TINC.out.rds
+            pdf_tinc = TINC.out.plot_pdf
+            csv_tinc = TINC.out.tinc_csv
+        }
 
         input_cnaqc = input.map{meta, cna, snv ->
                 def sample =  meta.tumour_sample
@@ -39,10 +51,10 @@ workflow QC {
         plot_cnaqc_data = CNAQC.out.plot_pdf_data
         plot_cnaqc_qc = CNAQC.out.plot_pdf_qc
 
-        plot_rds_tinc = TINC.out.plot_rds
-        rds_tinc = TINC.out.rds
-        pdf_tinc = TINC.out.plot_pdf
-        csv_tinc = TINC.out.tinc_csv
+        plot_rds_tinc
+        rds_tinc
+        pdf_tinc
+        csv_tinc
 
         join_cnaqc_ALL = JOIN_CNAQC.out.rds_all
         join_cnaqc_PASS = JOIN_CNAQC.out.rds_pass

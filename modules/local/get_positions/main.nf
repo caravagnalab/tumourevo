@@ -25,11 +25,25 @@ process GET_POSITIONS_ALL {
 
     positions = lapply(strsplit("$rds_list", " ")[[1]], FUN = function(rds){
         df = readRDS(rds)
-        df = df[[1]]\$mutations %>%
-          dplyr::mutate(id = paste(chr, from, to, sep = ":")) %>%
-          dplyr::select(chr, from, to, ref, alt, id)
+
+        df1 = df[[1]]\$mutations
+        df2 = df[[2]]\$mutations
+        if ('HGVSp' %in% colnames(df1)){
+            df = df1
+        } else {
+            df = df2
+        }
+
+        df = df %>%
+              dplyr::mutate(IMPACT = factor(IMPACT, levels = c("LOW", "MODIFIER", "MODERATE", "HIGH"))) %>%
+              dplyr::mutate(pos = paste(chr, from, to, sep = ":")) %>%
+              dplyr::group_by(pos) %>%
+      	      dplyr::arrange(desc(SYMBOL)) %>%
+              dplyr::slice_max(order_by = as.numeric(IMPACT), n = 1, with_ties = FALSE) %>%
+	            dplyr::ungroup() %>%
+              dplyr::select(chr, from, to, ref, alt, SYMBOL, HGVSp, IMPACT)
     })
-    all = positions %>% dplyr::bind_rows() %>% dplyr::distinct() %>% dplyr::select(-id)
+    all = positions %>% dplyr::bind_rows() %>% dplyr::distinct()
     saveRDS(object = all, file = paste0("$prefix", "_all_positions.rds"))
 
     # version export

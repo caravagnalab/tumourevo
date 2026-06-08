@@ -19,8 +19,8 @@ parse_Sequenza = function(segments_file, extra_file){
         dplyr::select(chr, from, to, Major, minor, dplyr::everything())
 
     solutions = readr::read_tsv(extra_file, col_types = readr::cols())
-    purity = solutions[["cellularity"]][2]
-    ploidy = solutions[["ploidy.estimate"]][2]
+    purity = solutions[["cellularity"]][1]
+    ploidy = solutions[["ploidy.estimate"]][1]
     return(list(segments = segments, purity = purity, ploidy = ploidy))
 }
 
@@ -58,19 +58,35 @@ parse_Battenberg = function(segments_file, extra_file){
 }
 
 parse_facets = function(segments_file, extra_file){
-  # Extract the extra information
-  purity_ploidy = read.table(extra_file, sep = '\t', header = T) %>%
-    dplyr::select(purity, ploidy)
+    data = vcfR::read.vcfR(segments_file, verbose = FALSE)
+    meta = data@meta
+    purity_line = meta[grep("^##purity=", meta)]
+    ploidy_line = meta[grep("^##ploidy=", meta)]
 
-  # Extract the segments information
-  segments = readr::read_tsv(segments_file, col_types = readr::cols()) %>%
-    dplyr::select(chr, from, to, Major, minor)
+    purity_d = if (length(purity_line)) as.numeric(sub("^##purity=", "", purity_line[1]))
+    ploidy_d = if (length(ploidy_line)) as.numeric(sub("^##ploidy=", "", ploidy_line[1]))
 
-  return(list(
-    segments = segments,
-    purity   = purity_ploidy[["purity"]][1],
-    ploidy   = purity_ploidy[["ploidy"]][1]
-  ))
+    fix = as.data.frame(vcfR::getFIX(data), stringsAsFactors = FALSE)
+    # INFO fields
+    endpos = as.integer(vcfR::extract.info(data, "END"))
+    tcn_em = as.integer(vcfR::extract.info(data, "TCN_EM"))
+    lcn_em = as.integer(vcfR::extract.info(data, "LCN_EM"))
+
+    seg = data.frame(
+        chr      = fix[["CHROM"]],
+        from = as.integer(fix[["POS"]]),
+        to   = endpos,
+        Major   = ifelse(is.na(tcn_em) | is.na(lcn_em), NA_integer_, tcn_em - lcn_em),
+        minor   = lcn_em
+    )
+
+    seg = seg[
+        !is.na(seg[["to"]]) &
+        !is.na(seg[["Major"]]) &
+        !is.na(seg[["minor"]]),
+    ]
+
+    return(list(segments = seg, purity = purity_d, ploidy = ploidy_d))
 }
 
 if ("$meta.cna_caller" == 'sequenza'){
