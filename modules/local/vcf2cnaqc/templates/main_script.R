@@ -224,7 +224,8 @@ parse_Platypus = function(vcf, tumour_id, normal_id){
             fits = list()
             fits[["sample"]] = s
             fits[["mutations"]] = dplyr::bind_cols(fix_field, gt_field_s) %>%
-                dplyr::select(chr, from, to, ref, alt, NV, DP, VAF, dplyr::everything())
+                dplyr::select(chr, from, to, ref, alt, NV, DP, VAF, dplyr::everything()) %>%
+                dplyr::mutate(NR = DP - NV)
             fits
         }
     )
