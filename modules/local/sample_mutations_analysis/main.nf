@@ -4,8 +4,8 @@ process SAMPLE_MUTATIONS_ANALYSIS {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/f9/f999ab0c279823df3a494cf13dda7fdbd4665f1f62563caafa7e5f67811859b7/data':
-        'community.wave.seqera.io/library/bioconductor-complexheatmap_bioconductor-maftools_r-dplyr_r-ggplot2_pruned:0431e79bdf418942' }"
+        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/e0/e057edad2ef577776755a1397e4831ebe1a375617ad08dab1a0fb2044a3c06c6/data':
+        'community.wave.seqera.io/library/bioconductor-complexheatmap_bioconductor-maftools_r-cnaqc_r-dplyr_pruned:ab37afa63a496cf3' }"
         
     input:
     tuple val(meta), path(snv_rds), val(tumour_sample)

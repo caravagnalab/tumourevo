@@ -44,7 +44,8 @@ library(ggplot2)
 library(ComplexHeatmap)
 library(patchwork)
 library(maftools)
-# library(CNAqc)
+library(CNAqc)
+library(cowplot)
 
 # colors and utilities functions
 compute_tmb = function(x, seq_length) {
@@ -113,39 +114,57 @@ tmb_stats = compute_tmb(data, seq_length = sequenced_mb) %>%
 
 # load chr length
 
-# if(opt[['genome']] == 'GRCh38') {
-#   df = CNAqc::chr_coordinates_GRCh38 %>% 
-#     dplyr::select(chr, length)
-# } else if(opt[['genome']] == 'GRCh37') {
-#   df = CNAqc::chr_coordinates_hg19 %>% 
-#     dplyr::select(chr, length)
-# } else {
-#   print('Genome not yet supported, reporting abosolute number of mutations per chromosome')
-# }
+if(opt[['genome']] == 'GRCh38') {
+  df = CNAqc::chr_coordinates_GRCh38 %>% 
+    dplyr::select(chr, length)
+} else if(opt[['genome']] == 'GRCh37') {
+  df = CNAqc::chr_coordinates_hg19 %>% 
+    dplyr::select(chr, length)
+} else {
+  print('Genome not yet supported, reporting abosolute number of mutations per chromosome')
+}
 
 # plots
-# plot number of mutations per chromosome -- or number of mutations on the chr length
-# if(any(opt[['genome']] %in% c('GRCh38', 'GRCh37', 'hg19'))) {
-#   data_chr_mut = data %>% 
-#     full_join(., df, by = 'chr') %>% 
-#     group_by(chr) %>% 
-#     mutate(n_mut = n()) %>% 
-#     dplyr::select(chr, length, n_mut) %>% 
-#     distinct() %>% 
-#     mutate(prop = (n_mut/length)*100)
-# }
+# plot number of mutations per chromosome -- or number of non synonymous mutations on the chr length
+if(any(opt[['genome']] %in% c('GRCh38', 'GRCh37', 'hg19'))) {
+  data_chr_mut = data %>%
+    tidyr::separate(Consequence, into = 'Consequence', sep = '&', convert = T) %>% 
+    filter(Consequence != 'synonymous_variant') %>% 
+    group_by(chr) %>% 
+    summarise(n_mut = n()) %>% 
+    left_join(., df, by = 'chr') %>%
+    # group_by(chr) %>%
+    # mutate(n_mut = n()) %>%
+    # dplyr::select(chr, length, n_mut) %>%
+    # distinct() %>%
+    mutate(prop = (n_mut/length)*1e6)
+} else {
+  data_chr_mut = data %>%
+    tidyr::separate(Consequence, into = 'Consequence', sep = '&', convert = T) %>% 
+    filter(Consequence != 'synonymous_variant') %>% 
+    group_by(chr) %>% 
+    summarise(prop = n()) 
+}
 
-p_chr = data %>% 
+p_chr = data_chr_mut %>% 
   filter(chr %in% paste0('chr', c(seq(1:22), 'X', 'Y'))) %>% 
-  mutate(chr = factor(chr, levels = paste0('chr', c(seq(1:22), 'X', 'Y')))) %>% 
+  mutate(chr = factor(chr, levels = rev(paste0('chr', c(seq(1:22), 'X', 'Y'))))) %>% 
   ggplot(aes(
-    chr
+    y = chr, 
+    x = prop
   )) + 
-  geom_bar(stat = 'count', fill = '#B4D3D9') + 
-  theme_bw() + 
-  # coord_flip() + 
-  labs(x = 'Chromosome', 
-       y = 'Number of mutations')
+  geom_bar(stat = 'identity', fill = '#B4D3D9') + 
+  theme_bw() 
+
+if(any(opt[['genome']] %in% c('GRCh38', 'GRCh37', 'hg19'))) {
+  p_chr = p_chr + 
+    labs(y = 'Chromosome', 
+         x = 'Number of mutations/chromosome length')
+} else {
+  p_chr = p_chr + 
+    labs(y = 'Chromosome', 
+         x = 'Number of mutations per chromosome')
+}
 
 # plot vaf per chromosome
 vaf_chr = data %>% 
@@ -158,10 +177,25 @@ vaf_chr = data %>%
   theme_bw() + 
   facet_wrap(~chr, scales = 'free_y', ncol = 6)
 
-# plot the mutations effect with maftools and save it
+# assembly together
+design = '
+AAA
+BBB
+'
+page1 = wrap_plots(list(
+  vaf_chr, p_chr
+), design = design)
 
-pdf(paste0(opt[['prefix']], '_mutations_report.pdf'), width = 10, height = 8)
-plotmafSummary(maf)
+ggplot2::ggsave(plot = page1, paste0(opt[['prefix']], '_mutations_per_chr.pdf'), width = 260, height = 180, units="mm", dpi = 200)
+
+# # plot mutations effect with maftools and rainfall plot
+# p1 <- function() { plotmafSummary(maf = maf) }
+# p2 <- function() { rainfallPlot(maf = maf) }
+
+pdf(paste0(opt[['prefix']], '_mutations_report.pdf'), width = 12, height = 7)
+# print(plot_grid(p1, p2, ncol = 1))
+plotmafSummary(maf = maf)
+rainfallPlot(maf = maf)
 dev.off()
 
 # drivers oncoprint (per sample)
@@ -216,25 +250,13 @@ ht = oncoPrint(drivers_matrix,
                name = 'Alteration type'
 )
 
-# assembly everything together
-design = '
-AAA
-BBB
-'
-
-page1 = wrap_plots(list(
-  vaf_chr, p_chr
-), design = design)
-
-ggplot2::ggsave(plot = page1, paste0(opt[['prefix']], '_mutations_per_chr.pdf'), width = 260, height = 180, units="mm", dpi = 200)
-
 # draw the oncoprint 
 
 pdf(paste0(opt[['prefix']], '_driver_oncoprint.pdf'), width = 15, height = 8)
 draw(ht, heatmap_legend_side = "bottom")
 dev.off()
 
-# save all the rds plots
+# save all the rds plots - not maftools since can not be saved
 saveRDS(object = tmb_stats, file = paste0(opt[['prefix']], '_tmb.rds'))
 saveRDS(object = vaf_chr, file = paste0(opt[['prefix']], '_vaf_chr_plot.rds'))
 saveRDS(object = p_chr, file = paste0(opt[['prefix']], '_chr_mut.rds'))
@@ -248,6 +270,8 @@ tidyr_version <- sessionInfo()\$otherPkgs\$tidyr\$Version
 complexheatmap_version <- sessionInfo()\$otherPkgs\$ComplexHeatmap\$Version
 patchwork_version <- sessionInfo()\$otherPkgs\$patchwork\$Version
 maftools_version <- sessionInfo()\$otherPkgs\$maftools\$Version
+cnaqc_version <- sessionInfo()\$otherPkgs\$CNAqc\$Version
+cowplot_version <- sessionInfo()\$otherPkgs\$cowplot\$Version
 writeLines(paste0('"', "$task.process", '"', ":"), f)
 writeLines(paste("    dplyr:", dplyr_version), f)
 writeLines(paste("    tidyr:", tidyr_version), f)
@@ -255,6 +279,8 @@ writeLines(paste("    ggplot2:", ggplot2_version), f)
 writeLines(paste("    ComplexHeatmap:", complexheatmap_version), f)
 writeLines(paste("    patchwork:", patchwork_version), f)
 writeLines(paste("    maftools:", maftools_version), f)
+writeLines(paste("    CNAqc:", cnaqc_version), f)
+writeLines(paste("    cowplot:", cowplot_version), f)
 close(f)
 
 # # plot type of mutation consequences
