@@ -3,7 +3,7 @@
 //
 
 include { COHORT_QC } from "../../../modules/local/cohort_qc/main"
-// include { COHORT_MUTATIONS } from "../../../modules/local/cohort_mutations_analysis/main"
+include { COHORT_MUTATIONS } from "../../../modules/local/cohort_mutations_analysis/main"
 include { SUBCLONAL_INTERPRETATION } from "../../../modules/local/subclonal_interpretation/main"
 include { COHORT_SIGNATURES } from "../../../modules/local/cohort_signatures/main"
 include { PLOT_CLONE_TREE } from "../../../modules/local/plot_clone_tree/main"
@@ -13,6 +13,7 @@ workflow GENOME_INTERPRETER {
     tinc_out    // tuple val(meta), path(file)
     join_cnaqc_out
     tmb_rds
+    maf
     table_pyclone
     table_mobster
     table_viber
@@ -23,7 +24,6 @@ workflow GENOME_INTERPRETER {
     sparsesignature_assign_cosmic
     ctree_viber
     ctree_pyclone
-    
 
     main:
     ch_versions = Channel.empty()
@@ -33,7 +33,7 @@ workflow GENOME_INTERPRETER {
     summary_report_pdf = null
     report_score = null
     report_signature = null
-    // oncoprint = null
+    mutation_report = null
     cohort_signatures_pdf = null
     cohort_signatures_rds = null
 
@@ -140,14 +140,20 @@ workflow GENOME_INTERPRETER {
         [meta.subMap('dataset', 'id'), rds, patient]}
     .groupTuple()
 
-    oncoprint_input = join_cnaqc_out.join(tmb_rds)
+    maf = maf.map { meta, rds ->
+        def patient = meta.patient
+        meta = meta + [ id: "${meta.dataset}" ]
+        [meta.subMap('dataset', 'id'), rds]}
+    .groupTuple()
+
+    oncoprint_input = join_cnaqc_out.join(tmb_rds.join(maf))
    
 
     // disabling momentarly the cohort mutations analysis and visualization
-    // COHORT_MUTATIONS(oncoprint_input)
-    // ch_versions = ch_versions.mix(COHORT_MUTATIONS.out.versions)
+    COHORT_MUTATIONS(oncoprint_input)
+    ch_versions = ch_versions.mix(COHORT_MUTATIONS.out.versions)
 
-    // oncoprint = COHORT_MUTATIONS.out.cohort_oncoprint
+    mutation_report = COHORT_MUTATIONS.out.mutation_report
     // summary_table_rds  = COHORT_MUTATIONS.out.summary_table_rds
     // summary_plot_rds  = COHORT_MUTATIONS.out.summary_plot_rds
     // summary_report_pdf = COHORT_MUTATIONS.out.summary_report_pdf
@@ -193,7 +199,7 @@ workflow GENOME_INTERPRETER {
     summary_plot_rds
     summary_report_pdf
     summary_cna_segments_rds
-    // oncoprint
+    mutation_report
     report_score
     report_signature
     cohort_signatures_pdf

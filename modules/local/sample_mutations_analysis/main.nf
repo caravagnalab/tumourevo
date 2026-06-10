@@ -48,6 +48,8 @@ process SAMPLE_MUTATIONS_ANALYSIS {
         complexheatmap: \$(Rscript -e "library(ComplexHeatmap); cat(as.character(packageVersion('ComplexHeatmap')))")
         patchwork: \$(Rscript -e "library(patchwork); cat(as.character(packageVersion('patchwork')))")
         maftools: \$(Rscript -e "library(maftools); cat(as.character(packageVersion('maftools')))")
+        cnaqc: \$(Rscript -e "library(CNAqc); cat(as.character(packageVersion('CNAqc')))")
+        cowplot: \$(Rscript -e "library(cowplot); cat(as.character(packageVersion('cowplot')))")
     END_VERSIONS
     """
 }

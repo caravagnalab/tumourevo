@@ -116,6 +116,12 @@ cnaqc_list = lapply(strsplit("$join_cnaqc", " ")[[1]], FUN = function(file){
 })
 names(cnaqc_list) = cnaqc_patients
 
+# load the mafs 
+mafs = lapply(strsplit("$maf", " ")[[1]], FUN = function(file){
+  read.maf(file)
+})
+mafs = merge_mafs(mafs)
+
 # get the tmb results 
 tmb = lapply(strsplit('$tmb_rds', " ")[[1]], FUN = function(file){
   readRDS(file)
@@ -357,98 +363,131 @@ draw(ht,
 dev.off()
 
 
+
 # now create the TMB plot
 
 # load tcga cohort data
 tcga.cohort = system.file('extdata', 'tcga_cohort.txt.gz', package = 'maftools')
-tcga.cohort = data.table::fread(file = tcga.cohort, sep = '\t', stringsAsFactors = FALSE)
+tcga.cohort = data.table::fread(file = tcga.cohort, sep = '	', stringsAsFactors = FALSE)
 
 tcga.cohort = tcga.cohort[,.(Tumor_Sample_Barcode, total, cohort)]
-tcga.cohort$total = as.numeric(as.character(tcga.cohort$total))
 
-# set each sample as a cohort name (or each patient?)
-cohortName = unique(tmb$Patient)
+if(length(mafs) == 1){
+  maf = list(mafs)
+}
 
-tmb = tmb %>% 
-  rename(cohort = Patient) %>%
+# extract the mutations for each sample
+maf.mutload = lapply(maf, function(m){
+  x = maftools::getSampleSummary(m)[,.(Tumor_Sample_Barcode, total)]
+  print(x)
+  
+  warning(paste0("Removed ", nrow(x[x\$total == 0]), " samples with zero mutations."))
+  x = x[!total == 0]
+  x
+})
+
+cohortName = opt[['prefix']]
+
+names(maf.mutload) = cohortName
+maf.mutload = data.table::rbindlist(l = maf.mutload, idcol = "cohort")
+tcga.cohort\$total = as.numeric(as.character(tcga.cohort\$total))
+maf.mutload\$total = as.numeric(as.character(maf.mutload\$total))
+
+tmb = tmb %>%
+  mutate(cohort = opt[['prefix']]) %>% 
   mutate(TCGA = 'Input')
 
-samples_t_type = tmb$TUMOUR_TYPE %>% unique
+maf.mutload = maf.mutload %>% 
+  full_join(., tmb, by = join_by(
+    'cohort' == 'cohort', 
+    'Tumor_Sample_Barcode' == 'sample'
+  )) %>% 
+  as.data.frame()
 
-tcga_t_types = as.data.frame(tcga.cohort) %>% 
-  pull(cohort) %>% 
+# handle the tumour type
+samples_t_type = maf.mutload\$TUMOUR_TYPE %>% unique
+
+tcga_t_types = as.data.frame(tcga.cohort) %>%
+  pull(cohort) %>%
   unique
 
 # associate tumour types of input samples with those from the tcga cohort and handle weird tumour types
-tcga.cohort = lapply(samples_t_type, function(type) {
-  
+tcga.cohort_v2 = lapply(samples_t_type, function(type) {
+
   if(!type %in% tcga_t_types) {
-    
-    tmb = tmb %>% 
-      filter(TUMOUR_TYPE == type) %>% 
-      mutate(TUMOUR_TYPE = 'PANCANCER')
-    
-    tcga.cohort = as.data.frame(tcga.cohort) %>% 
+
+    maf.mutload = maf.mutload %>%
+      filter(TUMOUR_TYPE == type) %>%
+      mutate(TUMOUR_TYPE = 'PANCANCER') %>% 
       rename(sample = Tumor_Sample_Barcode) %>% 
-      rename(n = total) %>% 
-      mutate(cohort = 'PANCANCER') %>% 
-      mutate(TCGA = 'TCGA') %>% 
-      # rename(Patient = cohort) %>% 
-      mutate(TUMOUR_TYPE = cohort) %>% 
-      bind_rows(., tmb) %>% 
-      mutate(plot_total = n)
-    
+      dplyr::select(cohort, total, TUMOUR_TYPE, Patient, sample, TCGA) %>% 
+      mutate(cohort_v2 = Patient)
+
+    as.data.frame(tcga.cohort) %>%
+      rename(Patient = Tumor_Sample_Barcode) %>%
+      mutate(sample = Patient) %>% 
+      # rename(n = total) %>%
+      mutate(TUMOUR_TYPE = 'PANCANCER') %>%
+      mutate(TCGA = 'TCGA') %>%
+      dplyr::select(cohort, total, TUMOUR_TYPE, Patient, sample, TCGA) %>% 
+      mutate(cohort_v2 = TUMOUR_TYPE) %>% 
+      # rename(Patient = cohort) %>%
+      bind_rows(., maf.mutload) %>%
+      rename(plot_total = total)
+
   } else {
-    
-    tmb = tmb %>% 
-      filter(TUMOUR_TYPE == type)
-    
-    tcga.cohort = as.data.frame(tcga.cohort) %>% 
+
+    maf.mutload = maf.mutload %>%
+      filter(TUMOUR_TYPE == type) %>% 
       rename(sample = Tumor_Sample_Barcode) %>% 
-      rename(n = total) %>% 
-      filter(cohort %in% samples_t_type) %>% 
-      mutate(TCGA = 'TCGA') %>% 
-      # rename(Patient = cohort) %>% 
+      dplyr::select(cohort, total, TUMOUR_TYPE, Patient, sample, TCGA) %>% 
+      mutate(cohort_v2 = Patient)
+
+    as.data.frame(tcga.cohort) %>%
+      rename(Patient = Tumor_Sample_Barcode) %>%
+      mutate(sample = Patient) %>% 
+      filter(cohort %in% samples_t_type) %>%
       mutate(TUMOUR_TYPE = cohort) %>% 
-      bind_rows(., tmb) %>% 
-      mutate(plot_total = n) 
-    
+      mutate(TCGA = 'TCGA') %>%
+      dplyr::select(cohort, total, TUMOUR_TYPE, Patient, sample, TCGA) %>% 
+      mutate(cohort_v2 = TUMOUR_TYPE) %>% 
+      bind_rows(., maf.mutload) %>%
+      mutate(plot_total = total)
   }
-    
-}) %>% 
-  bind_rows() %>% 
+}) %>%
+  bind_rows() %>%
   distinct()
 
 # #Median mutations
 # tcga.cohort_median = tcga.cohort %>%
 #   group_by(TUMOUR_TYPE) %>%
 #   summarise(N = n(), Median_Mutations = median(plot_total)) %>%
-#   arrange(if (decreasing) desc(Median_Mutations) else Median_Mutations) %>% 
+#   arrange(if (decreasing) desc(Median_Mutations) else Median_Mutations) %>%
 #   rename(Cohort_size = N)
 
-tcga.cohort = tcga.cohort %>% 
-  mutate(TUMOUR_TYPE = factor(tcga.cohort$TUMOUR_TYPE, levels = tcga.cohort$TUMOUR_TYPE)) 
+tcga.cohort_v2 = tcga.cohort_v2 %>%
+  mutate(TUMOUR_TYPE = factor(TUMOUR_TYPE, levels = unique(tcga.cohort_v2\$TUMOUR_TYPE)))
 
-tcga.cohort = split(tcga.cohort, as.factor(tcga.cohort$cohort))
-plot.dat = lapply(seq_len(length(tcga.cohort)), function(i){
-  x = tcga.cohort[[i]]
+tcga.cohort_v2 = split(tcga.cohort_v2, as.factor(tcga.cohort_v2\$cohort_v2))
+plot.dat = lapply(seq_len(length(tcga.cohort_v2)), function(i){
+  x = tcga.cohort_v2[[i]]
   pos = rev(seq(i-1, i, length.out = nrow(x)))
-  x %>% 
-    arrange(desc(plot_total)) %>% 
-    mutate(V1 = pos)  
-}) %>% 
-  bind_rows() %>% 
-  mutate(cohort = factor(cohort)) %>% 
-  mutate(facet_id = as.numeric(cohort)) 
+  x %>%
+    arrange(desc(plot_total)) %>%
+    mutate(V1 = pos)
+}) %>%
+  bind_rows() %>%
+  mutate(cohort_v2 = factor(cohort_v2)) %>%
+  mutate(facet_id = as.numeric(cohort_v2))
 
 # precompute ranges outside the mutate
-tcga_global_range <- plot.dat %>% 
-  filter(TCGA == "TCGA") %>% 
+tcga_global_range <- plot.dat %>%
+  filter(TCGA == "TCGA") %>%
   summarise(min_v1 = min(V1), max_v1 = max(V1))
 
 tcga_type_range <- plot.dat %>%
   filter(TCGA == "TCGA") %>%
-  filter(TUMOUR_TYPE %in% samples_t_type) %>% 
+  filter(TUMOUR_TYPE %in% samples_t_type) %>%
   group_by(TUMOUR_TYPE) %>%
   summarise(min_v1 = min(V1), max_v1 = max(V1), .groups = "drop")
 
@@ -456,8 +495,8 @@ data = plot.dat %>%
   left_join(tcga_type_range, by = "TUMOUR_TYPE") %>%
   mutate(
     # if no TCGA match for this tumour type, fall back to global TCGA range
-    min_v1 = if_else(is.na(min_v1), tcga_global_range$min_v1, min_v1),
-    max_v1 = if_else(is.na(max_v1), tcga_global_range$max_v1, max_v1),
+    min_v1 = if_else(is.na(min_v1), tcga_global_range\$min_v1, min_v1),
+    max_v1 = if_else(is.na(max_v1), tcga_global_range\$max_v1, max_v1),
   ) %>%
   group_by(TUMOUR_TYPE) %>%
   mutate(
@@ -465,8 +504,8 @@ data = plot.dat %>%
     V1_scaled = if_else(TCGA == "TCGA", V1, V1_scaled)
   ) %>%
   ungroup() %>%
-  select(-min_v1, -max_v1) %>% 
-  mutate(cc = ifelse(TCGA == 'TCGA', 'TCGA', as.character(cohort)))
+  select(-min_v1, -max_v1) %>%
+  mutate(cc = ifelse(TCGA == 'TCGA', 'TCGA', as.character(cohort_v2)))
 
 bg <- data %>%
   dplyr::distinct(TUMOUR_TYPE, facet_id) %>%
@@ -477,7 +516,12 @@ med_df <- data %>%
   dplyr::summarise(med = median(log10(plot_total), na.rm = TRUE))
 
 cex_opt = getOption('CNAqc_cex', default = 1)
-plt_tmb <- data %>% 
+
+col = c('gray70', 'black')
+bg_col = c('peachpuff', 'lightblue3')
+pt_cols = c(top_ann@anno_list\$Patient@color_mapping@colors, 'TCGA' = '#B7B7B7')
+
+plt_tmb <- data %>%
   ggplot() +
   geom_rect(
     data = bg,
@@ -490,19 +534,19 @@ plt_tmb <- data %>%
   geom_hline(
     data = med_df,
     aes(yintercept = med),
-    color = "gray60",
-    linewidth = 0.7
-  ) + 
+    color = "firebrick",
+    linewidth = 0.7, 
+    linetype = "dashed"
+  ) +
   geom_hline(
     yintercept = 0:6,
-    linetype = "dashed",
+    linetype = "dotted",
     color = "grey",
     linewidth = 0.3
-  ) + 
+  ) +
   geom_point(data = data  %>% filter(TCGA == 'TCGA'), aes(x = V1_scaled, y = log10(plot_total), col = cc), size =.4) +
   geom_point(data = data  %>% filter(TCGA != 'TCGA'), aes(x = V1_scaled,y = log10(plot_total), col = cc), size = 2) +
-  # scale_color_manual('', values = col_point)+ 
-  # scale_shape_manual('', values = c('Normal' = 16, 'WGD' =15, 'Hypermutant' = 17))+ 
+  scale_color_manual('', values = pt_cols) +
   facet_grid(.~TUMOUR_TYPE, scales = 'free_x', switch = 'x') +
   ylab('TMB') +
   xlab('') +
@@ -516,29 +560,28 @@ plt_tmb <- data %>%
     panel.grid.minor = element_blank(),      # removes minor grid lines
     panel.spacing = unit(0, "mm"),                       # remove spacing between facets
     panel.border = element_blank(),
-    plot.margin      = margin(0, 0, 0, 0), 
+    plot.margin      = margin(0, 0, 0, 0),
     plot.background = element_rect(color = "transparent", fill = NA, colour = NA),
     strip.background = element_blank(),
     strip.text.x = element_text(
       angle = 0,      # rotation
       vjust = 0.5,     # vertical alignment
       hjust = 0.5,      # horizontal alignment,
-      size = 8, 
-      margin = margin(t = 0.1, b = 0.1), 
+      size = 8,
+      margin = margin(t = 0.1, b = 0.1),
       colour = 'gray20'
     )
   ) +
   guides(
     color = guide_legend(override.aes = list(size = 2), title = ''),
     fill  = guide_legend(override.aes = list(size = 2))
-    # shape = guide_legend(override.aes = list(size = 2))
-  )  
+  )
 
-ht = grid.grabExpr(draw(ht, 
-          heatmap_legend_side = 'bottom', 
-          annotation_legend_side = 'bottom', 
+ht = grid.grabExpr(draw(ht,
+          heatmap_legend_side = 'bottom',
+          annotation_legend_side = 'bottom',
           annotation_legend_list = c(list(lgd_tmb), list(lgs_fga)),
-          merge_legend = TRUE), 
+          merge_legend = TRUE),
           width  = 7,   # inches — pin this to avoid layout fighting
           height = 7)
 
@@ -547,13 +590,11 @@ ht = grid.grabExpr(draw(ht,
 combined <- plot_grid(
   ht, plt_tmb,
   ncol        = 2,
-  labels      = c("A", "B"),
   rel_widths  = c(1.6, 1)   # give oncoprint more room
 )
 
 ggsave(plot = plt_tmb, filename = paste0(opt[['prefix']],'_tmb.pdf'), bg = 'white', width = 6, height = 8, units = 'in')
-ggsave(filename = paste0(opt[['prefix']],'_oncoprint_tmb.pdf'), bg = 'white', width = 17, height = 8, units = 'in')
-
+ggsave(filename = paste0(opt[['prefix']],'_oncoprint_tmb.pdf'), plot = combined, bg = 'white', width = 17, height = 8, units = 'in')
 
 # version export
 f <- file("versions.yml","w")
@@ -562,10 +603,16 @@ ggplot2_version <- sessionInfo()\$otherPkgs\$ggplot2\$Version
 tidyr_version <- sessionInfo()\$otherPkgs\$tidyr\$Version
 complexheatmap_version <- sessionInfo()\$otherPkgs\$ComplexHeatmap\$Version
 cnaqc_version <- sessionInfo()\$otherPkgs\$CNAqc\$Version
+cowplot_version <- sessionInfo()\$otherPkgs\$cowplot\$Version
+maftools_version <- sessionInfo()\$otherPkgs\$maftools\$Version
+
+
 writeLines(paste0('"', "NFCORE_TUMOUREVO:TUMOUREVO:GENOME_INTERPRETER:COHORT_MUTATIONS", '"', ":"), f)
 writeLines(paste("    dplyr:", dplyr_version), f)
 writeLines(paste("    tidyr:", tidyr_version), f)
 writeLines(paste("    ggplot2:", ggplot2_version), f)
 writeLines(paste("    ComplexHeatmap:", complexheatmap_version), f)
 writeLines(paste("    CNAqc:", cnaqc_version), f)
+writeLines(paste("    maftools:", maftools_version), f)
+writeLines(paste("    cowplot:", cowplot_version), f)
 close(f)
