@@ -16,7 +16,8 @@ parse_args <- function(x){
 
 opt <- list(
   prefix = ifelse('$task.ext.prefix' == 'null', '$meta.id', '$task.ext.prefix'), 
-  sequenced_mb = 3.1e9
+  sequenced_mb = 3.1e9, 
+  genome = 'GRCh38'
 )
 opt_types <- lapply(opt, class)
 
@@ -42,6 +43,8 @@ library(tidyr)
 library(ggplot2)
 library(ComplexHeatmap)
 library(patchwork)
+library(maftools)
+# library(CNAqc)
 
 # colors and utilities functions
 compute_tmb = function(x, seq_length) {
@@ -60,41 +63,45 @@ compute_tmb = function(x, seq_length) {
   
 }
 
-mut_cols = c('SNV' = '#7FBC41', 'Indel' = '#DE77AE')
+# mut_cols = c('SNV' = '#7FBC41', 'Indel' = '#DE77AE')
+# 
+# # consequences
+# # colors of mutations
+# consequences_colors = setNames(
+#   nm = c('transcript_ablation', 'splice_acceptor_variant', 'splice_donor_variant', 'stop_gained',    
+#           'frameshift_variant', 'stop_lost', 'start_lost', 'transcript_amplification', 'feature_elongation',
+#           'feature_truncation', 'inframe_insertion', 'inframe_deletion', 'missense_variant', 
+#           'protein_altering_variant', 'splice_donor_5th_base_variant', 'splice_region_variant', 
+#           'splice_donor_region_variant', 'splice_polypyrimidine_tract_variant', 
+#           'incomplete_terminal_codon_variant', 'start_retained_variant', 'stop_retained_variant',     
+#           'synonymous_variant', 'coding_sequence_variant', 'mature_miRNA_variant', '5_prime_UTR_variant',
+#           '3_prime_UTR_variant', 'non_coding_transcript_exon_variant', 'intron_variant', 
+#           'NMD_transcript_variant', 'non_coding_transcript_variant', 'coding_transcript_variant', 
+#           'upstream_gene_variant', 'downstream_gene_variant', 'TFBS_ablation', 'TFBS_amplification',    
+#           'TF_binding_site_variant', 'regulatory_region_ablation', 'regulatory_region_amplification',     
+#           'regulatory_region_variant', 'intergenic_variant', 'sequence_variant'), 
+#   object = c("wheat4", "darkseagreen2", "gold2", "mistyrose4", 'coral', "bisque", "mediumpurple", 
+#              "bisque3", "burlywood3", "blue3", "seashell4", "lightblue", "tan4", "orchid4", "darkorange", 
+#              "indianred", "seashell2", "plum3", "thistle2", "skyblue4", "red1", "darkolivegreen3", 
+#              "green", "tomato4", "turquoise4", "greenyellow", "cyan3", "slateblue3", "lightblue3", 
+#              "tomato", "sandybrown", "blue", "violetred4", "yellowgreen", "lightskyblue1", "blue2", 
+#              "salmon4", "darkseagreen1", "palegreen", "plum", "powderblue")
+# )
 
-# consequences
-# colors of mutations
-consequences_colors = setNames(
-  nm = c('transcript_ablation', 'splice_acceptor_variant', 'splice_donor_variant', 'stop_gained',    
-          'frameshift_variant', 'stop_lost', 'start_lost', 'transcript_amplification', 'feature_elongation',
-          'feature_truncation', 'inframe_insertion', 'inframe_deletion', 'missense_variant', 
-          'protein_altering_variant', 'splice_donor_5th_base_variant', 'splice_region_variant', 
-          'splice_donor_region_variant', 'splice_polypyrimidine_tract_variant', 
-          'incomplete_terminal_codon_variant', 'start_retained_variant', 'stop_retained_variant',     
-          'synonymous_variant', 'coding_sequence_variant', 'mature_miRNA_variant', '5_prime_UTR_variant',
-          '3_prime_UTR_variant', 'non_coding_transcript_exon_variant', 'intron_variant', 
-          'NMD_transcript_variant', 'non_coding_transcript_variant', 'coding_transcript_variant', 
-          'upstream_gene_variant', 'downstream_gene_variant', 'TFBS_ablation', 'TFBS_amplification',    
-          'TF_binding_site_variant', 'regulatory_region_ablation', 'regulatory_region_amplification',     
-          'regulatory_region_variant', 'intergenic_variant', 'sequence_variant'), 
-  object = c("wheat4", "darkseagreen2", "gold2", "mistyrose4", 'coral', "bisque", "mediumpurple", 
-             "bisque3", "burlywood3", "blue3", "seashell4", "lightblue", "tan4", "orchid4", "darkorange", 
-             "indianred", "seashell2", "plum3", "thistle2", "skyblue4", "red1", "darkolivegreen3", 
-             "green", "tomato4", "turquoise4", "greenyellow", "cyan3", "slateblue3", "lightblue3", 
-             "tomato", "sandybrown", "blue", "violetred4", "yellowgreen", "lightskyblue1", "blue2", 
-             "salmon4", "darkseagreen1", "palegreen", "plum", "powderblue")
-)
-
-#computing TMB per sample
+# load sample data
+# mutations
 data = readRDS("$snv_rds") %>%
   purrr::pluck("$tumour_sample", "mutations") %>%
   dplyr::mutate(mutation_id = paste(chr,from,to,ref,alt,sep = ':'))
 
-print(opt)
+# print(opt)
+
+# maf
+maf = maftools::read.maf("$maf")
 
 sequenced_mb = as.numeric(opt[['sequenced_mb']])/10^6
 
-# compute TMB
+# compute TMB per sample
 t_type = data %>% 
   filter(!is.na(TUMOUR_TYPE)) %>%
   pull(TUMOUR_TYPE) %>% 
@@ -104,17 +111,39 @@ tmb_stats = compute_tmb(data, seq_length = sequenced_mb) %>%
   mutate(status = ifelse(TMB >= 10, 'Hyper-mutant (TMB >= 10)', 'TMB < 10')) %>% 
   mutate(TUMOUR_TYPE = t_type)
 
+# load chr length
+
+# if(opt[['genome']] == 'GRCh38') {
+#   df = CNAqc::chr_coordinates_GRCh38 %>% 
+#     dplyr::select(chr, length)
+# } else if(opt[['genome']] == 'GRCh37') {
+#   df = CNAqc::chr_coordinates_hg19 %>% 
+#     dplyr::select(chr, length)
+# } else {
+#   print('Genome not yet supported, reporting abosolute number of mutations per chromosome')
+# }
+
 # plots
-# plot number of mutations per chromosome
+# plot number of mutations per chromosome -- or number of mutations on the chr length
+# if(any(opt[['genome']] %in% c('GRCh38', 'GRCh37', 'hg19'))) {
+#   data_chr_mut = data %>% 
+#     full_join(., df, by = 'chr') %>% 
+#     group_by(chr) %>% 
+#     mutate(n_mut = n()) %>% 
+#     dplyr::select(chr, length, n_mut) %>% 
+#     distinct() %>% 
+#     mutate(prop = (n_mut/length)*100)
+# }
+
 p_chr = data %>% 
   filter(chr %in% paste0('chr', c(seq(1:22), 'X', 'Y'))) %>% 
-  mutate(chr = factor(chr, levels = rev(paste0('chr', c(seq(1:22), 'X', 'Y'))))) %>% 
+  mutate(chr = factor(chr, levels = paste0('chr', c(seq(1:22), 'X', 'Y')))) %>% 
   ggplot(aes(
     chr
   )) + 
   geom_bar(stat = 'count', fill = '#B4D3D9') + 
   theme_bw() + 
-  coord_flip() + 
+  # coord_flip() + 
   labs(x = 'Chromosome', 
        y = 'Number of mutations')
 
@@ -129,53 +158,11 @@ vaf_chr = data %>%
   theme_bw() + 
   facet_wrap(~chr, scales = 'free_y', ncol = 6)
 
-# plot type of mutation consequences
-p_consequence = data %>% 
-  separate(Consequence, into = "Consequence", sep = "&") %>% 
-  ggplot(aes(fill = Consequence, 
-             x = IMPACT)
-         ) + 
-  geom_bar(stat = 'count', position = 'stack') + 
-  theme_bw() + 
-  labs(x = '', 
-       fill = 'Mutation effect', 
-       y = 'Number of mutations', 
-       fill = '')+
-  theme(axis.text.y = element_blank(), 
-        axis.ticks.length.y = unit(0, 'mm'), 
-        legend.position = 'bottom'
-        ) + 
-  guides(fill = guide_legend(ncol = 6, title = '')) +
-  facet_wrap(~IMPACT, scales = 'free', ncol = 1, strip.position = 'left') + # change the palette!
-  coord_flip() + 
-  scale_fill_manual(values = consequences_colors)
+# plot the mutations effect with maftools and save it
 
-# plot the number of indels and snvs 
-mut_type = data %>% 
-  mutate(VARIANT_CLASS = case_when(
-    VARIANT_CLASS %in% c('deletion', 'insertion') ~ 'Indel', 
-    VARIANT_CLASS == 'substitution' ~ 'SNV', 
-    .default = VARIANT_CLASS
-    
-  )) %>% 
-  group_by(VARIANT_CLASS, sample) %>% 
-  count()
-
-# distribution of indels and snvs
-p_mut_type = mut_type %>% 
-  ggplot(aes(x = sample, 
-             y = n, 
-             fill = reorder(VARIANT_CLASS, -n))) + 
-  geom_bar(stat = 'identity', position = 'dodge') + 
-  theme_bw() + 
-  labs(y = 'Number of mutations', 
-       fill = '', 
-       x = ' ') +
-  scale_fill_manual(values = mut_cols) +
-  theme(axis.text.x = element_blank(), 
-        axis.ticks.length.x = unit(0, 'mm'), 
-        legend.position = 'bottom'
-        )
+pdf(paste0(opt[['prefix']], '_mutations_report.pdf'), width = 10, height = 8)
+plotmafSummary(maf)
+dev.off()
 
 # drivers oncoprint (per sample)
 drivers = data %>% 
@@ -186,7 +173,7 @@ drivers_matrix = drivers %>%
   dplyr::select(driver_label, Consequence, VAF_class) %>% 
   mutate(mut = Consequence, 
          type = paste(Consequence, VAF_class, sep = ',')
-         ) %>% 
+  ) %>% 
   dplyr::select(-c(Consequence, VAF_class)) %>% 
   pivot_wider(values_from = type, 
               names_from = driver_label) %>% 
@@ -218,28 +205,28 @@ alter_fun = c(alter_fun,
               list('background' = alter_graphic("rect", width = 0.95, height = 0.95, fill = 'gainsboro')))
 
 ht = oncoPrint(drivers_matrix, 
-          alter_fun = alter_fun, 
-          col = cols, 
-          show_row_names = F, 
-          show_column_names = T, 
-          top_annotation = NULL, 
-          row_title = 'Consequence alterations', 
-          column_title = 'Driver mutations', 
-          heatmap_legend_param = list(ncol = 2), 
-          name = 'Alteration type'
-          )
+               alter_fun = alter_fun, 
+               col = cols, 
+               show_row_names = F, 
+               show_column_names = T, 
+               top_annotation = NULL, 
+               row_title = 'Consequence alterations', 
+               column_title = 'Driver mutations', 
+               heatmap_legend_param = list(ncol = 2), 
+               name = 'Alteration type'
+)
 
 # assembly everything together
 design = '
-AAAB
-CCCD
+AAA
+BBB
 '
 
 page1 = wrap_plots(list(
-  vaf_chr, p_chr, p_consequence, p_mut_type
+  vaf_chr, p_chr
 ), design = design)
 
-ggplot2::ggsave(plot = page1, paste0(opt[['prefix']], '_mutations_report.pdf'), width = 260, height = 297, units="mm", dpi = 200)
+ggplot2::ggsave(plot = page1, paste0(opt[['prefix']], '_mutations_per_chr.pdf'), width = 260, height = 180, units="mm", dpi = 200)
 
 # draw the oncoprint 
 
@@ -251,8 +238,6 @@ dev.off()
 saveRDS(object = tmb_stats, file = paste0(opt[['prefix']], '_tmb.rds'))
 saveRDS(object = vaf_chr, file = paste0(opt[['prefix']], '_vaf_chr_plot.rds'))
 saveRDS(object = p_chr, file = paste0(opt[['prefix']], '_chr_mut.rds'))
-saveRDS(object = p_consequence, file = paste0(opt[['prefix']], '_consequence_mut_plot.rds'))
-saveRDS(object = p_mut_type, file = paste0(opt[['prefix']], '_mut_type_plot.rds'))
 saveRDS(object = ht, file = paste0(opt[['prefix']], '_driver_oncoprint.rds'))
 
 # version export
@@ -262,10 +247,61 @@ ggplot2_version <- sessionInfo()\$otherPkgs\$ggplot2\$Version
 tidyr_version <- sessionInfo()\$otherPkgs\$tidyr\$Version
 complexheatmap_version <- sessionInfo()\$otherPkgs\$ComplexHeatmap\$Version
 patchwork_version <- sessionInfo()\$otherPkgs\$patchwork\$Version
+maftools_version <- sessionInfo()\$otherPkgs\$maftools\$Version
 writeLines(paste0('"', "$task.process", '"', ":"), f)
 writeLines(paste("    dplyr:", dplyr_version), f)
 writeLines(paste("    tidyr:", tidyr_version), f)
 writeLines(paste("    ggplot2:", ggplot2_version), f)
 writeLines(paste("    ComplexHeatmap:", complexheatmap_version), f)
 writeLines(paste("    patchwork:", patchwork_version), f)
+writeLines(paste("    maftools:", maftools_version), f)
 close(f)
+
+# # plot type of mutation consequences
+# p_consequence = data %>% 
+#   separate(Consequence, into = "Consequence", sep = "&") %>% 
+#   ggplot(aes(fill = Consequence, 
+#              x = IMPACT)
+#          ) + 
+#   geom_bar(stat = 'count', position = 'stack') + 
+#   theme_bw() + 
+#   labs(x = '', 
+#        fill = 'Mutation effect', 
+#        y = 'Number of mutations', 
+#        fill = '')+
+#   theme(axis.text.y = element_blank(), 
+#         axis.ticks.length.y = unit(0, 'mm'), 
+#         legend.position = 'bottom'
+#         ) + 
+#   guides(fill = guide_legend(ncol = 6, title = '')) +
+#   facet_wrap(~IMPACT, scales = 'free', ncol = 1, strip.position = 'left') + # change the palette!
+#   coord_flip() + 
+#   scale_fill_manual(values = consequences_colors)
+# 
+# # plot the number of indels and snvs 
+# mut_type = data %>% 
+#   mutate(VARIANT_CLASS = case_when(
+#     VARIANT_CLASS %in% c('deletion', 'insertion') ~ 'Indel', 
+#     VARIANT_CLASS == 'substitution' ~ 'SNV', 
+#     .default = VARIANT_CLASS
+#     
+#   )) %>% 
+#   group_by(VARIANT_CLASS, sample) %>% 
+#   count()
+# 
+# # distribution of indels and snvs
+# p_mut_type = mut_type %>% 
+#   ggplot(aes(x = sample, 
+#              y = n, 
+#              fill = reorder(VARIANT_CLASS, -n))) + 
+#   geom_bar(stat = 'identity', position = 'dodge') + 
+#   theme_bw() + 
+#   labs(y = 'Number of mutations', 
+#        fill = '', 
+#        x = ' ') +
+#   scale_fill_manual(values = mut_cols) +
+#   theme(axis.text.x = element_blank(), 
+#         axis.ticks.length.x = unit(0, 'mm'), 
+#         legend.position = 'bottom'
+#         )
+

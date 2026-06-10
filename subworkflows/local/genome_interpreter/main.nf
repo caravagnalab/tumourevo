@@ -3,7 +3,7 @@
 //
 
 include { COHORT_QC } from "../../../modules/local/cohort_qc/main"
-include { COHORT_MUTATIONS } from "../../../modules/local/cohort_mutations_analysis/main"
+// include { COHORT_MUTATIONS } from "../../../modules/local/cohort_mutations_analysis/main"
 include { SUBCLONAL_INTERPRETATION } from "../../../modules/local/subclonal_interpretation/main"
 include { COHORT_SIGNATURES } from "../../../modules/local/cohort_signatures/main"
 
@@ -30,7 +30,7 @@ workflow GENOME_INTERPRETER {
     summary_report_pdf = null
     summary_subclonal_pdf = null
     summary_subclonal_rds = null
-    oncoprint = null
+    // oncoprint = null
     cohort_signatures_pdf = null
     cohort_signatures_rds = null
 
@@ -149,10 +149,11 @@ workflow GENOME_INTERPRETER {
     oncoprint_input = join_cnaqc_out.join(tmb_rds)
     // oncoprint_input.view()
 
-    COHORT_MUTATIONS(oncoprint_input)
-    ch_versions = ch_versions.mix(COHORT_MUTATIONS.out.versions)
+    // disabling momentarly the cohort mutations analysis and visualization
+    // COHORT_MUTATIONS(oncoprint_input)
+    // ch_versions = ch_versions.mix(COHORT_MUTATIONS.out.versions)
 
-    oncoprint = COHORT_MUTATIONS.out.cohort_oncoprint
+    // oncoprint = COHORT_MUTATIONS.out.cohort_oncoprint
     // summary_table_rds  = COHORT_MUTATIONS.out.summary_table_rds
     // summary_plot_rds  = COHORT_MUTATIONS.out.summary_plot_rds
     // summary_report_pdf = COHORT_MUTATIONS.out.summary_report_pdf
@@ -188,7 +189,7 @@ workflow GENOME_INTERPRETER {
     summary_table_rds
     summary_plot_rds
     summary_report_pdf
-    oncoprint
+    // oncoprint
     summary_subclonal_pdf
     summary_subclonal_rds
     cohort_signatures_pdf

@@ -9,6 +9,8 @@ include { FORMATTER as FORMATTER_CNA } from "../subworkflows/local/formatter/mai
 include { FORMATTER as FORMATTER_VCF} from "../subworkflows/local/formatter/main"
 include { LIFTER } from "../subworkflows/local/lifter/main"
 include { ANNOTATE_DRIVER } from "../modules/local/annotate_driver/main"
+include { GUNZIP } from "../modules/nf-core/gunzip/main"
+include { VCF2MAF } from "../modules/nf-core/vcf2maf/main"
 include { SAMPLE_MUTATIONS_ANALYSIS } from "../modules/local/sample_mutations_analysis/main"
 include { FORMATTER as FORMATTER_RDS} from "../subworkflows/local/formatter/main"
 include { QC } from "../subworkflows/local/qc/main"
@@ -94,6 +96,10 @@ main:
     ch_versions = ch_versions.mix(ch_ensemblvep_versions)
     ch_vcf_tbi = ENSEMBLVEP_VEP.out.vcf.join(ENSEMBLVEP_VEP.out.tbi, failOnDuplicate: true, failOnMismatch: true)
 
+    GUNZIP(ENSEMBLVEP_VEP.out.vcf)
+
+    VCF2MAF(GUNZIP.out.gunzip, fasta)
+
     FORMATTER_VCF(ch_vcf_tbi, "vcf")
     FORMATTER_CNA(input_cna, "cna")
     vcf_file = FORMATTER_VCF.out.out_data
@@ -122,8 +128,9 @@ main:
 
     input_muts = ANNOTATE_DRIVER.out.rds.map { meta, rds ->
         [meta, rds, meta.tumour_sample]
-        }
-    SAMPLE_MUTATIONS_ANALYSIS(input_muts)
+        }    
+    
+    SAMPLE_MUTATIONS_ANALYSIS(input_muts, VCF2MAF.out.maf)
     ch_versions = ch_versions.mix(SAMPLE_MUTATIONS_ANALYSIS.out.versions)
 
     in_cnaqc = cna_file.join(ANNOTATE_DRIVER.out.rds)

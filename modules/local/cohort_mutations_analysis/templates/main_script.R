@@ -42,6 +42,10 @@ library(dplyr)
 library(CNAqc)
 library(tidyr)
 library(ggplot2)
+library(maftools)
+library(cowplot)
+library(grid)
+
 
 # colors and other setup stuff -----
 cna_cols = CNAqc:::get_karyotypes_colors(c('0:0', '1:0', '1:1', '2:0', '2:1', '2:2'))
@@ -351,6 +355,205 @@ draw(ht,
      annotation_legend_list = c(list(lgd_tmb), list(lgs_fga)),
      merge_legend = TRUE)
 dev.off()
+
+
+# now create the TMB plot
+
+# load tcga cohort data
+tcga.cohort = system.file('extdata', 'tcga_cohort.txt.gz', package = 'maftools')
+tcga.cohort = data.table::fread(file = tcga.cohort, sep = '\t', stringsAsFactors = FALSE)
+
+tcga.cohort = tcga.cohort[,.(Tumor_Sample_Barcode, total, cohort)]
+tcga.cohort$total = as.numeric(as.character(tcga.cohort$total))
+
+# set each sample as a cohort name (or each patient?)
+cohortName = unique(tmb$Patient)
+
+tmb = tmb %>% 
+  rename(cohort = Patient) %>%
+  mutate(TCGA = 'Input')
+
+samples_t_type = tmb$TUMOUR_TYPE %>% unique
+
+tcga_t_types = as.data.frame(tcga.cohort) %>% 
+  pull(cohort) %>% 
+  unique
+
+# associate tumour types of input samples with those from the tcga cohort and handle weird tumour types
+tcga.cohort = lapply(samples_t_type, function(type) {
+  
+  if(!type %in% tcga_t_types) {
+    
+    tmb = tmb %>% 
+      filter(TUMOUR_TYPE == type) %>% 
+      mutate(TUMOUR_TYPE = 'PANCANCER')
+    
+    tcga.cohort = as.data.frame(tcga.cohort) %>% 
+      rename(sample = Tumor_Sample_Barcode) %>% 
+      rename(n = total) %>% 
+      mutate(cohort = 'PANCANCER') %>% 
+      mutate(TCGA = 'TCGA') %>% 
+      # rename(Patient = cohort) %>% 
+      mutate(TUMOUR_TYPE = cohort) %>% 
+      bind_rows(., tmb) %>% 
+      mutate(plot_total = n)
+    
+  } else {
+    
+    tmb = tmb %>% 
+      filter(TUMOUR_TYPE == type)
+    
+    tcga.cohort = as.data.frame(tcga.cohort) %>% 
+      rename(sample = Tumor_Sample_Barcode) %>% 
+      rename(n = total) %>% 
+      filter(cohort %in% samples_t_type) %>% 
+      mutate(TCGA = 'TCGA') %>% 
+      # rename(Patient = cohort) %>% 
+      mutate(TUMOUR_TYPE = cohort) %>% 
+      bind_rows(., tmb) %>% 
+      mutate(plot_total = n) 
+    
+  }
+    
+}) %>% 
+  bind_rows() %>% 
+  distinct()
+
+# #Median mutations
+# tcga.cohort_median = tcga.cohort %>%
+#   group_by(TUMOUR_TYPE) %>%
+#   summarise(N = n(), Median_Mutations = median(plot_total)) %>%
+#   arrange(if (decreasing) desc(Median_Mutations) else Median_Mutations) %>% 
+#   rename(Cohort_size = N)
+
+tcga.cohort = tcga.cohort %>% 
+  mutate(TUMOUR_TYPE = factor(tcga.cohort$TUMOUR_TYPE, levels = tcga.cohort$TUMOUR_TYPE)) 
+
+tcga.cohort = split(tcga.cohort, as.factor(tcga.cohort$cohort))
+plot.dat = lapply(seq_len(length(tcga.cohort)), function(i){
+  x = tcga.cohort[[i]]
+  pos = rev(seq(i-1, i, length.out = nrow(x)))
+  x %>% 
+    arrange(desc(plot_total)) %>% 
+    mutate(V1 = pos)  
+}) %>% 
+  bind_rows() %>% 
+  mutate(cohort = factor(cohort)) %>% 
+  mutate(facet_id = as.numeric(cohort)) 
+
+# precompute ranges outside the mutate
+tcga_global_range <- plot.dat %>% 
+  filter(TCGA == "TCGA") %>% 
+  summarise(min_v1 = min(V1), max_v1 = max(V1))
+
+tcga_type_range <- plot.dat %>%
+  filter(TCGA == "TCGA") %>%
+  filter(TUMOUR_TYPE %in% samples_t_type) %>% 
+  group_by(TUMOUR_TYPE) %>%
+  summarise(min_v1 = min(V1), max_v1 = max(V1), .groups = "drop")
+
+data = plot.dat %>%
+  left_join(tcga_type_range, by = "TUMOUR_TYPE") %>%
+  mutate(
+    # if no TCGA match for this tumour type, fall back to global TCGA range
+    min_v1 = if_else(is.na(min_v1), tcga_global_range$min_v1, min_v1),
+    max_v1 = if_else(is.na(max_v1), tcga_global_range$max_v1, max_v1),
+  ) %>%
+  group_by(TUMOUR_TYPE) %>%
+  mutate(
+    V1_scaled = scales::rescale(V1, to = c(min_v1[1], max_v1[1])),
+    V1_scaled = if_else(TCGA == "TCGA", V1, V1_scaled)
+  ) %>%
+  ungroup() %>%
+  select(-min_v1, -max_v1) %>% 
+  mutate(cc = ifelse(TCGA == 'TCGA', 'TCGA', as.character(cohort)))
+
+bg <- data %>%
+  dplyr::distinct(TUMOUR_TYPE, facet_id) %>%
+  dplyr::mutate(col = ifelse(facet_id %% 2 == 0, "1", "2"))
+
+med_df <- data %>%
+  dplyr::group_by(TUMOUR_TYPE) %>%
+  dplyr::summarise(med = median(log10(plot_total), na.rm = TRUE))
+
+cex_opt = getOption('CNAqc_cex', default = 1)
+plt_tmb <- data %>% 
+  ggplot() +
+  geom_rect(
+    data = bg,
+    aes(xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf, fill = col),
+    inherit.aes = FALSE,
+    alpha = 0.1,
+    show.legend = F
+  ) +
+  scale_fill_manual(values = bg_col) +
+  geom_hline(
+    data = med_df,
+    aes(yintercept = med),
+    color = "gray60",
+    linewidth = 0.7
+  ) + 
+  geom_hline(
+    yintercept = 0:6,
+    linetype = "dashed",
+    color = "grey",
+    linewidth = 0.3
+  ) + 
+  geom_point(data = data  %>% filter(TCGA == 'TCGA'), aes(x = V1_scaled, y = log10(plot_total), col = cc), size =.4) +
+  geom_point(data = data  %>% filter(TCGA != 'TCGA'), aes(x = V1_scaled,y = log10(plot_total), col = cc), size = 2) +
+  # scale_color_manual('', values = col_point)+ 
+  # scale_shape_manual('', values = c('Normal' = 16, 'WGD' =15, 'Hypermutant' = 17))+ 
+  facet_grid(.~TUMOUR_TYPE, scales = 'free_x', switch = 'x') +
+  ylab('TMB') +
+  xlab('') +
+  ggplot2::theme_light(base_size = 10 * cex_opt) +
+  theme(
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank(),
+    strip.text.y = element_text(size = 8, margin = margin(l = 0, r = 0), colour = 'gray20'),
+    panel.background = element_rect(fill = "transparent", colour = NA),     # removes grey background
+    panel.grid.major = element_blank(),      # removes major grid lines
+    panel.grid.minor = element_blank(),      # removes minor grid lines
+    panel.spacing = unit(0, "mm"),                       # remove spacing between facets
+    panel.border = element_blank(),
+    plot.margin      = margin(0, 0, 0, 0), 
+    plot.background = element_rect(color = "transparent", fill = NA, colour = NA),
+    strip.background = element_blank(),
+    strip.text.x = element_text(
+      angle = 0,      # rotation
+      vjust = 0.5,     # vertical alignment
+      hjust = 0.5,      # horizontal alignment,
+      size = 8, 
+      margin = margin(t = 0.1, b = 0.1), 
+      colour = 'gray20'
+    )
+  ) +
+  guides(
+    color = guide_legend(override.aes = list(size = 2), title = ''),
+    fill  = guide_legend(override.aes = list(size = 2))
+    # shape = guide_legend(override.aes = list(size = 2))
+  )  
+
+ht = grid.grabExpr(draw(ht, 
+          heatmap_legend_side = 'bottom', 
+          annotation_legend_side = 'bottom', 
+          annotation_legend_list = c(list(lgd_tmb), list(lgs_fga)),
+          merge_legend = TRUE), 
+          width  = 7,   # inches — pin this to avoid layout fighting
+          height = 7)
+
+# --- Combine the two plots ---
+
+combined <- plot_grid(
+  ht, plt_tmb,
+  ncol        = 2,
+  labels      = c("A", "B"),
+  rel_widths  = c(1.6, 1)   # give oncoprint more room
+)
+
+ggsave(plot = plt_tmb, filename = paste0(opt[['prefix']],'_tmb.pdf'), bg = 'white', width = 6, height = 8, units = 'in')
+ggsave(filename = paste0(opt[['prefix']],'_oncoprint_tmb.pdf'), bg = 'white', width = 17, height = 8, units = 'in')
+
 
 # version export
 f <- file("versions.yml","w")
