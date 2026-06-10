@@ -146,6 +146,7 @@ main:
         SIGNATURE_DECONVOLUTION(QC.out.join_cnaqc_ALL)
     }
 
+
     ch_versions = ch_versions.mix(SUBCLONAL_DECONVOLUTION.out.versions)
     ch_versions = ch_versions.mix(SIGNATURE_DECONVOLUTION.out.versions)
 
@@ -156,7 +157,7 @@ main:
                     SIGNATURE_DECONVOLUTION.out.sigprofiler_out)
     
     if (params.filter == true) {
-        GENOME_INTERPRETER(QC.out.rds_cnaqc,
+        GENOME_INTERPRETER(
                         QC.out.rds_tinc,
                         QC.out.join_cnaqc_PASS,
                         SAMPLE_MUTATIONS_ANALYSIS.out.tmb_rds,
@@ -167,10 +168,12 @@ main:
                         ASSIGN_SIGNATURE.out.assign_mobster,
                         ASSIGN_SIGNATURE.out.assign_viber,
                         SIGNATURE_DECONVOLUTION.out.sigprofiler_out,
-                        SIGNATURE_DECONVOLUTION.out.sparsesignature_assign_cosmic
+                        SIGNATURE_DECONVOLUTION.out.sparsesignature_assign_cosmic,
+                        SUBCLONAL_DECONVOLUTION.out.ctree_viber_rds,
+                        SUBCLONAL_DECONVOLUTION.out.ctree_pyclone_rds
                         )
     } else {
-        GENOME_INTERPRETER(QC.out.rds_cnaqc,
+        GENOME_INTERPRETER(
                         QC.out.rds_tinc,
                         QC.out.join_cnaqc_ALL,
                         SAMPLE_MUTATIONS_ANALYSIS.out.tmb_rds,
@@ -181,7 +184,9 @@ main:
                         ASSIGN_SIGNATURE.out.assign_mobster,
                         ASSIGN_SIGNATURE.out.assign_viber,
                         SIGNATURE_DECONVOLUTION.out.sigprofiler_out,
-                        SIGNATURE_DECONVOLUTION.out.sparsesignature_assign_cosmic
+                        SIGNATURE_DECONVOLUTION.out.sparsesignature_assign_cosmic,
+                        SUBCLONAL_DECONVOLUTION.out.ctree_viber_rds,
+                        SUBCLONAL_DECONVOLUTION.out.ctree_pyclone_rds
                         )
     }
 

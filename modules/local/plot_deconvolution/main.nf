@@ -1,4 +1,4 @@
-process SUBCLONAL_INTERPRETATION {
+process PLOT_DECONVOLUTION {
     tag "$meta.id"
     label "process_low"
 
@@ -8,13 +8,11 @@ process SUBCLONAL_INTERPRETATION {
         'community.wave.seqera.io/library/r-ggforce_r-ggnewscale_r-ggraph_r-ggrepel_pruned:5408b55f63d978d5' }"
 
     input:
-    tuple val(meta), path(mutation_tables), path(results_sigprofiler)
+    tuple val(meta), path(rds_mobster), path(rds_viber), path(pyclone_table), path(pyclone_fit)
 
     output:
-    tuple val(meta), path("*_scores_clusters.pdf"), emit: report_score
-    tuple val(meta), path("*_signature_clusters.pdf"), emit: report_signature
-    tuple val(meta), path("*_scores.rds"), emit: rds_score
-    tuple val(meta), path("*_table_signature.rds"), emit: rds_signature
+    tuple val(meta), path("*.pdf"), optional: true, emit: plot_pdf
+    tuple val(meta), path("*.png"), optional: true, emit: plot_png
 
     script:
     def args = task.ext.args ?: ""
@@ -27,9 +25,6 @@ process SUBCLONAL_INTERPRETATION {
     def prefix = task.ext.prefix ?: "${meta.id}"
 
     """
-    touch ${prefix}_scores_clusters.pdf
-    touch ${prefix}_signature_clusters.pdf
-    touch ${prefix}_scores.rds
-    touch ${prefix}_table_signature
+    touch ${prefix}.pdf
     """
 }
