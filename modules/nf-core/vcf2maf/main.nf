@@ -10,8 +10,8 @@ process VCF2MAF {
 
     input:
     tuple val(meta), path(vcf) // Use an uncompressed VCF file!
-    path fasta                 // Required
-    path vep_cache             // Required for VEP running. A default of /.vep is supplied.
+    tuple val(meta2), path(fasta)
+    // path fasta                 // Required
 
     output:
     tuple val(meta), path("*.maf"), emit: maf
@@ -23,28 +23,21 @@ process VCF2MAF {
     script:
     def args          = task.ext.args   ?: ''
     def prefix        = task.ext.prefix ?: "${meta.id}"
-    def vep_cache_cmd = vep_cache       ? "--vep-data $vep_cache" : ""     // If VEP is present, it will find it and add it to commands otherwise blank
     def VERSION       = '1.6.22' // WARN: Version information not provided by tool on CLI. Please update this string when bumping container versions.
     """
-    if [ "$vep_cache" ]; then
-        VEP_CMD="--vep-path \$(dirname \$(type -p vep))"
-        VEP_VERSION=\$(echo -e "\\n    ensemblvep: \$( echo \$(vep --help 2>&1) | sed 's/^.*Versions:.*ensembl-vep : //;s/ .*\$//')")
-    else
-        VEP_CMD=""
-        VEP_VERSION=""
-    fi
 
     vcf2maf.pl \\
         $args \\
-        \$VEP_CMD \\
-        $vep_cache_cmd \\
         --ref-fasta $fasta \\
         --input-vcf $vcf \\
-        --output-maf ${prefix}.maf
+        --tumor-id "${meta.tumour_sample}" \\
+        --normal-id "${meta.normal_sample}" \\
+        --output-maf ${prefix}.maf \\
+        --inhibit-vep
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        vcf2maf: $VERSION\$VEP_VERSION
+        vcf2maf: $VERSION
     END_VERSIONS
     """
 
@@ -52,17 +45,12 @@ process VCF2MAF {
     def prefix  = task.ext.prefix ?: "${meta.id}"
     def VERSION = '1.6.22' // WARN: Version information not provided by tool on CLI. Please update this string when bumping container versions.
     """
-    if [ "$vep_cache" ]; then
-        VEP_VERSION=\$(echo -e "\\n    ensemblvep: \$( echo \$(vep --help 2>&1) | sed 's/^.*Versions:.*ensembl-vep : //;s/ .*\$//')")
-    else
-        VEP_VERSION=""
-    fi
 
     touch ${prefix}.maf
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        vcf2maf: $VERSION\$VEP_VERSION
+        vcf2maf: $VERSION
     END_VERSIONS
     """
 }
