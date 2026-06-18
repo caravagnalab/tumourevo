@@ -65,133 +65,180 @@ process SPARSESIGNATURE_ASSIGN {
             colnames(res_matrix) <- colnames(mut_matrix2)
             return(res_matrix)
         }
-    map_sparsesig_to_cosmic <- function(sparsesig_out, sparsesig_count,cosmic_path, threshold = 0.8) {
-      # Check inputs
-      
-      samples <- rownames(sparsesig_count) 
-      if (is.null(sparsesig_out[["beta"]]) || is.null(sparsesig_out[["alpha"]])) {
+    map_sparsesig_to_cosmic <- function(
+        sparsesig_out,
+        sparsesig_count,
+        cosmic_path,
+        threshold = 0.8,
+        top_n = 2,
+        min_weight = 0.1
+    ) {
+    
+    # Check inputs
+    samples <- rownames(sparsesig_count)
+    
+    if (is.null(sparsesig_out[["beta"]]) || is.null(sparsesig_out[["alpha"]])) {
         stop("sparsesig_out must contain 'beta' and 'alpha'.")
-      }
-      
-      # Load COSMIC reference
-      cosmic_signatures <- read.delim(cosmic_path, check.names = FALSE) %>%
-        tibble::column_to_rownames("Type") %>%
+    }
+    
+    # Load COSMIC reference
+    cosmic_signatures <- read.delim(cosmic_path, check.names = FALSE) |>
+        tibble::column_to_rownames("Type") |>
         as.matrix()
     
-      # Extract de novo signatures and exposures
-      de_novo_signatures <- t(sparsesig_out[["beta"]]) %>%  as.matrix()
-      de_novo_exposures  <- as.matrix(sparsesig_out[["alpha"]])
+    # Extract de novo signatures and exposures
+    de_novo_signatures <- t(sparsesig_out[["beta"]]) |> as.matrix()
+    de_novo_exposures  <- as.matrix(sparsesig_out[["alpha"]])
+    rownames(de_novo_exposures) <- samples
     
-      # Check that mutation types overlap
-      common_types <- intersect(rownames(cosmic_signatures), rownames(de_novo_signatures))
-      if (length(common_types) == 0) {
+    # Check that mutation types overlap
+    common_types <- intersect(rownames(cosmic_signatures), rownames(de_novo_signatures))
+    
+    if (length(common_types) == 0) {
         stop("No shared mutation types between COSMIC reference and de novo signatures.")
-      }
-      
-      # Restrict both matrices to shared mutation types in identical order
-      cosmic_signatures  <- cosmic_signatures[common_types, , drop = FALSE]
-      de_novo_signatures <- de_novo_signatures[common_types, , drop = FALSE]
-      
-      # Compute cosine similarity matrix
-      similarity_matrix <- cos_sim_matrix(
+    }
+    
+    # Restrict both matrices to shared mutation types in identical order
+    cosmic_signatures  <- cosmic_signatures[common_types, , drop = FALSE]
+    de_novo_signatures <- de_novo_signatures[common_types, , drop = FALSE]
+    
+    # Compute cosine similarity matrix
+    similarity_matrix <- cos_sim_matrix(
         de_novo_signatures,
         cosmic_signatures
-      )
-      
-      # Build mapping list: one entry per de novo signature
-      # Each entry is a named numeric vector of cosine similarities
-      sim_matrix_all <- vector("list", length = nrow(similarity_matrix))
-      names(sim_matrix_all) <- rownames(similarity_matrix)
-      
-      for (de_novo_sig in rownames(similarity_matrix)) {
+    )
+    
+    # Initialize output objects
+    # Store decomposition weights for each de novo signature
+    # Example: S1 -> SBS5 = 0.7, SBS44 = 0.3
+    mapping_weights <- list()
+    reconstruction_quality <- data.frame()
+    
+    # Decompose each DeNovo signature
+    
+    for (de_novo_sig in rownames(similarity_matrix)) {
         similarities <- similarity_matrix[de_novo_sig, ]
         
+        # SparseSignatures background is treated as SBS5
         if (de_novo_sig == "Background") {
-          # Force Background to SBS5
-          if (!"SBS5" %in% colnames(similarity_matrix)) {
+        if (!"SBS5" %in% colnames(cosmic_signatures)) {
             stop("Background is mapped to SBS5, but SBS5 is not present in COSMIC reference.")
-          }
-          sim_matrix_all[[de_novo_sig]] <- similarities["SBS5"]
+        }
+        
+        mapping_weights[[de_novo_sig]] <- c(SBS5 = 1)
+        
+        reconstruction_quality <- rbind(
+            reconstruction_quality,
+            data.frame(
+            de_novo_signature = de_novo_sig,
+            reconstruction_cosine = similarities["SBS5"],
+            n_cosmic_components = 1
+            )
+        )
+        next
+        }
+        
+        # Keep signatures above cosine similarity threshold
+        candidates <- names(similarities[similarities >= threshold])
+        
+        if (length(candidates) == 0) {
+        candidates <- names(sort(similarities, decreasing = TRUE))[seq_len(min(top_n, length(similarities)))]
         } else {
-          above_threshold <- similarities[similarities >= threshold]
-          above_threshold <- sort(above_threshold, decreasing = TRUE)[1]
-          
-          if (length(above_threshold) == 0) {
-            sim_matrix_all[[de_novo_sig]] <- NA_real_
-          } else {
-            sim_matrix_all[[de_novo_sig]] <- above_threshold
-          }
-        }
-      }
-      
-      # Determine all COSMIC signatures that appear in mappings
-      cosmic_sigs <- unique(unlist(
-        lapply(sim_matrix_all, function(x) {
-          if (length(x) == 1 && is.na(x)) {
-            return(NULL)
-          }
-          names(x)
-        })
-      ))
-      
-      # Ensure SBS5 exists if Background is present
-      if ("Background" %in% names(sim_matrix_all) && !"SBS5" %in% cosmic_sigs) {
-        cosmic_sigs <- c(cosmic_sigs, "SBS5")
-      }
-      
-      # Create remapped exposure matrix
-      samples <- rownames(de_novo_exposures)
-      remapped_exposures <- matrix(
-        0,
-        nrow = length(samples),
-        ncol = length(cosmic_sigs),
-        dimnames = list(samples, cosmic_sigs)
-      )
-      
-      # Remap exposures
-      for (de_novo_sig in colnames(de_novo_exposures)) {
-        if (!de_novo_sig %in% names(sim_matrix_all)) {
-          warning(sprintf("No similarity entry found for de novo signature: %s", de_novo_sig))
-          next
+        candidates <- names(sort(similarities[candidates], decreasing = TRUE))[seq_len(min(top_n, length(candidates)))]
         }
         
-        mapping <- sim_matrix_all[[de_novo_sig]]
+        target <- de_novo_signatures[, de_novo_sig]
+        reference <- cosmic_signatures[, candidates, drop = FALSE]
         
-        # Skip signatures with no match above threshold
-        if (length(mapping) == 1 && is.na(mapping)) {
-          warning(sprintf(
-            "No COSMIC match above threshold for de novo signature: %s",
-            de_novo_sig
-          ))
-          next
+        # Objective function: minimise squared reconstruction error
+        objective <- function(w) {
+        reconstructed <- as.vector(reference %*% w)
+        sum((target - reconstructed)^2)
         }
         
-        # Normalize similarity weights
-        sim_weights <- mapping / sum(mapping)
+        # Fit non-negative weights using constrained optimization
+        fit <- stats::optim(
+        par = rep(1 / length(candidates), length(candidates)),
+        fn = objective,
+        method = "L-BFGS-B",
+        lower = rep(0, length(candidates))
+        )
         
-        # Add weighted exposure to mapped COSMIC signatures
-        for (sig in names(sim_weights)) {
-          tmp <- remapped_exposures[, sig] +
-            de_novo_exposures[, de_novo_sig] * sim_weights[sig]
-          remapped_exposures[, sig] <- round(tmp,0)
+        weights <- fit[["par"]]
+        
+        if (sum(weights) == 0) {
+        mapping_weights[[de_novo_sig]] <- NA_real_
+        next
         }
-      }
-      
-      # Convert to proportions
-      row_totals <- rowSums(remapped_exposures)
-      remapped_exposures_prop <- remapped_exposures
+        
+        # Normalize weights to sum to 1
+        weights <- weights / sum(weights)
+        names(weights) <- candidates
+        # Remove weak contributors
+        weights <- weights[weights >= min_weight]
+        weights <- weights / sum(weights)
+        
+        mapping_weights[[de_novo_sig]] <- weights
+        
+        reconstructed <- as.vector(reference[, names(weights), drop = FALSE] %*% weights)
+        
+        reconstruction_quality <- rbind(
+        reconstruction_quality,
+        data.frame(
+            de_novo_signature = de_novo_sig,
+            # cosine similarity between reconstructed and original de novo signature
+            reconstruction_cosine = sum(target * reconstructed) /
+            sqrt(sum(target^2) * sum(reconstructed^2)),
+            n_cosmic_components = length(weights)
+        )
+        )
+    }
     
-      nonzero_rows <- row_totals > 0
-      remapped_exposures_prop[nonzero_rows, ] <-
+    # Build remapped exposure matrix
+    cosmic_sigs <- unique(unlist(lapply(mapping_weights, names)))
+    cosmic_sigs <- cosmic_sigs[!is.na(cosmic_sigs)]
+    
+    remapped_exposures <- matrix(
+        0,
+        nrow = nrow(de_novo_exposures),
+        ncol = length(cosmic_sigs),
+        dimnames = list(rownames(de_novo_exposures), cosmic_sigs)
+    )
+    
+    # Redistribute de novo exposures to COSMIC signatures
+    for (de_novo_sig in colnames(de_novo_exposures)) {
+        mapping <- mapping_weights[[de_novo_sig]]
+        
+        if (length(mapping) == 1 && is.na(mapping)) {
+        warning(sprintf("No COSMIC decomposition found for %s", de_novo_sig))
+        next
+        }
+        
+        for (cosmic_sig in names(mapping)) {
+        remapped_exposures[, cosmic_sig] <-
+            remapped_exposures[, cosmic_sig] +
+            de_novo_exposures[, de_novo_sig] * mapping[cosmic_sig]
+        }
+    }
+    
+    # Convert to proportions
+    row_totals <- rowSums(remapped_exposures)
+    
+    remapped_exposures_prop <- remapped_exposures
+    nonzero_rows <- row_totals > 0
+    
+    remapped_exposures_prop[nonzero_rows, ] <-
         remapped_exposures[nonzero_rows, , drop = FALSE] / row_totals[nonzero_rows]
-      
-      remapped_exposures_prop[!nonzero_rows, ] <- 0
-      rownames(remapped_exposures_prop) <- samples
-      return(list(
+    
+    remapped_exposures_prop[!nonzero_rows, ] <- 0
+    
+    return(list(
+        remapped_exposures = remapped_exposures,
         remapped_exposures_prop = remapped_exposures_prop,
-        sim_matrix_all = sim_matrix_all,
-        similarity_matrix = similarity_matrix
-      ))
+        mapping_weights = mapping_weights,
+        similarity_matrix = similarity_matrix,
+        reconstruction_quality = reconstruction_quality
+    ))
     }
     nmf_out <- readRDS("${signatures_nmfOut_rds}")
     c_matrix <- readRDS("${signatures_mutCounts_rds}")
