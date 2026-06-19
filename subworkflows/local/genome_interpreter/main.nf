@@ -36,6 +36,7 @@ workflow GENOME_INTERPRETER {
     mutation_report = null
     cohort_signatures_pdf = null
     cohort_signatures_rds = null
+    cohort_signatures_table = null
 
 
     cohort_cnaqc = join_cnaqc_out.map { meta, file, samples ->
@@ -192,6 +193,7 @@ workflow GENOME_INTERPRETER {
     COHORT_SIGNATURES(cohort_signatures_input)
     cohort_signatures_pdf = COHORT_SIGNATURES.out.report_cohort_signatures
     cohort_signatures_rds = COHORT_SIGNATURES.out.rds_cohort_signatures
+    cohort_signatures_table = COHORT_SIGNATURES.out.table_cohort_signatures
     ch_versions = ch_versions.mix(COHORT_SIGNATURES.out.versions)
     
     emit:
@@ -204,6 +206,7 @@ workflow GENOME_INTERPRETER {
     report_signature
     cohort_signatures_pdf
     cohort_signatures_rds
+    cohort_signatures_table
     versions = ch_versions
 
 }
