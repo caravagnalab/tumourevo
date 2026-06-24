@@ -135,44 +135,11 @@
             "description": "CNAqc tool parameters.",
             "default": "",
             "properties": {
-                "cnaqc_karyotypes": {
-                    "type": "string",
-                    "default": "c(\"1:0\", \"1:1\", \"2:0\", \"2:1\", \"2:2\")",
-                    "description": "For clonal simple CNAs, the list of segments to test.",
-                    "help_text": "By default LOH regions (A, AA), diploid regions (AB), and amplification regions (AAB, AABB) are tested, corresponding to '1:0', '1:1', '2:1', '2:0', '2:2' in \"Major:minor\" notation.",
-                    "pattern": "^c\\(\\s*\"(1:[01]|2:[012])\"(?:\\s*,\\s*\"(1:[01]|2:[012])\")*\\s*\\)$"
-                },
-                "cnaqc_min_karyotype_size": {
-                    "type": "number",
-                    "default": 0.0,
-                    "description": "For clonal simple CNAs, a filter for the segments to test.",
-                    "help_text": "The segment size is defined based on the number of mutations mapped. This threshold is the proportion relative to the whole set of segments one wishes to analyse (defined by `karyotypes`). For example, by setting `cnaqc_min_karyotype_size = 0.2` one would QC clonal simple CNAs that contain at least 20.",
-                    "minimum": 0,
-                    "maximum": 1
-                },
-                "cnaqc_cluster_subclonal_ccf": {
-                    "type": "string",
-                    "default": "FALSE",
-                    "description": "For subclonal segments, should the tool try to merge segments with similar CCF and the same copy number alteration?",
-                    "enum": ["TRUE", "FALSE"]
-                },
-                "cnaqc_cutoff_qc_pass": {
-                    "type": "number",
-                    "default": 0.1,
-                    "help_text": "For the entropy-based method, percentage of mutations that can be not-assigned (NA) in a karyotype. If the karyotype has more than cutoff_QC_PASS percentage of non-assigned mutations, then the overall set of CCFs is failed for the karyotype.",
-                    "description": "Used in the CCF estimation step."
-                },
                 "cnaqc_min_absolute_karyotype_mutations": {
                     "type": "integer",
                     "default": 100,
                     "description": "For clonal simple CNAs, this is the same as [`cnaqc_min_karyotype_size`](#cnaqc_min_karyotype_size), but with a cut measured on absolute mutation counts.",
                     "help_text": "For example, by setting `cnaqc_min_absolute_karyotype_mutations = 150` one would QC the clonal simple CNAs that contain at least `150` mutations. "
-                },
-                "cnaqc_p_binsize_peaks": {
-                    "type": "number",
-                    "default": 0.005,
-                    "description": "For clonal simple CNAs, peaks detected will be filtered if, in a peak, we map less than `cnaqc_p_binsize_peaks * N` mutations.",
-                    "help_text": "The value N is obtained couting all mutations that map in all peaks. "
                 },
                 "cnaqc_purity_error": {
                     "type": "number",
@@ -180,44 +147,16 @@
                     "description": "For clonal simple CNAs, the purity error tolerance to determine QC pass or fail.",
                     "help_text": "This can be set automatically using function auto_tolerance to optimise the analysis based on a desired rate of false positives matches, as a function of the data coverage and (putative) purity.\n\n"
                 },
-                "cnaqc_vaf_tolerance": {
-                    "type": "number",
-                    "default": 0.015,
-                    "description": "For clonal simple CNAs, a tolerance in comparing bands overlaps which is applied to the raw VAF values."
-                },
-                "cnaqc_n_bootstrap": {
-                    "type": "integer",
-                    "default": 1,
-                    "description": "For clonal simple CNAs, the number of times peak detection is bootstrapped.",
-                    "help_text": "This helps sometimes finding peaks that might be visually observable but fail to be detected by the underlying peak-detection heuristics."
-                },
-                "cnaqc_kernel_adjust": {
-                    "type": "integer",
-                    "default": 1,
-                    "description": "For KDE-based matches the adjust density parameter; see density."
-                },
                 "cnaqc_matching_strategy": {
                     "type": "string",
                     "default": "rightmost",
                     "description": "For clonal simple CNAs, if \"closest\" the closest peak will be used to match the expected peak. If \"rightmost\" peaks are matched prioritizing right to left peaks (the higher-VAF gets matched first); this strategy is more correct in principle but works only if there are no spurious peaks in the estimated density.",
                     "enum": ["closest", "rightmost"]
                 },
-                "cnaqc_starting_state_subclonal_evolution": {
-                    "type": "string",
-                    "default": "1:1",
-                    "description": "For subclonal simple CNAs, the starting state to determine linear versus branching evolutionary models.",
-                    "pattern": "^(1:[01]|2:[012])$"
-                },
                 "cnaqc_muts_per_karyotype": {
                     "type": "integer",
                     "default": 25,
                     "description": "Minimum number of mutations that are required to be mapped to a karyotype in order to compute CCF values."
-                },
-                "cnaqc_method": {
-                    "type": "string",
-                    "default": "ENTROPY",
-                    "description": "Either \"ENTROPY\" (default) or \"ROUGH\", to reflect the two different algorithms to compute CCF.",
-                    "enum": ["ENTROPY", "ROUGH"]
                 }
             },
             "fa_icon": "fas fa-briefcase"
@@ -314,54 +253,10 @@
             "description": "",
             "default": "",
             "properties": {
-                "viber_samples": {
-                    "type": "integer",
-                    "default": 10,
-                    "description": "The number of fits to be computed."
-                },
-                "viber_alpha_0": {
-                    "type": "number",
-                    "default": 1e-6,
-                    "description": "The concentration parameter of the Dirichlet mixture."
-                },
                 "viber_k": {
                     "type": "integer",
                     "default": 10,
                     "description": "The maximum number of clusters returned. Lower values speed up convergence."
-                },
-                "viber_max_iter": {
-                    "type": "integer",
-                    "default": 5000,
-                    "description": "Maximum number of fit iterations.",
-                    "help_text": "The fit is interrupted when this number of iterations is performed."
-                },
-                "viber_a_0": {
-                    "type": "integer",
-                    "default": 1,
-                    "description": "The prior Beta hyperparameter for each Binomial component a"
-                },
-                "viber_b_0": {
-                    "type": "integer",
-                    "default": 1,
-                    "description": "The prior Beta hyperparameter for each Binomial component b"
-                },
-                "viber_epsilon_conv": {
-                    "type": "number",
-                    "default": 1e-10,
-                    "description": "The epsilon to measure convergence as ELBO absolute difference"
-                },
-                "viber_q_init": {
-                    "type": "string",
-                    "default": "prior",
-                    "description": "Initialization of the q-distribution to compute the approximation of the posterior distributions.",
-                    "help_text": "This can be set in three different ways: equal to the prior, via kmeans clustering and capturing points which are private to each dimension.",
-                    "enum": ["prior", "kmeans", "private"]
-                },
-                "viber_trace": {
-                    "type": "string",
-                    "default": "FALSE",
-                    "description": "Whether points assigned to a cluster that is filtered out are re-assigned by the density function.urn the trace of model fit.",
-                    "enum": ["TRUE", "FALSE"]
                 },
                 "viber_binomial_cutoff": {
                     "type": "number",
