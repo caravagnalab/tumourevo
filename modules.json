@@ -40,7 +40,7 @@
                     },
                     "mobster": {
                         "branch": "master",
-                        "git_sha": "be8d7a5227223396a308243db310379f329082e4",
+                        "git_sha": "e65bff46035a56cc8fc3d21fb8af8d988ef02cfe",
                         "installed_by": ["modules"],
                         "patch": "modules/nf-core/mobster/mobster.diff"
                     },

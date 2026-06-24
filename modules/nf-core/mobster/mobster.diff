@@ -1,4 +1,6 @@
 Changes in component 'nf-core/mobster'
+'modules/nf-core/mobster/environment.yml' is unchanged
+'modules/nf-core/mobster/meta.yml' is unchanged
 Changes in 'mobster/main.nf':
 --- modules/nf-core/mobster/main.nf
 +++ modules/nf-core/mobster/main.nf
@@ -9,12 +11,10 @@ Changes in 'mobster/main.nf':
 +    label "error_ignore"
  
      conda "${moduleDir}/environment.yml"
-     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+     container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
 
-'modules/nf-core/mobster/environment.yml' is unchanged
-'modules/nf-core/mobster/meta.yml' is unchanged
-'modules/nf-core/mobster/tests/nextflow.config' is unchanged
 'modules/nf-core/mobster/tests/main.nf.test.snap' is unchanged
+'modules/nf-core/mobster/tests/nextflow.config' is unchanged
 'modules/nf-core/mobster/tests/main.nf.test' is unchanged
 'modules/nf-core/mobster/templates/main_script.R' is unchanged
 ************************************************************
