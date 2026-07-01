@@ -84,7 +84,15 @@ if (length(mobster_files)>0){
     select(Project, patient_id, mutation_id, everything(), -chrom, -pos_start,
            -pos_end, -ref, -alt, -Type, -ID, -Genome, -mut_type) %>%
     rename(cluster_mobster=Sample)
+
+  if ( 'Tail' %in% unique((mutations_mobster[["cluster_mobster"]]))){
+    w_tail = 1
+  } else {
+    w_tail = 0
+  }
 }
+
+
 
 table_signatures <- tibble()
 tool_list <- strsplit(opt[['tools']], ",")[[1]]
@@ -112,7 +120,9 @@ score_table = lapply(tool_list, function(tool) {
       final_table_subclonal = mutations_tool %>%
         left_join(never_tail_muts) %>%
         group_by(cluster_tool) %>%
-        reframe(n_never_tail=sum(never_tail, na.rm=T) / n(),
+        reframe(n_tail = sum(!is.na(never_tail)),
+                n=n(),
+                n_never_tail=sum(never_tail, na.rm=T) / n_tail,
                 is_driver=any(is_driver), is_clonal=all(is_clonal))
     } else {
       final_table_subclonal = mutations_tool %>%
@@ -203,19 +213,22 @@ score_table = lapply(tool_list, function(tool) {
 }) %>% bind_rows() %>% select(patient_id, cluster_tool, everything())
 
 
+w_sig = 1
+w_driver = 1
 score_table = score_table %>%
   group_by(patient_id, cluster_tool, tool, is_clonal, is_driver, n_never_tail, driver) %>%
-  reframe(cs_sign = ifelse(is_clonal == T, 1, min(cs_sign)),
-            n_rel = ifelse(is_clonal == T, 1, max(n_rel)),
-            bg_sign =  ifelse(is_clonal == T, 1, min(bg_sign))) %>%
+  reframe(cs_sign = ifelse(is_clonal == T, 1, min(cs_sign, na.rm = T)),
+            n_rel = ifelse(is_clonal == T, 1, max(n_rel, na.rm = T)),
+            bg_sign =  ifelse(is_clonal == T, 1, min(bg_sign, na.rm = T))) %>%
   rowwise() %>%
   mutate(
     score_driver = driver,
     score_sign = (cs_sign + n_rel + bg_sign) / 3,
     score_tail = n_never_tail,
     score_all = ifelse(is.na(n_never_tail),
-                       (score_driver + score_sign) / 2,
-                       (score_driver + score_tail + score_sign) / 3))
+                       (w_driver * score_driver + w_sig * score_sign) / (w_driver+w_sig),
+                       (w_driver * score_driver + w_sig * score_sign + w_tail * score_tail) / (w_driver+w_sig+w_tail))) %>%
+  mutate(weight_tail = w_tail)
 
 get_signature_colors <- function(names) {
   n <- length(names)
@@ -251,29 +264,55 @@ get_cluster_colors <- function(cluster_names) {
 cluster_names = unique(score_table[['cluster_tool']])
 cluster_colors <- get_cluster_colors(cluster_names)
 
-pl_scores = score_table %>%
-  pivot_longer(cols=c(score_driver, score_all, score_tail, score_sign)) %>%
-  mutate(name=factor(name, levels=c("score_driver", "score_tail", "score_sign", "score_all"))) %>%
-  ggplot() +
-  annotate("rect", xmin=-Inf, xmax=Inf, ymin=0.9, ymax=1, fill="palegreen4", alpha=0.2) +
-  annotate("rect", xmin=-Inf, xmax=Inf, ymin=0.55, ymax=.9, fill="goldenrod", alpha=0.2) +
-  annotate("rect", xmin=-Inf, xmax=Inf, ymin=0.2, ymax=0.55, fill="salmon1", alpha=0.2) +
-  annotate("rect", xmin=-Inf, xmax=Inf, ymin=0.2, ymax=0, fill="gainsboro", alpha=0.2) +
-  geom_point(aes(x=name, y=value, col=cluster_tool, shape = is_driver), size=4) +
-  geom_line(data=~filter(.x, !is.na(value)),
-            aes(x=name, y=value, color=cluster_tool, group=cluster_tool), linewidth=.6)  +
-  geom_text(data=~filter(.x, is_clonal & name=="score_all"),
-            aes(x=name, y=value, color=cluster_tool, group=cluster_tool, label="Clonal"), vjust=0.07, show.legend = F) +
-  scale_color_manual("Cluster", values=cluster_colors) +
-  scale_shape_manual('Contains Driver', values = c(4, 20)) +
-  scale_x_discrete(labels=c("score_driver"="Driver",
-                            "score_tail"="Tail",
-                            "score_sign"="Signature",
-                            "score_all"="All")) +
-  facet_grid(.~tool) +
-  theme_bw() +
-  theme(axis.title.x=element_blank())
+if (w_tail == 0){
+  pl_scores = score_table %>%
+    pivot_longer(cols=c(score_driver, score_all, score_sign)) %>%
+    mutate(name=factor(name, levels=c("score_driver", "score_sign", "score_all"))) %>%
+    ggplot() +
+    annotate("rect", xmin=-Inf, xmax=Inf, ymin=0.9, ymax=1, fill="palegreen4", alpha=0.2) +
+    annotate("rect", xmin=-Inf, xmax=Inf, ymin=0.55, ymax=.9, fill="goldenrod", alpha=0.2) +
+    annotate("rect", xmin=-Inf, xmax=Inf, ymin=0.2, ymax=0.55, fill="salmon1", alpha=0.2) +
+    annotate("rect", xmin=-Inf, xmax=Inf, ymin=0.2, ymax=0, fill="gainsboro", alpha=0.2) +
+    geom_point(aes(x=name, y=value, col=cluster_tool, shape = is_driver), size=4) +
+    geom_line(data=~filter(.x, !is.na(value)),
+              aes(x=name, y=value, color=cluster_tool, group=cluster_tool), linewidth=.6)  +
+    geom_text(data=~filter(.x, is_clonal & name=="score_all"),
+              aes(x=name, y=value, color=cluster_tool, group=cluster_tool, label="Clonal"), vjust=0.07, show.legend = F) +
+    scale_color_manual("Cluster", values=cluster_colors) +
+    scale_shape_manual('Contains Driver', values = c(4, 20)) +
+    scale_x_discrete(labels=c("score_driver"="Driver",
+                              #"score_tail"="Tail",
+                              "score_sign"="Signature",
+                              "score_all"="All")) +
+    facet_grid(.~tool) +
+    theme_bw() +
+    theme(axis.title.x=element_blank())
 
+} else {
+  pl_scores = score_table %>%
+    pivot_longer(cols=c(score_driver, score_all, score_tail, score_sign)) %>%
+    mutate(name=factor(name, levels=c("score_driver", "score_tail", "score_sign", "score_all"))) %>%
+    ggplot() +
+    annotate("rect", xmin=-Inf, xmax=Inf, ymin=0.9, ymax=1, fill="palegreen4", alpha=0.2) +
+    annotate("rect", xmin=-Inf, xmax=Inf, ymin=0.55, ymax=.9, fill="goldenrod", alpha=0.2) +
+    annotate("rect", xmin=-Inf, xmax=Inf, ymin=0.2, ymax=0.55, fill="salmon1", alpha=0.2) +
+    annotate("rect", xmin=-Inf, xmax=Inf, ymin=0.2, ymax=0, fill="gainsboro", alpha=0.2) +
+    geom_point(aes(x=name, y=value, col=cluster_tool, shape = is_driver), size=4) +
+    geom_line(data=~filter(.x, !is.na(value)),
+              aes(x=name, y=value, color=cluster_tool, group=cluster_tool), linewidth=.6)  +
+    geom_text(data=~filter(.x, is_clonal & name=="score_all"),
+              aes(x=name, y=value, color=cluster_tool, group=cluster_tool, label="Clonal"), vjust=0.07, show.legend = F) +
+    scale_color_manual("Cluster", values=cluster_colors) +
+    scale_shape_manual('Contains Driver', values = c(4, 20)) +
+    scale_x_discrete(labels=c("score_driver"="Driver",
+                              "score_tail"="Tail",
+                              "score_sign"="Signature",
+                              "score_all"="All")) +
+    facet_grid(.~tool) +
+    theme_bw() +
+    theme(axis.title.x=element_blank())
+
+}
 
 names <- unique(table_signatures[["Signature"]])
 signature_colors <- get_signature_colors(names = names)
