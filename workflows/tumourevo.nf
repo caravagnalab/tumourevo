@@ -12,10 +12,10 @@ include { ANNOTATE_DRIVER } from "../modules/local/annotate_driver/main"
 include { SAMPLE_MUTATIONS_ANALYSIS } from "../modules/local/sample_mutations_analysis/main"
 include { FORMATTER as FORMATTER_RDS} from "../subworkflows/local/formatter/main"
 include { QC } from "../subworkflows/local/qc/main"
-include { SUBCLONAL_DECONVOLUTION } from "../subworkflows/local/subclonal_deconvolution/main"
-include { SIGNATURE_DECONVOLUTION } from "../subworkflows/local/signature_deconvolution/main"
-include { ASSIGN_SIGNATURE } from "../subworkflows/local/assign_signature/main"
-include { GENOME_INTERPRETER } from "../subworkflows/local/genome_interpreter/main"
+// include { SUBCLONAL_DECONVOLUTION } from "../subworkflows/local/subclonal_deconvolution/main"
+// include { SIGNATURE_DECONVOLUTION } from "../subworkflows/local/signature_deconvolution/main"
+// include { ASSIGN_SIGNATURE } from "../subworkflows/local/assign_signature/main"
+// include { GENOME_INTERPRETER } from "../subworkflows/local/genome_interpreter/main"
 
 
 include { softwareVersionsToYAML           } from '../subworkflows/nf-core/utils_nfcore_pipeline'
@@ -121,58 +121,58 @@ main:
     QC(in_cnaqc)
     ch_versions = ch_versions.mix(QC.out.versions)
 
-    if (params.filter == true){
-        SUBCLONAL_DECONVOLUTION(QC.out.join_cnaqc_PASS)
-        SIGNATURE_DECONVOLUTION(QC.out.join_cnaqc_PASS)
+    // if (params.filter == true){
+    //     SUBCLONAL_DECONVOLUTION(QC.out.join_cnaqc_PASS)
+    //     SIGNATURE_DECONVOLUTION(QC.out.join_cnaqc_PASS)
 
-    } else {
-        SUBCLONAL_DECONVOLUTION(QC.out.join_cnaqc_ALL)
-        SIGNATURE_DECONVOLUTION(QC.out.join_cnaqc_ALL)
-    }
+    // } else {
+    //     SUBCLONAL_DECONVOLUTION(QC.out.join_cnaqc_ALL)
+    //     SIGNATURE_DECONVOLUTION(QC.out.join_cnaqc_ALL)
+    // }
 
 
-    ch_versions = ch_versions.mix(SUBCLONAL_DECONVOLUTION.out.versions)
-    ch_versions = ch_versions.mix(SIGNATURE_DECONVOLUTION.out.versions)
+    // ch_versions = ch_versions.mix(SUBCLONAL_DECONVOLUTION.out.versions)
+    // ch_versions = ch_versions.mix(SIGNATURE_DECONVOLUTION.out.versions)
 
-    ASSIGN_SIGNATURE(SUBCLONAL_DECONVOLUTION.out.pyclone_best,
-                    QC.out.join_cnaqc_ALL,
-                    SUBCLONAL_DECONVOLUTION.out.mobster_results,
-                    SUBCLONAL_DECONVOLUTION.out.viber_results,
-                    SIGNATURE_DECONVOLUTION.out.sigprofiler_out)
+    // ASSIGN_SIGNATURE(SUBCLONAL_DECONVOLUTION.out.pyclone_best,
+    //                 QC.out.join_cnaqc_ALL,
+    //                 SUBCLONAL_DECONVOLUTION.out.mobster_results,
+    //                 SUBCLONAL_DECONVOLUTION.out.viber_results,
+    //                 SIGNATURE_DECONVOLUTION.out.sigprofiler_out)
 
-    if (params.filter == true) {
-        GENOME_INTERPRETER(
-                        QC.out.rds_tinc,
-                        QC.out.join_cnaqc_PASS,
-                        SAMPLE_MUTATIONS_ANALYSIS.out.tmb_rds,
-                        ASSIGN_SIGNATURE.out.table_pyclone,
-                        ASSIGN_SIGNATURE.out.table_mobster,
-                        ASSIGN_SIGNATURE.out.table_viber,
-                        ASSIGN_SIGNATURE.out.assign_pyclone,
-                        ASSIGN_SIGNATURE.out.assign_mobster,
-                        ASSIGN_SIGNATURE.out.assign_viber,
-                        SIGNATURE_DECONVOLUTION.out.sigprofiler_out,
-                        SIGNATURE_DECONVOLUTION.out.sparsesignature_assign_cosmic,
-                        SUBCLONAL_DECONVOLUTION.out.ctree_viber_rds,
-                        SUBCLONAL_DECONVOLUTION.out.ctree_pyclone_rds
-                        )
-    } else {
-        GENOME_INTERPRETER(
-                        QC.out.rds_tinc,
-                        QC.out.join_cnaqc_ALL,
-                        SAMPLE_MUTATIONS_ANALYSIS.out.tmb_rds,
-                        ASSIGN_SIGNATURE.out.table_pyclone,
-                        ASSIGN_SIGNATURE.out.table_mobster,
-                        ASSIGN_SIGNATURE.out.table_viber,
-                        ASSIGN_SIGNATURE.out.assign_pyclone,
-                        ASSIGN_SIGNATURE.out.assign_mobster,
-                        ASSIGN_SIGNATURE.out.assign_viber,
-                        SIGNATURE_DECONVOLUTION.out.sigprofiler_out,
-                        SIGNATURE_DECONVOLUTION.out.sparsesignature_assign_cosmic,
-                        SUBCLONAL_DECONVOLUTION.out.ctree_viber_rds,
-                        SUBCLONAL_DECONVOLUTION.out.ctree_pyclone_rds
-                        )
-    }
+    // if (params.filter == true) {
+    //     GENOME_INTERPRETER(
+    //                     QC.out.rds_tinc,
+    //                     QC.out.join_cnaqc_PASS,
+    //                     SAMPLE_MUTATIONS_ANALYSIS.out.tmb_rds,
+    //                     ASSIGN_SIGNATURE.out.table_pyclone,
+    //                     ASSIGN_SIGNATURE.out.table_mobster,
+    //                     ASSIGN_SIGNATURE.out.table_viber,
+    //                     ASSIGN_SIGNATURE.out.assign_pyclone,
+    //                     ASSIGN_SIGNATURE.out.assign_mobster,
+    //                     ASSIGN_SIGNATURE.out.assign_viber,
+    //                     SIGNATURE_DECONVOLUTION.out.sigprofiler_out,
+    //                     SIGNATURE_DECONVOLUTION.out.sparsesignature_assign_cosmic,
+    //                     SUBCLONAL_DECONVOLUTION.out.ctree_viber_rds,
+    //                     SUBCLONAL_DECONVOLUTION.out.ctree_pyclone_rds
+    //                     )
+    // } else {
+    //     GENOME_INTERPRETER(
+    //                     QC.out.rds_tinc,
+    //                     QC.out.join_cnaqc_ALL,
+    //                     SAMPLE_MUTATIONS_ANALYSIS.out.tmb_rds,
+    //                     ASSIGN_SIGNATURE.out.table_pyclone,
+    //                     ASSIGN_SIGNATURE.out.table_mobster,
+    //                     ASSIGN_SIGNATURE.out.table_viber,
+    //                     ASSIGN_SIGNATURE.out.assign_pyclone,
+    //                     ASSIGN_SIGNATURE.out.assign_mobster,
+    //                     ASSIGN_SIGNATURE.out.assign_viber,
+    //                     SIGNATURE_DECONVOLUTION.out.sigprofiler_out,
+    //                     SIGNATURE_DECONVOLUTION.out.sparsesignature_assign_cosmic,
+    //                     SUBCLONAL_DECONVOLUTION.out.ctree_viber_rds,
+    //                     SUBCLONAL_DECONVOLUTION.out.ctree_pyclone_rds
+    //                     )
+    // }
 
 
     softwareVersionsToYAML(ch_versions)
