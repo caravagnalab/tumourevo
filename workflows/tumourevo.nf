@@ -12,8 +12,8 @@ include { ANNOTATE_DRIVER } from "../modules/local/annotate_driver/main"
 include { SAMPLE_MUTATIONS_ANALYSIS } from "../modules/local/sample_mutations_analysis/main"
 include { FORMATTER as FORMATTER_RDS} from "../subworkflows/local/formatter/main"
 include { QC } from "../subworkflows/local/qc/main"
-// include { SUBCLONAL_DECONVOLUTION } from "../subworkflows/local/subclonal_deconvolution/main"
-// include { SIGNATURE_DECONVOLUTION } from "../subworkflows/local/signature_deconvolution/main"
+include { SUBCLONAL_DECONVOLUTION } from "../subworkflows/local/subclonal_deconvolution/main"
+include { SIGNATURE_DECONVOLUTION } from "../subworkflows/local/signature_deconvolution/main"
 // include { ASSIGN_SIGNATURE } from "../subworkflows/local/assign_signature/main"
 // include { GENOME_INTERPRETER } from "../subworkflows/local/genome_interpreter/main"
 
@@ -121,14 +121,14 @@ main:
     QC(in_cnaqc)
     ch_versions = ch_versions.mix(QC.out.versions)
 
-    // if (params.filter == true){
-    //     SUBCLONAL_DECONVOLUTION(QC.out.join_cnaqc_PASS)
-    //     SIGNATURE_DECONVOLUTION(QC.out.join_cnaqc_PASS)
+    if (params.filter == true){
+         SUBCLONAL_DECONVOLUTION(QC.out.join_cnaqc_PASS)
+         SIGNATURE_DECONVOLUTION(QC.out.join_cnaqc_PASS)
 
-    // } else {
-    //     SUBCLONAL_DECONVOLUTION(QC.out.join_cnaqc_ALL)
-    //     SIGNATURE_DECONVOLUTION(QC.out.join_cnaqc_ALL)
-    // }
+     } else {
+         SUBCLONAL_DECONVOLUTION(QC.out.join_cnaqc_ALL)
+         SIGNATURE_DECONVOLUTION(QC.out.join_cnaqc_ALL)
+     }
 
 
     // ch_versions = ch_versions.mix(SUBCLONAL_DECONVOLUTION.out.versions)
