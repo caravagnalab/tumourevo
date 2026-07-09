@@ -412,7 +412,8 @@ analyze_peaks = function(x,
     dplyr::filter(VAF <= min_VAF | blacklisted)
   
   x\$mutations = x\$mutations %>%
-    dplyr::filter(VAF > min_VAF)
+    dplyr::filter(VAF > min_VAF) %>% 
+    dplyr::filter(blacklisted == FALSE)
   
   # recompute the number of mutations mapping on each karyotype
   n_karyo = x\$mutations %>% 
@@ -1300,6 +1301,7 @@ plot_peaks_fit_subclonal = function(x) {
   
 }
 
+
 # Script #####
 
 
@@ -1354,7 +1356,7 @@ pl_exp = ggpubr::annotate_figure(pl_exp, top = ggpubr::text_grob("$tumour_sample
 
 pl_qc = ggpubr::ggarrange(
   plotlist = list(
-    CNAqc::plot_peaks_analysis(tmp_x, what = 'common', empty_plot = FALSE),
+    plot_peaks_analysis(tmp_x, what = 'common', empty_plot = FALSE),
     CNAqc::plot_qc(tmp_x),
     CNAqc::plot_CCF(tmp_x, assembly_plot = TRUE, empty_plot = FALSE)),
   nrow = 3,
