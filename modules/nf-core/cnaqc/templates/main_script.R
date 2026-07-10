@@ -87,6 +87,7 @@ for ( ao in names(args_opt)){
 library(dplyr)
 library(CNAqc)
 library(tibble)
+library(ggplot2)
 
 # ---------------------------------------------------------------------------------
 # NEW VERSION FUNCTIONS ---------------------------
