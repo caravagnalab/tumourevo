@@ -2,7 +2,8 @@
 // FORMATTING SUB-WORKFLOW
 //
 
-include { FORMATTER } from "../../../subworkflows/local/formatter/main"
+include { FORMATTER as FORMATTER_PYCLONE } from "../../../subworkflows/local/formatter/main"
+include { FORMATTER as FORMATTER_VIBER } from "../../../subworkflows/local/formatter/main"
 include { PREPARE_CLUSTER as PREPARE_CLUSTER_PYCLONE } from '../../../modules/local/prepare_cluster/main'
 include { PREPARE_CLUSTER as PREPARE_CLUSTER_MOBSTER } from '../../../modules/local/prepare_cluster/main'
 include { PREPARE_CLUSTER as PREPARE_CLUSTER_VIBER } from '../../../modules/local/prepare_cluster/main'
@@ -45,7 +46,12 @@ workflow ASSIGN_SIGNATURE {
         }
 
         if (params.tools && params.tools.split(",").contains("viber")) {
-            viber_combined = viber_fit.map { meta, fit -> tuple(meta, fit, []) }
+            FORMATTER_VIBER(rds_join, "rds")
+            ch_versions = ch_versions.mix(FORMATTER_VIBER.out.versions)
+
+            // viber_combined = viber_fit.map { meta, fit -> tuple(meta, fit, []) }
+            viber_combined = viber_fit.join(FORMATTER_VIBER.out.out_data, by: 0).map {meta, fit, data, samples -> tuple(meta, fit, data)}
+
             PREPARE_CLUSTER_VIBER(viber_combined)
             table_viber = PREPARE_CLUSTER_VIBER.out.signature_table
             ch_versions = ch_versions.mix(PREPARE_CLUSTER_VIBER.out.versions)
@@ -56,10 +62,10 @@ workflow ASSIGN_SIGNATURE {
         }
 
         if (params.tools && params.tools.split(",").contains("pyclone-vi")) {
-            FORMATTER(rds_join, "rds")
-            ch_versions = ch_versions.mix(FORMATTER.out.versions)
+            FORMATTER_PYCLONE(rds_join, "rds")
+            ch_versions = ch_versions.mix(FORMATTER_PYCLONE.out.versions)
 
-            pyclone_combined = pyclone_fit.join(FORMATTER.out.out_data, by: 0).map {meta, fit, data, samples -> tuple(meta, fit, data)}
+            pyclone_combined = pyclone_fit.join(FORMATTER_PYCLONE.out.out_data, by: 0).map {meta, fit, data, samples -> tuple(meta, fit, data)}
             PREPARE_CLUSTER_PYCLONE(pyclone_combined)
             table_pyclone = PREPARE_CLUSTER_PYCLONE.out.signature_table
             ch_versions = ch_versions.mix(PREPARE_CLUSTER_PYCLONE.out.versions)

@@ -95,6 +95,7 @@ if (length(mobster_files)>0){
 
 
 table_signatures <- tibble()
+table_driver <- tibble()
 tool_list <- strsplit(opt[['tools']], ",")[[1]]
 tool_list <- tool_list[tool_list %in% c("viber", "pyclone-vi")]
 tool_list <- gsub("pyclone-vi", "pyclonevi", tool_list)
@@ -111,6 +112,8 @@ score_table = lapply(tool_list, function(tool) {
       select(Project, patient_id, mutation_id, everything(), -chrom, -pos_start,
               -pos_end, -ref, -alt, -Type, -ID, -Genome, -mut_type) %>%
       rename(cluster_tool=Sample)
+
+    table_driver <<- bind_rows(table_driver, mutations_tool %>% filter(is_driver))
 
     if (length(mobster_files>0)){
       never_tail_muts = mutations_mobster %>%
@@ -318,6 +321,10 @@ names <- unique(table_signatures[["Signature"]])
 signature_colors <- get_signature_colors(names = names)
 
 pl_signature <- table_signatures %>%
+  group_by(signature_type) %>%
+  mutate(Nmut = sum(Nmuts)) %>%
+  filter(Nmut > 50) %>%
+  ungroup() %>%
   ggplot(aes(fill=Signature, y=Exposure, x=as.factor(cluster_tool))) +
   geom_bar(position="fill", stat="identity")+
   coord_flip()+
@@ -344,5 +351,5 @@ if (length(unique(table_signatures[['signature_type']])) == 2){
 
 ggsave(pl_scores, filename=paste0(opt[["prefix"]], "_scores_clusters.pdf"), width = wd, height = 4, units = 'in')
 ggsave(pl_signature, filename=paste0(opt[["prefix"]], "_signature_clusters.pdf"), width = wd, height = hg, units = 'in')
-saveRDS(object = score_table, file = paste0(opt[["prefix"]], "_scores.rds"))
+saveRDS(object = list('score' = score_table, 'driver' = table_driver %>% distinct()), file = paste0(opt[["prefix"]], "_scores.rds"))
 saveRDS(object = table_signatures, file = paste0(opt[["prefix"]], "_table_signature.rds"))

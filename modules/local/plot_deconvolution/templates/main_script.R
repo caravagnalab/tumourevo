@@ -89,13 +89,14 @@ if ("$pyclone_fit" != ''){
     mutate(mutation_id = paste(patient_id, chr, from, alt, sep = ':')) %>%
     select(mutation_id, VAF, SYMBOL, Indiv, is_driver) %>%
     dplyr::rename(sample_id = Indiv)
+
   pyclone_fit = read.table("$pyclone_fit", header = T, sep = '\\t') %>%
     select(mutation_id, cluster_id)
 
 
   plt_pyclone <- list()
 
-  data = left_join(pyclone_table, pyclone_fit) %>%
+  data = left_join(pyclone_fit, pyclone_table) %>%
     filter(!is.na(sample_id)) %>%
     mutate(cluster_id = paste0('C', cluster_id)) %>%
     distinct()

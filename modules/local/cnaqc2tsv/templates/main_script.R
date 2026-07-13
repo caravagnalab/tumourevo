@@ -10,10 +10,10 @@ parse_args = function(x) {
     x_splt = strsplit(x, split=":")[[1]]
     c(x_splt[1],  paste(x_splt[2:length(x_splt)], collapse=":"))
   })
-  
+
   # Ensure the option vectors are length 2 (key/ value) to catch empty ones
   args_vals = lapply(args_vals, function(z){ length(z) = 2; z})
-  
+
   parsed_args = structure(lapply(args_vals, function(x) x[2]), names = lapply(args_vals, function(x) x[1]))
   parsed_args[! is.na(parsed_args)]
 }
@@ -48,12 +48,21 @@ if (as.logical(opt[["qc_chr"]])){
   mutations_multisample <- get_sample(m_cnaqc_obj = multi_cnaqc,sample = get_sample_name(multi_cnaqc),
                                       which_obj = "original")
   multisample_jointTable = list()
-  
+
   for (s in get_sample_name(multi_cnaqc)){
     purity = mutations_multisample[[s]][["purity"]]
     multisample_jointTable[[s]] = mutations_multisample[[s]][["mutations"]] %>%
       dplyr::mutate(purity = purity) %>%
       dplyr::mutate(patient_id = "$meta.patient")
+
+    if ('CCF_estimates' %in%  names(mutations_multisample[[s]])){
+
+      ccf = lapply(mutations_multisample[[s]][["CCF_estimates"]], FUN = function(k){
+        k[["mutations"]] %>% select(mutation_id, CCF, mutation_multiplicity)
+      }) %>% bind_rows()
+
+      multisample_jointTable[[s]] = multisample_jointTable[[s]] %>% left_join(ccf, by = join_by(mutation_id))
+    }
   }
 }
 

@@ -30,7 +30,7 @@ opt = list(
 args_opt = parse_args('$task.ext.args')
 for ( ao in names(args_opt)) opt[[ao]] = args_opt[[ao]]
 
-plot_tree <- function(ctree, signature, score, sub_tool, s_type){
+plot_tree <- function(ctree, signature, score, sub_tool, s_type, label){
   if (s_type == 'SBS'){
     s_colors = sbs_colors
   } else {
@@ -70,6 +70,8 @@ plot_tree <- function(ctree, signature, score, sub_tool, s_type){
       r_node = 0.1 * cex + 0.25 * cex * (nMuts / max(nMuts, na.rm = TRUE))
     )
 
+  layout_ctree = layout_ctree %>%
+    left_join(label)
 
   ctree_plot <- ggraph(layout_ctree) +
   geom_edge_link(
@@ -96,7 +98,7 @@ plot_tree <- function(ctree, signature, score, sub_tool, s_type){
     aes(
       x = x,
       y = y,
-      label = driver,
+      label = new_driver,
       colour = cluster
     ),
     na.rm = TRUE,
@@ -278,7 +280,7 @@ tier_colors <- c(
 )
 
 
-score = readRDS("$rds_score") %>%
+score = readRDS("$rds_score")[['score']] %>%
   dplyr::rename(cluster = cluster_tool,
                 is_clonal_tool = is_clonal) %>%
   mutate(tier=case_when(
@@ -290,8 +292,14 @@ score = readRDS("$rds_score") %>%
   )) %>%
   select(cluster,tier,score_all, tool)
 
+driver = readRDS("$rds_score")[['driver']]
+
 signature = readRDS("$rds_signature") %>%
-  dplyr::rename(cluster = cluster_tool)
+  dplyr::rename(cluster = cluster_tool) %>%
+  group_by(signature_type) %>%
+  mutate(Nmut = sum(Nmuts)) %>%
+  filter(Nmut > 50) %>%
+  ungroup()
 
 signature_type = unique(signature[["signature_type"]])
 signature_name = unique(signature[["Signature"]])
@@ -344,8 +352,28 @@ if (length(id_names) > 0){
 
 if ("$rds_ctree_pyclone" != ''){
   ctree_pyclone = readRDS("$rds_ctree_pyclone")[[1]]
+  sample = ctree_pyclone\$samples
+
+  driver_tmp = driver %>% filter(tool == 'pyclonevi')
+  table = ctree_pyclone\$drivers %>% select(patientID, cluster, is.driver, is.clonal, `sample`) %>% distinct()
+  missing_driver = driver_tmp %>%
+    filter(!driver_label %in% ctree_pyclone\$drivers\$variantID) %>%
+    select(cluster_tool, driver_label) %>%
+    rename(cluster = cluster_tool, variantID = driver_label) %>%
+    left_join(table)
+
+  ctree_pyclone\$drivers <- bind_rows(ctree_pyclone\$drivers, missing_driver)
+
+  driver_summary <- ctree_pyclone\$drivers %>%
+    group_by(cluster) %>%
+    summarise(
+      new_driver = paste(variantID, collapse = "\n"),
+      .groups = "drop"
+    )
+
+
   for (sign_type in signature_type){
-    plt = plot_tree(ctree = ctree_pyclone, signature = signature, score = score, sub_tool = 'pyclonevi', s_type = sign_type)
+    plt = plot_tree(ctree = ctree_pyclone, signature = signature, score = score, sub_tool = 'pyclonevi', s_type = sign_type, label = driver_summary)
     ggsave(plt, filename=paste0(opt[["prefix"]], "_tree_pyclonevi_",sign_type,".pdf"), width = 5, height = 6, units = 'in')
 
   }
@@ -353,8 +381,27 @@ if ("$rds_ctree_pyclone" != ''){
 
 if ("$rds_ctree_viber" != ''){
   ctree_viber = readRDS("$rds_ctree_viber")[[1]]
+  sample = ctree_viber\$samples
+
+  driver_tmp = driver %>% filter(tool == 'viber')
+  table = ctree_viber\$drivers %>% select(patientID, cluster, is.driver, is.clonal, `sample`) %>% distinct()
+  missing_driver = driver_tmp %>%
+    filter(!driver_label %in% ctree_viber\$drivers\$variantID) %>%
+    select(cluster_tool, driver_label) %>%
+    rename(cluster = cluster_tool, variantID = driver_label) %>%
+    left_join(table)
+
+  ctree_viber\$drivers <- bind_rows(ctree_viber\$drivers, missing_driver)
+
+  driver_summary <- ctree_viber\$drivers %>%
+    group_by(cluster) %>%
+    summarise(
+      new_driver = paste(variantID, collapse = "\n"),
+      .groups = "drop"
+    )
+
   for (sign_type in signature_type){
-    plt = plot_tree(ctree = ctree_viber, signature = signature, score = score, sub_tool = 'viber', s_type = sign_type)
+    plt = plot_tree(ctree = ctree_viber, signature = signature, score = score, sub_tool = 'viber', s_type = sign_type, label = driver_summary)
     ggsave(plt, filename=paste0(opt[["prefix"]], "_tree_viber_",sign_type,".pdf"), width = 5, height = 6, units = 'in')
   }
 }
