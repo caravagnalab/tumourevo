@@ -38,6 +38,11 @@
                         "git_sha": "34505e1fc5e9f4fd641210ca440acff6bd33b842",
                         "installed_by": ["modules"]
                     },
+                    "gunzip": {
+                        "branch": "master",
+                        "git_sha": "0902eac3012baaf4f9ab6513c8c55acc9353c96c",
+                        "installed_by": ["modules"]
+                    },
                     "mobster": {
                         "branch": "master",
                         "git_sha": "be8d7a5227223396a308243db310379f329082e4",

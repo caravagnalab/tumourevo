@@ -13,6 +13,7 @@ workflow GENOME_INTERPRETER {
     tinc_out    // tuple val(meta), path(file)
     join_cnaqc_out
     tmb_rds
+    maf
     table_pyclone
     table_mobster
     table_viber
@@ -23,7 +24,6 @@ workflow GENOME_INTERPRETER {
     sparsesignature_assign_cosmic
     ctree_viber
     ctree_pyclone
-    
 
     main:
     ch_versions = Channel.empty()
@@ -33,9 +33,10 @@ workflow GENOME_INTERPRETER {
     summary_report_pdf = null
     report_score = null
     report_signature = null
-    oncoprint = null
+    mutation_report = null
     cohort_signatures_pdf = null
     cohort_signatures_rds = null
+    cohort_signatures_table = null
 
 
     cohort_cnaqc = join_cnaqc_out.map { meta, file, samples ->
@@ -140,14 +141,23 @@ workflow GENOME_INTERPRETER {
         [meta.subMap('dataset', 'id'), rds, patient]}
     .groupTuple()
 
-    oncoprint_input = join_cnaqc_out.join(tmb_rds)
+    maf = maf.map { meta, rds ->
+        def patient = meta.patient
+        meta = meta + [ id: "${meta.dataset}" ]
+        [meta.subMap('dataset', 'id'), rds]}
+    .groupTuple()
+
+    oncoprint_input = join_cnaqc_out.join(tmb_rds.join(maf))
    
 
+    // disabling momentarly the cohort mutations analysis and visualization
     COHORT_MUTATIONS(oncoprint_input)
     ch_versions = ch_versions.mix(COHORT_MUTATIONS.out.versions)
 
-    oncoprint = COHORT_MUTATIONS.out.cohort_oncoprint
-    
+    mutation_report = COHORT_MUTATIONS.out.mutation_report
+    // summary_table_rds  = COHORT_MUTATIONS.out.summary_table_rds
+    // summary_plot_rds  = COHORT_MUTATIONS.out.summary_plot_rds
+    // summary_report_pdf = COHORT_MUTATIONS.out.summary_report_pdf
 
     if (params.tools && params.tools.split(",").contains("sigprofiler") && !params.tools.split(",").contains("sparsesignatures")) {
         cohort_sigprofiler = sigprofiler_out.map { meta, file ->
@@ -183,6 +193,7 @@ workflow GENOME_INTERPRETER {
     COHORT_SIGNATURES(cohort_signatures_input)
     cohort_signatures_pdf = COHORT_SIGNATURES.out.report_cohort_signatures
     cohort_signatures_rds = COHORT_SIGNATURES.out.rds_cohort_signatures
+    cohort_signatures_table = COHORT_SIGNATURES.out.table_cohort_signatures
     ch_versions = ch_versions.mix(COHORT_SIGNATURES.out.versions)
     
     emit:
@@ -190,11 +201,12 @@ workflow GENOME_INTERPRETER {
     summary_plot_rds
     summary_report_pdf
     summary_cna_segments_rds
-    oncoprint
+    mutation_report
     report_score
     report_signature
     cohort_signatures_pdf
     cohort_signatures_rds
+    cohort_signatures_table
     versions = ch_versions
 
 }

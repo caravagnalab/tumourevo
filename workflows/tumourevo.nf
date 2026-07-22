@@ -9,6 +9,8 @@ include { FORMATTER as FORMATTER_CNA } from "../subworkflows/local/formatter/mai
 include { FORMATTER as FORMATTER_VCF} from "../subworkflows/local/formatter/main"
 include { LIFTER } from "../subworkflows/local/lifter/main"
 include { ANNOTATE_DRIVER } from "../modules/local/annotate_driver/main"
+include { GUNZIP } from "../modules/nf-core/gunzip/main"
+include { VCF2MAF } from "../modules/nf-core/vcf2maf/main"
 include { SAMPLE_MUTATIONS_ANALYSIS } from "../modules/local/sample_mutations_analysis/main"
 include { FORMATTER as FORMATTER_RDS} from "../subworkflows/local/formatter/main"
 include { QC } from "../subworkflows/local/qc/main"
@@ -85,6 +87,10 @@ main:
 
     ch_vcf_tbi = ENSEMBLVEP_VEP.out.vcf.join(ENSEMBLVEP_VEP.out.tbi, failOnDuplicate: true, failOnMismatch: true)
 
+    GUNZIP(ENSEMBLVEP_VEP.out.vcf)
+
+    VCF2MAF(GUNZIP.out.gunzip, fasta)
+
     FORMATTER_VCF(ch_vcf_tbi, "vcf")
     FORMATTER_CNA(input_cna, "cna")
     vcf_file = FORMATTER_VCF.out.out_data
@@ -113,8 +119,9 @@ main:
 
     input_muts = ANNOTATE_DRIVER.out.rds.map { meta, rds ->
         [meta, rds, meta.tumour_sample]
-        }
-    SAMPLE_MUTATIONS_ANALYSIS(input_muts)
+        }    
+    
+    SAMPLE_MUTATIONS_ANALYSIS(input_muts, VCF2MAF.out.maf)
     ch_versions = ch_versions.mix(SAMPLE_MUTATIONS_ANALYSIS.out.versions)
 
     in_cnaqc = cna_file.join(ANNOTATE_DRIVER.out.rds)
@@ -135,44 +142,46 @@ main:
     ch_versions = ch_versions.mix(SIGNATURE_DECONVOLUTION.out.versions)
 
     ASSIGN_SIGNATURE(SUBCLONAL_DECONVOLUTION.out.pyclone_best,
-                     QC.out.join_cnaqc_ALL,
-                     SUBCLONAL_DECONVOLUTION.out.mobster_results,
-                     SUBCLONAL_DECONVOLUTION.out.viber_results,
-                     SIGNATURE_DECONVOLUTION.out.sigprofiler_out)
-
-     if (params.filter == true) {
-         GENOME_INTERPRETER(
-                         QC.out.rds_tinc,
-                         QC.out.join_cnaqc_PASS,
-                         SAMPLE_MUTATIONS_ANALYSIS.out.tmb_rds,
-                         ASSIGN_SIGNATURE.out.table_pyclone,
-                         ASSIGN_SIGNATURE.out.table_mobster,
-                         ASSIGN_SIGNATURE.out.table_viber,
-                         ASSIGN_SIGNATURE.out.assign_pyclone,
-                         ASSIGN_SIGNATURE.out.assign_mobster,
-                         ASSIGN_SIGNATURE.out.assign_viber,
-                         SIGNATURE_DECONVOLUTION.out.sigprofiler_out,
-                         SIGNATURE_DECONVOLUTION.out.sparsesignature_assign_cosmic,
-                         SUBCLONAL_DECONVOLUTION.out.ctree_viber_rds,
-                         SUBCLONAL_DECONVOLUTION.out.ctree_pyclone_rds
-                         )
-     } else {
-         GENOME_INTERPRETER(
-                         QC.out.rds_tinc,
-                         QC.out.join_cnaqc_ALL,
-                         SAMPLE_MUTATIONS_ANALYSIS.out.tmb_rds,
-                         ASSIGN_SIGNATURE.out.table_pyclone,
-                         ASSIGN_SIGNATURE.out.table_mobster,
-                         ASSIGN_SIGNATURE.out.table_viber,
-                         ASSIGN_SIGNATURE.out.assign_pyclone,
-                         ASSIGN_SIGNATURE.out.assign_mobster,
-                         ASSIGN_SIGNATURE.out.assign_viber,
-                         SIGNATURE_DECONVOLUTION.out.sigprofiler_out,
-                         SIGNATURE_DECONVOLUTION.out.sparsesignature_assign_cosmic,
-                         SUBCLONAL_DECONVOLUTION.out.ctree_viber_rds,
-                         SUBCLONAL_DECONVOLUTION.out.ctree_pyclone_rds
-                         )
-     }
+                    QC.out.join_cnaqc_ALL,
+                    SUBCLONAL_DECONVOLUTION.out.mobster_results,
+                    SUBCLONAL_DECONVOLUTION.out.viber_results,
+                    SIGNATURE_DECONVOLUTION.out.sigprofiler_out)
+    
+    if (params.filter == true) {
+        GENOME_INTERPRETER(
+                        QC.out.rds_tinc,
+                        QC.out.join_cnaqc_PASS,
+                        SAMPLE_MUTATIONS_ANALYSIS.out.tmb_rds,
+                        VCF2MAF.out.maf,
+                        ASSIGN_SIGNATURE.out.table_pyclone,
+                        ASSIGN_SIGNATURE.out.table_mobster,
+                        ASSIGN_SIGNATURE.out.table_viber,
+                        ASSIGN_SIGNATURE.out.assign_pyclone,
+                        ASSIGN_SIGNATURE.out.assign_mobster,
+                        ASSIGN_SIGNATURE.out.assign_viber,
+                        SIGNATURE_DECONVOLUTION.out.sigprofiler_out,
+                        SIGNATURE_DECONVOLUTION.out.sparsesignature_assign_cosmic,
+                        SUBCLONAL_DECONVOLUTION.out.ctree_viber_rds,
+                        SUBCLONAL_DECONVOLUTION.out.ctree_pyclone_rds
+                        )
+    } else {
+        GENOME_INTERPRETER(
+                        QC.out.rds_tinc,
+                        QC.out.join_cnaqc_ALL,
+                        SAMPLE_MUTATIONS_ANALYSIS.out.tmb_rds,
+                        VCF2MAF.out.maf,
+                        ASSIGN_SIGNATURE.out.table_pyclone,
+                        ASSIGN_SIGNATURE.out.table_mobster,
+                        ASSIGN_SIGNATURE.out.table_viber,
+                        ASSIGN_SIGNATURE.out.assign_pyclone,
+                        ASSIGN_SIGNATURE.out.assign_mobster,
+                        ASSIGN_SIGNATURE.out.assign_viber,
+                        SIGNATURE_DECONVOLUTION.out.sigprofiler_out,
+                        SIGNATURE_DECONVOLUTION.out.sparsesignature_assign_cosmic,
+                        SUBCLONAL_DECONVOLUTION.out.ctree_viber_rds,
+                        SUBCLONAL_DECONVOLUTION.out.ctree_pyclone_rds
+                        )
+    }
 
 
     softwareVersionsToYAML(ch_versions)
