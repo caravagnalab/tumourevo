@@ -55,8 +55,9 @@ process PREPARE_CLUSTER {
                                            TRUE, FALSE)) %>%
             dplyr::select(chr, from, ref, alt, cluster, is_clonal) %>% unique()
 
+	clusters = clonal_clusters %>% pull(cluster) %>% unique()
         data_table <- readr::read_tsv("$data") %>%
-            dplyr::select(chr, from, to, ref, alt, is_driver, driver_label, QC_PASS, blacklisted, karyotype, DP, NV, VAF, Indiv, CCF, mutation_multiplicity) %>%
+            dplyr::select(chr, from, to, ref, alt, is_driver, driver_label, QC_PASS, blacklisted, karyotype, DP, NV, VAF, Indiv, CCF, mutation_multiplicity, purity) %>%
             dplyr::mutate(chr = sub("chr", "", chr)) %>%
             dplyr::mutate(mutation_id = paste("${meta.patient}", chr, from, alt, sep = ':'))
 
@@ -78,13 +79,14 @@ process PREPARE_CLUSTER {
         to_assign_muts_cn <- driver_cn %>% filter(!mutation_id %in% mut_data\$mutation_id)
 
         if (nrow(to_assign_muts)>0){
-          theta = tool_table\$theta_k %>% as.data.frame() %>% tibble::add_column(sample = rownames(.))
-          samples = theta\$sample %>% unique()
+          #theta = tool_table\$theta_k %>% as.data.frame() %>% tibble::add_column(sample = rownames(.))
+          theta = tool_table\$theta_k[,clusters] %>% as.data.frame() %>% tibble::add_column(sample = rownames(.))
+	  samples = theta\$sample %>% unique()
           clusters = colnames(theta)[1:(ncol(theta)-1)]
           eps = 1e-9
 
           to_assign_muts = to_assign_muts %>% dplyr::rename(sample = Indiv)
-          mut_data_sample = to_assign_muts %>% filter(sample == !!samples)
+          mut_data_sample = to_assign_muts %>% filter(sample %in% samples) #filter(sample == !!samples)
 
           mut_cluster_assignments <- mut_data_sample %>%
             rowwise() %>%
@@ -102,7 +104,7 @@ process PREPARE_CLUSTER {
               }
             ) %>%
             ungroup() %>%
-            mutate(is_clonal = ifelse(cluster %in% clonal_clusters\$cluster, T, F)) %>%
+            left_join(clonal_clusters %>% select(cluster, is_clonal) %>% mutate(cluster = as.character(cluster)) %>% distinct()) %>%
             select(chr, from, ref, alt, is_driver, driver_label, cluster, is_clonal) %>%
             mutate(chr = paste0('chr', chr))
         } else {
@@ -114,13 +116,14 @@ process PREPARE_CLUSTER {
           theta = tool_table\$theta_k %>% as.data.frame() %>% tibble::add_column(sample = rownames(.))
           samples = theta\$sample %>% unique()
           theta_clonal = theta[,clonal]
+          names(theta_clonal) = rownames(theta)
           purity = to_assign_muts_cn\$purity %>% unique()
           ccf_clonal = (theta_clonal * ((1+1-2)*purity+2)) / (1 * purity)
           eps = 1e-9
 
           to_assign_muts_cn = to_assign_muts_cn %>% dplyr::rename(sample = Indiv)
           mut_data_sample_cn = to_assign_muts_cn %>%
-            filter(sample == !!samples) %>%
+            filter(sample %in% samples) %>%
             tidyr::separate(col = karyotype, into = c('major', 'minor'), sep = ':', remove = F, convert = T)
 
           mut_cluster_assignments_cn <- mut_data_sample_cn %>%
@@ -128,7 +131,7 @@ process PREPARE_CLUSTER {
             group_by(chr, from, ref, alt, is_driver, driver_label) %>%
             summarize(
               log_lik_clonal = {
-                mu_tmp <- (mutation_multiplicity * purity * ccf_clonal)/(2*(1-purity) + purity*(major+minor))
+                mu_tmp <- (mutation_multiplicity * purity * ccf_clonal[sample])/(2*(1-purity) + purity*(major+minor))
                 mu <- pmax(pmin(mu_tmp, 1 - eps), eps)
                 sum(dbinom(x = NV, size = DP, prob = mu, log = TRUE))
               }
@@ -138,7 +141,8 @@ process PREPARE_CLUSTER {
             mutate(is_clonal = ifelse(log_lik_clonal > -3, T, F)) %>%
             select(chr, from, ref, alt, is_driver, driver_label, cluster, is_clonal) %>%
             mutate(chr = paste0('chr', chr)) %>%
-            filter(is_clonal)
+            filter(is_clonal) %>%
+            mutate(cluster = as.character(cluster))
         } else {
           mut_cluster_assignments_cn <- tibble()
         }
@@ -189,7 +193,10 @@ process PREPARE_CLUSTER {
         tool <- 'pyclonevi'
 
         best_fit_table = readr::read_tsv("$fit") %>%
-            dplyr::rename(ccf=cellular_prevalence, cluster=cluster_id)
+            dplyr::rename(ccf=cellular_prevalence, cluster=cluster_id) %>%
+            group_by(cluster) %>%
+            filter(!all(ccf == 0)) %>%
+            ungroup()
 
         clonal_clusters = best_fit_table %>%
             dplyr::mutate(is_clonal=ifelse(cluster==get_clonal_cluster(best_fit_table),
@@ -242,8 +249,9 @@ process PREPARE_CLUSTER {
               }
             ) %>%
             ungroup() %>%
-            mutate(is_clonal = ifelse(cluster %in% clonal_clusters\$cluster, T, F)) %>%
-            select(chr, from, ref, alt, is_driver, driver_label, cluster, is_clonal)
+            left_join(clonal_clusters %>% select(cluster, is_clonal) %>% mutate(cluster = as.character(cluster)) %>% distinct()) %>%
+            select(chr, from, ref, alt, is_driver, driver_label, cluster, is_clonal) %>%
+            mutate(cluster = as.numeric(cluster))
         } else {
           mut_cluster_assignments <- tibble()
         }
@@ -253,7 +261,7 @@ process PREPARE_CLUSTER {
             dplyr::left_join(data_table) %>%
             dplyr::left_join(clonal_clusters) %>%
             dplyr::select(chr, from, ref, alt, is_driver, driver_label, cluster, is_clonal) %>%
-            dplyr::bind_rows(mut_cluster_assignments %>% mutate(cluster = as.numeric(cluster))) %>%
+            dplyr::bind_rows(mut_cluster_assignments) %>%
             dplyr::mutate(cluster = paste0('C', cluster)) %>%
             dplyr::mutate(Project = "$meta.id", Genome = "${params.genome}", mut_type = 'SNP', Type = 'SOMATIC', ID = cluster, Sample = cluster) %>%
             dplyr::rename(chrom = chr, pos_start = from) %>%

@@ -77,7 +77,9 @@ patient_id = opt[["prefix"]]
 
 mobster_files = grep(mutation_tables, pattern="mobster", value=T)
 if (length(mobster_files)>0){
-  mutations_mobster = lapply(mobster_files, readr::read_tsv) %>%
+  mutations_mobster = lapply(mobster_files, FUN = function(f){
+    readr::read_tsv(f) %>% mutate(chrom = as.character(chrom))
+    }) %>%
     bind_rows() %>%
     mutate(patient_id=patient_id, tool="mobster",
            mutation_id=paste(chrom, pos_start, pos_end, ref, alt, sep=":")) %>%

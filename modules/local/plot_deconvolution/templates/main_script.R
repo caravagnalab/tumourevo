@@ -280,7 +280,7 @@ if (length(plt_mobster) == 1){
 } else if (length(plt_mobster) > 1) {
   hg = ceiling(length(plt_mobster)/2)
   mobster <- wrap_plots(plt_mobster, ncol = 2, nrow = hg)
-  ggsave(mobster, filename=paste0(opt[["prefix"]], "_deconvolution_mobster.pdf"), width = 8, height = hg*3, units = 'in')
+  ggsave(mobster, filename=paste0(opt[["prefix"]], "_deconvolution_mobster.pdf"), width = 8, height = hg*3, units = 'in', limitsize = FALSE)
 
 }
 
@@ -290,7 +290,7 @@ if (length(plt_pyclone) == 1){
 } else if (length(plt_pyclone) > 1) {
   hg = ceiling(length(plt_pyclone)/2)
   pyclone <- wrap_plots(plt_pyclone, ncol = 2, nrow = hg)
-  ggsave(pyclone, filename=paste0(opt[["prefix"]], "_deconvolution_pyclonevi.png"), width = 8, height = hg*3, units = 'in')
+  ggsave(pyclone, filename=paste0(opt[["prefix"]], "_deconvolution_pyclonevi.png"), width = 8, height = hg*3, units = 'in', limitsize = FALSE)
 
 }
 
@@ -300,6 +300,6 @@ if (length(plt_viber) == 1){
 } else if (length(plt_viber) > 1){
   hg = ceiling(length(plt_viber)/2)
   viber <- wrap_plots(plt_viber, ncol = 2, nrow = hg)
-  ggsave(plot = viber, filename=paste0(opt[["prefix"]], "_deconvolution_viber.png"), width = 8, height = hg*3, units = 'in')
+  ggsave(plot = viber, filename=paste0(opt[["prefix"]], "_deconvolution_viber.png"), width = 8, height = hg*3, units = 'in', limitsize = FALSE)
 
 }

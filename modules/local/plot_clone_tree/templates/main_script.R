@@ -47,7 +47,7 @@ plot_tree <- function(ctree, signature, score, sub_tool, s_type, label){
 
   cex = 1
   clones_orderings = igraph::topo_sort(igraph::graph_from_adjacency_matrix(DataFrameToMatrix(ctree[["transfer"]][["clones"]])),
-                                       mode = 'out')\$name
+                                       mode = 'out')[["name"]]
 
   nDrivers = length(clones_orderings) - 1 # avoid GL
   layout_ctree <- create_layout(tb_tree, layout = "tree")
