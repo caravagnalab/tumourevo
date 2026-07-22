@@ -1,6 +1,7 @@
 process ASSIGN_CLUSTER {
     tag "$meta.id"
     label 'process_high'
+    label "error_ignore"
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
@@ -99,9 +100,11 @@ process ASSIGN_CLUSTER {
 
     if os.path.exists(catalog_id):
       data_id = os.path.join(out, f'output/ID/{name}.ID83.all')
-      os.mkdir(os.path.join(out, 'ID/'))
+      if os.path.exists(data_id):
 
-      Analyze.cosmic_fit(data_id,
+      	os.mkdir(os.path.join(out, 'ID/'))
+
+      	Analyze.cosmic_fit(data_id,
                       os.path.join(out, 'ID/'),
                       input_type="matrix",
                       context_type="83",

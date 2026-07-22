@@ -16,10 +16,13 @@ process CNAQC2TSV {
     path "versions.yml",                                             emit: versions
 
     script:
+    args = task.ext.args ?: ''
+    prefix = task.ext.prefix ?: "${meta.id}"
     template "main_script.R"
 
     stub:
     def prefix = task.ext.prefix ?: "${meta.id}"
+    def args = task.ext.args ?: ''
     """
     touch ${prefix}_joint_table.tsv
 

@@ -89,13 +89,14 @@ if ("$pyclone_fit" != ''){
     mutate(mutation_id = paste(patient_id, chr, from, alt, sep = ':')) %>%
     select(mutation_id, VAF, SYMBOL, Indiv, is_driver) %>%
     dplyr::rename(sample_id = Indiv)
+
   pyclone_fit = read.table("$pyclone_fit", header = T, sep = '\\t') %>%
     select(mutation_id, cluster_id)
 
 
   plt_pyclone <- list()
 
-  data = left_join(pyclone_table, pyclone_fit) %>%
+  data = left_join(pyclone_fit, pyclone_table) %>%
     filter(!is.na(sample_id)) %>%
     mutate(cluster_id = paste0('C', cluster_id)) %>%
     distinct()
@@ -279,7 +280,7 @@ if (length(plt_mobster) == 1){
 } else if (length(plt_mobster) > 1) {
   hg = ceiling(length(plt_mobster)/2)
   mobster <- wrap_plots(plt_mobster, ncol = 2, nrow = hg)
-  ggsave(mobster, filename=paste0(opt[["prefix"]], "_deconvolution_mobster.pdf"), width = 8, height = hg*3, units = 'in')
+  ggsave(mobster, filename=paste0(opt[["prefix"]], "_deconvolution_mobster.pdf"), width = 8, height = hg*3, units = 'in', limitsize = FALSE)
 
 }
 
@@ -289,7 +290,7 @@ if (length(plt_pyclone) == 1){
 } else if (length(plt_pyclone) > 1) {
   hg = ceiling(length(plt_pyclone)/2)
   pyclone <- wrap_plots(plt_pyclone, ncol = 2, nrow = hg)
-  ggsave(pyclone, filename=paste0(opt[["prefix"]], "_deconvolution_pyclonevi.png"), width = 8, height = hg*3, units = 'in')
+  ggsave(pyclone, filename=paste0(opt[["prefix"]], "_deconvolution_pyclonevi.png"), width = 8, height = hg*3, units = 'in', limitsize = FALSE)
 
 }
 
@@ -299,6 +300,6 @@ if (length(plt_viber) == 1){
 } else if (length(plt_viber) > 1){
   hg = ceiling(length(plt_viber)/2)
   viber <- wrap_plots(plt_viber, ncol = 2, nrow = hg)
-  ggsave(plot = viber, filename=paste0(opt[["prefix"]], "_deconvolution_viber.png"), width = 8, height = hg*3, units = 'in')
+  ggsave(plot = viber, filename=paste0(opt[["prefix"]], "_deconvolution_viber.png"), width = 8, height = hg*3, units = 'in', limitsize = FALSE)
 
 }

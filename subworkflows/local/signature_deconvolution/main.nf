@@ -35,7 +35,7 @@ workflow SIGNATURE_DECONVOLUTION {
 
         SPARSE_SIGNATURES(input_sparsesig, params.genome) // run SparseSignatures
 
-        //ch_versions = ch_versions.mix(SPARSE_SIGNATURES.out.versions_sparsesignature)
+        ch_versions = ch_versions.mix(SPARSE_SIGNATURES.out.versions_sparsesignatures)
         plot_pdf = SPARSE_SIGNATURES.out.signatures_plot_pdf
         plot_rds = SPARSE_SIGNATURES.out.signatures_plot_rds
         signatures_nmfOut = SPARSE_SIGNATURES.out.signatures_nmfOut_rds
@@ -43,9 +43,9 @@ workflow SIGNATURE_DECONVOLUTION {
         sign_cv = SPARSE_SIGNATURES.out.signatures_cv_rds
         mut_counts = SPARSE_SIGNATURES.out.signatures_mutCounts_rds
         SPARSESIGNATURE_ASSIGN(signatures_nmfOut,mut_counts, params.genome)
-        
+
         sparsesignature_assign_cosmic = SPARSESIGNATURE_ASSIGN.out.sparsesignature_assigned
-        
+
     }
 
 

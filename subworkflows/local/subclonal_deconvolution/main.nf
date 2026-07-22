@@ -42,7 +42,7 @@ workflow SUBCLONAL_DECONVOLUTION {
         ch_versions = ch_versions.mix(MOBSTER.out.versions_mobster)
 
         CTREE_MOBSTER(MOBSTER.out.mobster_best_rds)
-        //ch_versions = ch_versions.mix(CTREE_MOBSTER.out.versions_ctree)
+        ch_versions = ch_versions.mix(CTREE_MOBSTER.out.versions)
 
         mobster_results = MOBSTER.out.mobster_best_rds
         mobster_pdf = MOBSTER.out.mobster_report_pdf
@@ -66,7 +66,7 @@ workflow SUBCLONAL_DECONVOLUTION {
         ch_versions = ch_versions.mix(VIBER.out.versions_viber)
 
         CTREE_VIBER(VIBER.out.viber_rds)
-        //ch_versions = ch_versions.mix(CTREE_VIBER.out.versions_ctree)
+        ch_versions = ch_versions.mix(CTREE_VIBER.out.versions)
 
         viber_results = VIBER.out.viber_rds
         viber_results_heuristic = VIBER.out.viber_heuristic_rds
@@ -87,7 +87,7 @@ workflow SUBCLONAL_DECONVOLUTION {
 
         ch_versions = ch_versions.mix(FORMATTER.out.versions)
         ch_versions = ch_versions.mix(PYCLONEVI.out.versions_pyclonevi)
-        //ch_versions = ch_versions.mix(CTREE_PYCLONEVI.out.versions_ctree)
+        ch_versions = ch_versions.mix(CTREE_PYCLONEVI.out.versions)
 
         pyclone_fits = PYCLONEVI.out.pyclone_all_fits
         pyclone_best = PYCLONEVI.out.pyclone_best_fit

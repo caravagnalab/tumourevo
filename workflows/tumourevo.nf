@@ -42,7 +42,7 @@ main:
             [meta.dataset + meta.patient, meta, vcf, tbi, bam, bai, cna_segs, cna_extra] }
             .groupTuple()
             .map { id, meta, vcf, tbi, bam, bai, cna_segs, cna_extra ->
-                n = vcf.baseName.unique().size()
+                def n = vcf.baseName.unique().size()
                 [id, meta, vcf, tbi, bam, bai, cna_segs, cna_extra, n ]}
             .transpose()
             .map { id, meta, vcf, tbi, bam, bai, cna_segs, cna_extra, n  ->
@@ -85,15 +85,6 @@ main:
         ch_extra_files,
     )
 
-    ch_ensemblvep_versions = ENSEMBLVEP_VEP.out.versions_ensemblvep
-                    .mix(ENSEMBLVEP_VEP.out.versions_tabix)
-                    .mix(ENSEMBLVEP_VEP.out.versions_perlmathcdf)
-                    .map { process_name, tool, version ->
-                        """${process_name}:
-                    ${tool}: ${version}"""
-                    }
-                    .collectFile(name: 'versions.yml', newLine: true, sort: false)
-    ch_versions = ch_versions.mix(ch_ensemblvep_versions)
     ch_vcf_tbi = ENSEMBLVEP_VEP.out.vcf.join(ENSEMBLVEP_VEP.out.tbi, failOnDuplicate: true, failOnMismatch: true)
 
     GUNZIP(ENSEMBLVEP_VEP.out.vcf)
@@ -138,13 +129,13 @@ main:
     ch_versions = ch_versions.mix(QC.out.versions)
 
     if (params.filter == true){
-        SUBCLONAL_DECONVOLUTION(QC.out.join_cnaqc_PASS)
-        SIGNATURE_DECONVOLUTION(QC.out.join_cnaqc_PASS)
+         SUBCLONAL_DECONVOLUTION(QC.out.join_cnaqc_PASS)
+         SIGNATURE_DECONVOLUTION(QC.out.join_cnaqc_PASS)
 
-    } else {
-        SUBCLONAL_DECONVOLUTION(QC.out.join_cnaqc_ALL)
-        SIGNATURE_DECONVOLUTION(QC.out.join_cnaqc_ALL)
-    }
+     } else {
+         SUBCLONAL_DECONVOLUTION(QC.out.join_cnaqc_ALL)
+         SIGNATURE_DECONVOLUTION(QC.out.join_cnaqc_ALL)
+     }
 
 
     ch_versions = ch_versions.mix(SUBCLONAL_DECONVOLUTION.out.versions)
