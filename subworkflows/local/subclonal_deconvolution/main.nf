@@ -65,7 +65,11 @@ workflow SUBCLONAL_DECONVOLUTION {
         VIBER(rds_join)
         ch_versions = ch_versions.mix(VIBER.out.versions_viber)
 
-        CTREE_VIBER(VIBER.out.viber_rds)
+        if (params.viber_heuristic == true){
+          CTREE_VIBER(VIBER.out.viber_heuristic_rds)
+        } else {
+          CTREE_VIBER(VIBER.out.viber_rds)
+        }
         ch_versions = ch_versions.mix(CTREE_VIBER.out.versions)
 
         viber_results = VIBER.out.viber_rds
@@ -74,8 +78,14 @@ workflow SUBCLONAL_DECONVOLUTION {
         ctree_viber_pdf = CTREE_VIBER.out.ctree_report_pdf
         ctree_viber_rds = CTREE_VIBER.out.ctree_rds
 
-        input_plot = viber_results.map { meta, fit ->
-          [meta, [], fit, [], []]
+        if (params.viber_heuristic == true){
+          input_plot = viber_results_heuristic.map { meta, fit ->
+            [meta, [], fit, [], []]
+          }
+        } else {
+          input_plot = viber_results.map { meta, fit ->
+            [meta, [], fit, [], []]
+          }
         }
         PLOT_DECONVOLUTION_VIBER(input_plot)
     }

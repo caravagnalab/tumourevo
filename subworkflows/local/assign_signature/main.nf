@@ -17,6 +17,7 @@ workflow ASSIGN_SIGNATURE {
         rds_join
         mobster_fit
         viber_fit
+        viber_fit_heuristic
         sigprofiler_fit
 
     main:
@@ -49,8 +50,11 @@ workflow ASSIGN_SIGNATURE {
             FORMATTER_VIBER(rds_join, "rds")
             ch_versions = ch_versions.mix(FORMATTER_VIBER.out.versions)
 
-            // viber_combined = viber_fit.map { meta, fit -> tuple(meta, fit, []) }
-            viber_combined = viber_fit.join(FORMATTER_VIBER.out.out_data, by: 0).map {meta, fit, data, samples -> tuple(meta, fit, data)}
+            if (params.viber_heuristic == true){
+              viber_combined = viber_fit_heuristic.join(FORMATTER_VIBER.out.out_data, by: 0).map {meta, fit, data, samples -> tuple(meta, fit, data)}
+            } else {
+              viber_combined = viber_fit.join(FORMATTER_VIBER.out.out_data, by: 0).map {meta, fit, data, samples -> tuple(meta, fit, data)}
+            }
 
             PREPARE_CLUSTER_VIBER(viber_combined)
             table_viber = PREPARE_CLUSTER_VIBER.out.signature_table

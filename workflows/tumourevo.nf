@@ -119,8 +119,8 @@ main:
 
     input_muts = ANNOTATE_DRIVER.out.rds.map { meta, rds ->
         [meta, rds, meta.tumour_sample]
-        }    
-    
+        }
+
     SAMPLE_MUTATIONS_ANALYSIS(input_muts, VCF2MAF.out.maf)
     ch_versions = ch_versions.mix(SAMPLE_MUTATIONS_ANALYSIS.out.versions)
 
@@ -145,8 +145,9 @@ main:
                     QC.out.join_cnaqc_ALL,
                     SUBCLONAL_DECONVOLUTION.out.mobster_results,
                     SUBCLONAL_DECONVOLUTION.out.viber_results,
+                    SUBCLONAL_DECONVOLUTION.out.viber_results_heuristic,
                     SIGNATURE_DECONVOLUTION.out.sigprofiler_out)
-    
+
     if (params.filter == true) {
         GENOME_INTERPRETER(
                         QC.out.rds_tinc,

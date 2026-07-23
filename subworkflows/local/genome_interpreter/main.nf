@@ -82,7 +82,7 @@ workflow GENOME_INTERPRETER {
             }
           : channel.empty()
 
-      mutation_tables_ch = ch_mobster              
+      mutation_tables_ch = ch_mobster
           .map { meta, files -> [meta, files] }           // [key, [file1, file2, ...]]
           .mix(ch_pyclone)                                // [key, [file]]
           .mix(ch_viber)                                  // [key, [file]]
@@ -148,7 +148,7 @@ workflow GENOME_INTERPRETER {
     .groupTuple()
 
     oncoprint_input = join_cnaqc_out.join(tmb_rds.join(maf))
-   
+
 
     // disabling momentarly the cohort mutations analysis and visualization
     COHORT_MUTATIONS(oncoprint_input)
@@ -188,14 +188,13 @@ workflow GENOME_INTERPRETER {
             }
 
     }
-    
-    cohort_signatures_input.view()
+
     COHORT_SIGNATURES(cohort_signatures_input)
     cohort_signatures_pdf = COHORT_SIGNATURES.out.report_cohort_signatures
     cohort_signatures_rds = COHORT_SIGNATURES.out.rds_cohort_signatures
     cohort_signatures_table = COHORT_SIGNATURES.out.table_cohort_signatures
     ch_versions = ch_versions.mix(COHORT_SIGNATURES.out.versions)
-    
+
     emit:
     summary_table_rds
     summary_plot_rds
