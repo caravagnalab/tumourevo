@@ -590,5 +590,14 @@
         {
             "$ref": "#/$defs/other"
         }
-    ]
+    ],
+    "properties": {
+        "qc_chr": {
+            "type": "boolean"
+        },
+        "cnaqc_indels_lenght": {
+            "type": "string",
+            "default": "NULL"
+        }
+    }
 }
