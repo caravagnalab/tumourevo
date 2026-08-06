@@ -20,8 +20,8 @@
                     "CNAqc": "1.1.2"
                 },
                 "CNAQC": {
-                    "CNAqc": "1.1.3",
-                    "dplyr": "1.1.4"
+                    "CNAqc": "1.1.4",
+                    "dplyr": "1.2.1"
                 },
                 "CTREE_MOBSTER": {
                     "ctree": "1.1.0",
@@ -62,7 +62,7 @@
                     "CNAqc": "1.1.3",
                     "mobster": "0.1.1",
                     "cli": "3.6.5",
-                    "dplyr": "1.1.4",
+                    "dplyr": "1.2.0",
                     "ggplot2": "3.5.2"
                 },
                 "PYCLONEVI": {
@@ -495,7 +495,7 @@
                 "variant_annotation/vep/SCOUT/SPN01_SS_nobam/SPN01_100X_0.9p_Sample_C/SCOUT_SPN01_SS_nobam_SPN01_100X_0.9p_Sample_C.annotated.vcf.gz"
             ]
         ],
-        "timestamp": "2026-05-26T13:24:00.929956641",
+        "timestamp": "2026-08-06T09:56:06.951844746",
         "meta": {
             "nf-test": "0.9.4",
             "nextflow": "25.10.0"

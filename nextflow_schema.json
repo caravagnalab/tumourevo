@@ -595,9 +595,9 @@
         "qc_chr": {
             "type": "boolean"
         },
-        "cnaqc_indels_lenght": {
+        "cnaqc_blacklist_indels": {
             "type": "string",
-            "default": "NULL"
+            "default": "TRUE"
         }
     }
 }
