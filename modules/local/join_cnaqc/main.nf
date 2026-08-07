@@ -39,7 +39,7 @@ process JOIN_CNAQC {
 
     qc_chr = as.logical(toupper("$qc_chr"))
 
-    if("$qc_chr" == TRUE) {
+    if(as.logical("$qc_chr") == TRUE) {
         result = lapply(result, function(x) {
             x = lapply(x, function(chr) {
                 chr\$mutations = chr\$mutations %>% dplyr::rename(Indiv = sample) %>% dplyr::select(-additional_info)
@@ -53,14 +53,14 @@ process JOIN_CNAQC {
         out_all = lapply(chromosomes, function(cc) {
             mcnaqc_list = lapply(result, function(df) {
                 df[[cc]]
-            })  
+            })
 
             out_all_by_chr = multisample_init(mcnaqc_list,
                                                 QC_filter = FALSE,
                                                 keep_original = as.logical("$keep_original"),
                                                 discard_private = FALSE)
             return(out_all_by_chr)
-        }) 
+        })
         names(out_all) = chromosomes
 
         saveRDS(object = out_all, file = paste0("$prefix", "_by_chr_multi_cnaqc_ALL.rds"))
@@ -71,7 +71,7 @@ process JOIN_CNAQC {
           out_PASS = lapply(chromosomes, function(cc) {
             mcnaqc_list = lapply(result, function(df) {
               df[[cc]]
-            })  
+            })
             # open the trycatch per chr
             tryCatch(expr = {
               out_PASS_by_chr = multisample_init(mcnaqc_list,
@@ -85,7 +85,7 @@ process JOIN_CNAQC {
               out_PASS <<- NULL
             }
             )
-          }) 
+          })
           names(out_PASS) = chromosomes
           saveRDS(object = out_PASS, file = paste0("$prefix", "_by_chr_multi_cnaqc_PASS.rds"))
         }

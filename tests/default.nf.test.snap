@@ -21,7 +21,8 @@
                 },
                 "CNAQC": {
                     "CNAqc": "1.1.4",
-                    "dplyr": "1.2.1"
+                    "dplyr": "1.2.1",
+                    "gridExtra": null
                 },
                 "CTREE_MOBSTER": {
                     "ctree": "1.1.0",
@@ -495,7 +496,7 @@
                 "variant_annotation/vep/SCOUT/SPN01_SS_nobam/SPN01_100X_0.9p_Sample_C/SCOUT_SPN01_SS_nobam_SPN01_100X_0.9p_Sample_C.annotated.vcf.gz"
             ]
         ],
-        "timestamp": "2026-08-06T09:56:06.951844746",
+        "timestamp": "2026-08-07T15:14:06.317394059",
         "meta": {
             "nf-test": "0.9.4",
             "nextflow": "25.10.0"

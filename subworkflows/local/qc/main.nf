@@ -32,22 +32,17 @@ workflow QC {
             pdf_tinc = TINC.out.plot_pdf
             csv_tinc = TINC.out.tinc_csv
         }
-        
-        // set the input for cnaqc 
+
+        // set the input for cnaqc
         input_cnaqc = input.map{meta, cna, snv ->
                 def sample =  meta.tumour_sample
                 [meta, snv, cna, sample]
         }
 
         // check if the flag is set to true or not
-        
+
         if(params.qc_chr == true) {
 
-            // in_qc_by_chr = CNAQC.out.qc_rds.map{ meta, rds ->
-            //     def sample = meta.tumour_sample
-            //     [meta, rds, sample]
-            // }
-            // perform qc by chromosomes
             CNAQC_BY_CHR(input_cnaqc)
 
             plot_cnaqc_by_chr_qc_pdf = CNAQC_BY_CHR.out.plot_pdf_qc_by_chr
@@ -63,7 +58,7 @@ workflow QC {
             plot_cnaqc_qc = CNAQC_BY_CHR.out.plot_pdf_qc
 
             // join by chromosomes
-            in_join_cnaqc = CNAQC_BY_CHR.out.qc_rds.map{ meta, rds ->
+            in_join_cnaqc = CNAQC_BY_CHR.out.qc_by_chr_rds.map{ meta, rds ->
                 def sample = meta.tumour_sample
                 meta = meta + [id: "${meta.dataset}_${meta.patient}"]
                 [meta.subMap('dataset', 'patient', 'id'), rds, sample]}
