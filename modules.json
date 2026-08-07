@@ -18,7 +18,7 @@
                     },
                     "cnaqc": {
                         "branch": "master",
-                        "git_sha": "2080397432fcb0d079121dbacf22ce42ef175cec",
+                        "git_sha": "0041db49284f44eaeba5b861acdb7d076771d244",
                         "installed_by": ["modules"]
                     },
                     "ctree": {

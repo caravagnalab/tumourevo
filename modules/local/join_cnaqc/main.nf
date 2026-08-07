@@ -21,6 +21,7 @@ process JOIN_CNAQC {
     def prefix = task.ext.prefix ?: "$meta.id"
     def qc_filter = args.qc_filter != null ? args.qc_filter : false
     def keep_original = args!="" && args.keep_original ? "$args.keep_original" : ""
+    def qc_chr = args!="" && args.qc_chr ? "$args.qc_chr" : ""
 
     """
     #!/usr/bin/env Rscript
@@ -36,33 +37,88 @@ process JOIN_CNAQC {
             })
     names(result) = samples
 
-    for (name in names(result)){
-        result[[name]]\$mutations = result[[name]]\$mutations %>% dplyr::rename(Indiv = sample) %>% dplyr::select(-additional_info)
-    }
+    qc_chr = as.logical(toupper("$qc_chr"))
 
-    out_all = CNAqc::multisample_init(result,
-                            QC_filter = FALSE,
-                            keep_original = as.logical("$keep_original"),
-                            discard_private = FALSE)
+    if("$qc_chr" == TRUE) {
+        result = lapply(result, function(x) {
+            x = lapply(x, function(chr) {
+                chr\$mutations = chr\$mutations %>% dplyr::rename(Indiv = sample) %>% dplyr::select(-additional_info)
+                return(chr)
+            })
+            return(x)
+        })
 
-    saveRDS(object = out_all, file = paste0("$prefix", "_multi_cnaqc_ALL.rds"))
+        chromosomes = lapply(result, names) %>% unlist %>% unique
 
+        out_all = lapply(chromosomes, function(cc) {
+            mcnaqc_list = lapply(result, function(df) {
+                df[[cc]]
+            })  
 
-    if (as.logical("$qc_filter") == TRUE){
-      tryCatch(expr = {
-        out_PASS = CNAqc::multisample_init(result,
-                            QC_filter = TRUE,
-                            keep_original = as.logical("$keep_original"),
-                            discard_private = FALSE)
-        }, error = function(e) {
-            print(e)
-            print('Not found common segments with QC PASS karyotype, the multi-CNaqc object will be NULL: re-run the pipeline with --filter false')
-            out_PASS <<- NULL
+            out_all_by_chr = multisample_init(mcnaqc_list,
+                                                QC_filter = FALSE,
+                                                keep_original = as.logical("$keep_original"),
+                                                discard_private = FALSE)
+            return(out_all_by_chr)
+        }) 
+        names(out_all) = chromosomes
+
+        saveRDS(object = out_all, file = paste0("$prefix", "_by_chr_multi_cnaqc_ALL.rds"))
+
+        if (as.logical("$qc_filter") == TRUE){
+
+          # select the chr elements
+          out_PASS = lapply(chromosomes, function(cc) {
+            mcnaqc_list = lapply(result, function(df) {
+              df[[cc]]
+            })  
+            # open the trycatch per chr
+            tryCatch(expr = {
+              out_PASS_by_chr = multisample_init(mcnaqc_list,
+                                                        QC_filter = TRUE,
+                                                        keep_original = as.logical("$keep_original"),
+                                                        discard_private = FALSE)
+              return(out_PASS_by_chr)
+            }, error = function(e) {
+              print(e)
+              print('Not found common segments with QC PASS karyotype, the multi-CNaqc object will be NULL: re-run the pipeline with --filter false')
+              out_PASS <<- NULL
+            }
+            )
+          }) 
+          names(out_PASS) = chromosomes
+          saveRDS(object = out_PASS, file = paste0("$prefix", "_by_chr_multi_cnaqc_PASS.rds"))
         }
-      )
-      saveRDS(object = out_PASS, file = paste0("$prefix", "_multi_cnaqc_PASS.rds"))
-    }
 
+    } else {
+
+        for (name in names(result)){
+            result[[name]]\$mutations = result[[name]]\$mutations %>% dplyr::rename(Indiv = sample) %>% dplyr::select(-additional_info)
+        }
+
+        out_all = CNAqc::multisample_init(result,
+                                QC_filter = FALSE,
+                                keep_original = as.logical("$keep_original"),
+                                discard_private = FALSE)
+
+        saveRDS(object = out_all, file = paste0("$prefix", "_multi_cnaqc_ALL.rds"))
+
+
+        if (as.logical("$qc_filter") == TRUE){
+          tryCatch(expr = {
+            out_PASS = CNAqc::multisample_init(result,
+                                QC_filter = TRUE,
+                                keep_original = as.logical("$keep_original"),
+                                discard_private = FALSE)
+            }, error = function(e) {
+                print(e)
+                print('Not found common segments with QC PASS karyotype, the multi-CNaqc object will be NULL: re-run the pipeline with --filter false')
+                out_PASS <<- NULL
+            }
+          )
+          saveRDS(object = out_PASS, file = paste0("$prefix", "_multi_cnaqc_PASS.rds"))
+        }
+    }
 
     # version export
     f <- file("versions.yml","w")
