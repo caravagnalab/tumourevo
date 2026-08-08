@@ -21,7 +21,8 @@ process JOIN_CNAQC {
     def prefix = task.ext.prefix ?: "$meta.id"
     def qc_filter = args.qc_filter != null ? args.qc_filter : false
     def keep_original = args!="" && args.keep_original ? "$args.keep_original" : ""
-    def qc_chr = args!="" && args.qc_chr ? "$args.qc_chr" : ""
+    def qc_chr = args.qc_chr != null ? args.qc_chr : false
+
 
     """
     #!/usr/bin/env Rscript
@@ -37,9 +38,8 @@ process JOIN_CNAQC {
             })
     names(result) = samples
 
-    qc_chr = as.logical(toupper("$qc_chr"))
 
-    if(as.logical("$qc_chr") == TRUE) {
+    if (as.logical("$qc_chr") == TRUE) {
         result = lapply(result, function(x) {
             x = lapply(x, function(chr) {
                 chr\$mutations = chr\$mutations %>% dplyr::rename(Indiv = sample) %>% dplyr::select(-additional_info)
