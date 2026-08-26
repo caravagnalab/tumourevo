@@ -106,12 +106,15 @@ dataset1,patient1,sample2,N1,patient1_sample2.vcf.gz,patient1_sample2.vcf.gz.tbi
 
 If you can not include the alignment files in the input csv, the pipeline will run anyway, treating each sample as independent.
 
-#### 3. Filtering data
+#### 3. Filtering data and QC by chromosome
 
-During the QC step, the pipeline will combine purity, copy number and mutation data to perform quality control on the copy number calls, by applying the [CNAqc algorithm](https://caravagnalab.github.io/CNAqc/). Each segment (for each sample) will be flagged as passing or not passing the QC, in the given combination of estimated purity and ploidy. According to CNAqc, a badly called segment should be recalled with a different purity estimation, in order to obtain more reliable results.
+During the QC step, the pipeline will combine purity, copy number and mutation data to perform quality control on the copy number calls, by applying the [CNAqc algorithm](https://caravagnalab.github.io/CNAqc/). Each segment (for each sample) will be flagged as passing or not passing the QC, in the given combination of estimated purity and ploidy.
 
-After CNAqc quality control, all the segments (coming from samples of the same patient) are used to build a multi-sample CNAqc object, in which a common segmentation is applied.
-In this way, only those regions that are shared among all samples will be kept in the new object.
+By default, CNAqc analysis is performed genome-wide. The `--qc_chr` flag can be used to instead run the analysis on a per-chromosome basis.
+
+The `--cnaqc_blacklist_indels` flag allows INDELs to be removed from CNAqc and the subsequent steps. INDELs can produce spurious VAF peaks that confound both the QC and subclonal deconvolution steps, so excluding them can improve the reliability of these analyses.
+
+After CNAqc quality control, all the segments (coming from samples of the same patient) are used to build a multi-sample CNAqc object, in which a common segmentation is applied. In this way, only those regions that are shared among all samples will be kept in the new object.
 It is possible to control whether to include or not in the new segmentation the segments, for each sample, that do not pass the QC test using the `--filter` flag.
 If it is set to true, only QC passing segments for each sample will be used to build the mCNAqc object and will then be passed to the subclonal deconvolution steps. This will lead to exclude some regions of the genome and the mutations that sit on it, but should result in more precise analyses. Otherwise, keeping also the segments that do not pass the QC will result in not losing any mutations but might lead to less precise results in the subclonal deconvolution steps.
 
@@ -160,7 +163,7 @@ Running the pipeline in tumour-only mode:
    - [MOBSTER](https://caravagnalab.github.io/mobster/)
    - [PyClone-VI](https://github.com/Roth-Lab/pyclone-vi)
    - [VIBER](https://caravagnalab.github.io/VIBER/index.html)
-   - [Ctree](https://caravagnalab.github.io/ctree/)
+   - [ctree](https://caravagnalab.github.io/ctree/)
 
 5. **Signature deconvolution**
    - [SparseSignatures](https://github.com/danro9685/SparseSignatures)

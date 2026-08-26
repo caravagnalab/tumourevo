@@ -10,7 +10,7 @@
             "type": "object",
             "fa_icon": "fas fa-terminal",
             "description": "Define where the pipeline should find input data and save output data.",
-            "required": ["outdir", "input"],
+            "required": ["input", "outdir"],
             "properties": {
                 "input": {
                     "type": "string",
@@ -56,6 +56,10 @@
                 "filter": {
                     "type": "boolean",
                     "description": "Flag for filtering or not QC mutations."
+                },
+                "qc_chr": {
+                    "type": "boolean",
+                    "description": "If True QC analysis is performed by chromosome otherwise is performed whole genome"
                 },
                 "publish_dir_mode": {
                     "type": "string",
@@ -157,6 +161,11 @@
                     "type": "integer",
                     "default": 25,
                     "description": "Minimum number of mutations that are required to be mapped to a karyotype in order to compute CCF values."
+                },
+                "cnaqc_blacklist_indels": {
+                    "type": "string",
+                    "default": "TRUE",
+                    "description": "If TRUE INDEL are excluded from CNAqc analysis and following steps otherwise are kept."
                 }
             },
             "fa_icon": "fas fa-briefcase"
@@ -590,14 +599,5 @@
         {
             "$ref": "#/$defs/other"
         }
-    ],
-    "properties": {
-        "qc_chr": {
-            "type": "boolean"
-        },
-        "cnaqc_blacklist_indels": {
-            "type": "string",
-            "default": "TRUE"
-        }
-    }
+    ]
 }
