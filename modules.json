@@ -18,7 +18,7 @@
                     },
                     "cnaqc": {
                         "branch": "master",
-                        "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
+                        "git_sha": "0041db49284f44eaeba5b861acdb7d076771d244",
                         "installed_by": ["modules"]
                     },
                     "ctree": {
@@ -40,13 +40,13 @@
                     },
                     "mobster": {
                         "branch": "master",
-                        "git_sha": "be8d7a5227223396a308243db310379f329082e4",
+                        "git_sha": "a31e49804d5ef8b9babb0afb64d655132247cd34",
                         "installed_by": ["modules"],
                         "patch": "modules/nf-core/mobster/mobster.diff"
                     },
                     "pyclonevi": {
                         "branch": "master",
-                        "git_sha": "60cd0533736e031a9e15b16ccc3459183abcef4b",
+                        "git_sha": "6579da34bf64dbb4736c9a34108177c1d6363430",
                         "installed_by": ["modules"]
                     },
                     "sigprofiler": {
@@ -78,7 +78,7 @@
                     },
                     "viber": {
                         "branch": "master",
-                        "git_sha": "92502f57f03d9e3557253d1513f2dc9fc7e1f29f",
+                        "git_sha": "48c74fe5b0ea96833674e794d563da282e55aab2",
                         "installed_by": ["modules"],
                         "patch": "modules/nf-core/viber/viber.diff"
                     }
