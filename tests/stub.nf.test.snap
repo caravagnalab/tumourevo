@@ -61,8 +61,8 @@
                     "dplyr": "1.1.4"
                 },
                 "JOIN_CNAQC": {
-                    "CNAqc": "1.1.2",
-                    "dplyr": "1.1.4"
+                    "CNAqc": "1.1.5",
+                    "dplyr": "1.2.1"
                 },
                 "JOIN_POSITIONS": {
                     "dplyr": "1.1.4",
@@ -583,7 +583,7 @@
                 "variant_annotation/vep/SCOUT/SPN01_SS_nobam/SPN01_100X_0.9p_Sample_C/SCOUT_SPN01_SS_nobam_SPN01_100X_0.9p_Sample_C.annotated_summary.html"
             ]
         ],
-        "timestamp": "2026-08-07T14:58:06.458430397",
+        "timestamp": "2026-09-04T11:59:19.724323319",
         "meta": {
             "nf-test": "0.9.4",
             "nextflow": "25.10.0"
