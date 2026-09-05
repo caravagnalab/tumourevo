@@ -5,8 +5,8 @@ process CNAQC2TSV {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/91/913112a2d9295d35fe97874caf5f500df5a98d6fef1cb5861fd64caa0223a047/data':
-        'community.wave.seqera.io/library/r-cnaqc_r-cli_r-dplyr_r-readr_pruned:0fc82bfd06afe6dc' }"
+        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/63/63f20f0f8ea78a7aecb1baa9aa35c03cdff9e18d19181d34561ed6d7e6376a0c/data' :
+        'community.wave.seqera.io/library/r-cnaqc_r-cli_r-dplyr_r-readr_pruned:aebdc556849a14c7' }"
 
     input:
     tuple val(meta), path(rds_join), val(tumour_samples)
