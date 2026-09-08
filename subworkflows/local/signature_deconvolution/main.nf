@@ -59,7 +59,12 @@ workflow SIGNATURE_DECONVOLUTION {
             [meta.subMap('dataset', 'id'), tsv]}
             .groupTuple()
 
-        SIGPROFILER(input_sigprofiler, params.genome, genome_path)
+        ch_seed = channel.of(
+                    "\tSeed",
+                    "0\t315836613344651455423314970566641622150"
+                ).collectFile(name: 'seed.txt', newLine: true, sort: false)
+
+        SIGPROFILER(input_sigprofiler, params.genome, genome_path, ch_seed)
         ch_versions = ch_versions.mix(SIGPROFILER.out.versions)
         sigprofiler_out = SIGPROFILER.out.results_sigprofiler
     }
