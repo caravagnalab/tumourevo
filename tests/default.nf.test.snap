@@ -16,7 +16,7 @@
                     "dplyr": "1.1.4"
                 },
                 "CNAQC2TSV": {
-                    "dplyr": "1.1.4",
+                    "dplyr": "1.2.1",
                     "CNAqc": "1.1.2"
                 },
                 "CNAQC": {
@@ -496,7 +496,7 @@
                 "variant_annotation/vep/SCOUT/SPN01_SS_nobam/SPN01_100X_0.9p_Sample_C/SCOUT_SPN01_SS_nobam_SPN01_100X_0.9p_Sample_C.annotated.vcf.gz"
             ]
         ],
-        "timestamp": "2026-09-04T11:51:20.710951713",
+        "timestamp": "2026-09-04T16:30:57.543275016",
         "meta": {
             "nf-test": "0.9.4",
             "nextflow": "25.10.0"

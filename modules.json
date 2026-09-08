@@ -7,7 +7,7 @@
                 "nf-core": {
                     "bcftools/mpileup": {
                         "branch": "master",
-                        "git_sha": "e753770db613ce014b3c4bc94f6cba443427b726",
+                        "git_sha": "feef37435aea56816adf4b3bde1fc76aac327a8d",
                         "installed_by": ["modules"],
                         "patch": "modules/nf-core/bcftools/mpileup/bcftools-mpileup.diff"
                     },
@@ -51,12 +51,12 @@
                     },
                     "sigprofiler": {
                         "branch": "master",
-                        "git_sha": "e753770db613ce014b3c4bc94f6cba443427b726",
+                        "git_sha": "2a355c816f06b834fadd05fd444cbea171f7bdee",
                         "installed_by": ["modules"]
                     },
                     "sparsesignatures": {
                         "branch": "master",
-                        "git_sha": "ebb717c1ec96c97695b88a4a9c9d8c0e1b1b980b",
+                        "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
                         "installed_by": ["modules"],
                         "patch": "modules/nf-core/sparsesignatures/sparsesignatures.diff"
                     },
