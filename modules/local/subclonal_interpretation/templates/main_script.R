@@ -233,7 +233,8 @@ score_table = score_table %>%
     score_all = ifelse(is.na(n_never_tail),
                        (w_driver * score_driver + w_sig * score_sign) / (w_driver+w_sig),
                        (w_driver * score_driver + w_sig * score_sign + w_tail * score_tail) / (w_driver+w_sig+w_tail))) %>%
-  mutate(weight_tail = w_tail)
+  mutate(weight_tail = w_tail) %>%
+  ungroup() %>% unique()
 
 get_signature_colors <- function(names) {
   n <- length(names)
