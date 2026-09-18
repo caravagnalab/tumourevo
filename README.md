@@ -45,7 +45,6 @@ different strategies will be applied.
 - Subclonal Deconvolution (`PyClone`, `MOBSTER`, `VIBER`)
 - Clone Tree Inference (`ctree`)
 - Signature Deconvolution (`SparseSignatures`, `SigProfiler`)
-- Genome Interpreter
 
 ## Usage
 
@@ -86,7 +85,31 @@ For more details about the output files and reports, please refer to the
 
 ## Credits
 
-nf-core/tumourevo was originally written by Nicola Calonaci, Elena Buscaroli, Katsiaryna Davydzenka, Giorgia Gandolfi, Virginia Gazziero, Brandon Hastings, Davide Rambaldi, Rodolfo Tolloi, Lucrezia Valeriani and Giulio Caravagna.
+nf-core/tumourevo was originally written by Elena Buscaroli, Katsiaryna Davydzenka, Giorgia Gandolfi, Virginia Gazziero, Lucrezia Valeriani, Nicola Calonaci and Giulio Caravagna at [Cancer Data Science Laboratory](https://www.caravagnalab.org) at University of Trieste with the support of AIRC, Orfeo HPC platform at AREA Science Park and Human Technopole.
+
+Main developers:
+
+- [Elena Buscaroli](https://github.com/elena-buscaroli)
+- [Katsiaryna Davydzenka](https://github.com/kdavydzenka)
+- [Giorgia Gandolfi](https://github.com/giorgiagandolfi)
+- [Virginia Gazziero](https://github.com/vvvirgy)
+- [Lucrezia Valeriani](https://github.com/valerianilucrezia)
+- [Nicola Calonaci](https://github.com/nicola-calonaci)
+
+We thank the following people for their assistance in the development of this pipeline:
+
+- [Rodolfo Tolloi](https://github.com/RodTol)
+- [Davide Rambaldi](https://github.com/tucano)
+- [Brandon Hasting](https://github.com/brandon-hastings)
+- [Chela James](https://github.com/chelauk)
+- [Maxime U Garcia](https://github.com/maxulysse)
+- [Raquel Manzano](https://github.com/RaqManzano)
+- [Phil Ewels](https://github.com/ewels)
+- [Simon Pearce](https://github.com/SPPearce)
+- [Matthias Hörtenhuber](https://github.com/mashehu)
+- [Friederike Hanssen](https://github.com/FriederikeHanssen)
+
+We acknowledge Andrea Sottoriva, Trevor Graham, Guido Sanguinetti, Giovanni Tonon, Stefano Cozzini, Niccolò Tosato and Alberto Cazzaniga.
 
 ## Contributions and Support
 
