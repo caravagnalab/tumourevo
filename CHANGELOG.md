@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Changed`
 
-- `SUBCLONAL_INTERPRETATION`: revised expansion score. The evidence score Φ (driver, tail, signature) is multiplied by a reliability factor R, the minimum of data-quality factors (purity consistency, CNAqc karyotype QC, read support) and fit factors (cluster size, own density mode, posterior predictive fit). Tiers are assigned on the final score; the clonal cluster is re-anchored on CCF; φ_driver is graded by tail status and corrected for chance; φ_signature is read against a same-size null; non-estimable components take a neutral value instead of being dropped.
+- `SUBCLONAL_INTERPRETATION`: revised expansion score. The evidence score Φ (driver, tail, signature) is multiplied by a reliability factor R, the minimum of read support, cluster size, own density mode and posterior predictive fit (purity and copy number are left to CNAqc). Tiers are assigned on the final score; the clonal cluster is re-anchored on CCF; φ_driver is graded by tail status and corrected for chance; φ_signature is read against a same-size null; non-estimable components take a neutral value instead of being dropped.
 - `GENOME_INTERPRETER` passes the clustering fits and the CNAqc joint table to `SUBCLONAL_INTERPRETATION`; `PLOT_CLONE_TREE` uses the tiers computed there.
 
 ### `Added`

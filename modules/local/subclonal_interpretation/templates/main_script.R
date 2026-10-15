@@ -215,7 +215,8 @@ fit_converged = function(fit) {
   NA
 }
 
-# Joint table: per-mutation, per-sample depth, VAF, karyotype, purity, CNAqc QC ######
+# Joint table: per-mutation, per-sample depth, VAF, karyotype, purity ######
+# Purity and copy number are validated by CNAqc upstream and are not re-scored here.
 
 joint = NULL
 if (length(joint_files) > 0) {
@@ -230,7 +231,6 @@ if (length(joint_files) > 0) {
     VAF = as.numeric(joint_raw[["VAF"]]),
     karyotype = as.character(joint_raw[["karyotype"]]),
     purity = as.numeric(joint_raw[["purity"]]),
-    QC_PASS = as.logical(col_or(joint_raw, "QC_PASS", NA)),
     CCF_cnaqc = as.numeric(col_or(joint_raw, "CCF", NA)),
     multiplicity = as.numeric(col_or(joint_raw, "mutation_multiplicity", NA))
   ) %>%
@@ -242,16 +242,14 @@ if (length(joint_files) > 0) {
                         CCF_cnaqc))
 }
 
-# Layer 1, sample level: q_purity from the clonal 1:1 peak
-sample_purity = tibble(sample=character(), purity=numeric(), v_clonal=numeric(), kappa=numeric(), q_purity=numeric())
+# Clonal 1:1 VAF peak per sample, used by the tail-estimability check
+sample_peaks = tibble(sample=character(), purity=numeric(), v_clonal=numeric())
 if (!is.null(joint)) {
-  sample_purity = joint %>%
+  sample_peaks = joint %>%
     group_by(sample) %>%
     summarise(purity=median(purity, na.rm=TRUE),
               v_clonal=clonal_peak(VAF[karyotype == "1:1"]),
-              .groups="drop") %>%
-    mutate(kappa=v_clonal / (purity / 2),
-           q_purity=pmin(kappa, 1 / kappa))
+              .groups="drop")
 }
 
 # MOBSTER: tail labels, tail estimability and tail shape (T5) per sample ######
@@ -299,7 +297,7 @@ if (length(mobster_fit_files) > 0) {
     mobster_labels = bind_rows(mobster_labels, lab)
 
     v_min = min(lab[["VAF"]], na.rm=TRUE)
-    v_cl = sample_purity %>% filter(sample == s) %>% pull(v_clonal)
+    v_cl = sample_peaks %>% filter(sample == s) %>% pull(v_clonal)
     if (length(v_cl) == 0 || is.na(v_cl[1])) {
       beta_means = as.numeric(fit[["a"]]) / (as.numeric(fit[["a"]]) + as.numeric(fit[["b"]]))
       v_cl = if (length(beta_means) > 0) max(beta_means, na.rm=TRUE) else NA_real_
@@ -594,11 +592,10 @@ score_table = lapply(tool_list, function(tool) {
       q_fit = pmin(1, pmax(0, (num("qfit_tv_high") - tv_used) / (num("qfit_tv_high") - num("qfit_tv_low"))))
       if (isFALSE(converged)) q_fit = min(q_fit, num("qfit_nonconverged_cap"), na.rm=TRUE)
       tibble(tool=tool, sample=s, n_mutations=n_distinct(m[["mut_key"]]),
-             q_CN=ifelse(all(is.na(m[["QC_PASS"]])), NA_real_, mean(m[["QC_PASS"]] %in% TRUE)),
              effective_depth=eff_depth, ccf_star=2 * a_star / eff_depth,
              tv=tvs[["tv"]], tv_noise=tvs[["tv_noise"]], fit_converged=converged, q_fit=q_fit)
     }) %>% bind_rows() %>%
-      left_join(sample_purity, by="sample")
+      left_join(sample_peaks, by="sample")
     sample_quality <<- bind_rows(sample_quality, sq %>% mutate(patient_id=patient_id))
 
     support = muts %>%
@@ -622,10 +619,10 @@ score_table = lapply(tool_list, function(tool) {
 
     cs = support %>%
       left_join(modes, by=c("cluster_tool", "sample")) %>%
-      left_join(sq %>% select(sample, q_CN, q_fit, q_purity), by="sample")
+      left_join(sq %>% select(sample, q_fit), by="sample")
   }
 
-  factor_names = c("q_size", "q_purity", "q_CN", "q_support", "q_mode", "q_fit")
+  factor_names = c("q_size", "q_support", "q_mode", "q_fit")
   cs = clusters %>%
     select(cluster_tool, q_size) %>%
     left_join(cs, by="cluster_tool") %>%
@@ -785,7 +782,7 @@ if (nrow(score_table) > 0) {
     ungroup() %>%
     select(patient_id, cluster_tool, tool, is_clonal, is_clonal_tool, clonal_anchor, n, ccf,
            score_tail, score_sign, score_driver, score_all, R, limiting_factor, score_final, tier,
-           best_sample, any_of(c("q_size", "q_purity", "q_CN", "q_support", "q_mode", "q_fit")),
+           best_sample, any_of(c("q_size", "q_support", "q_mode", "q_fit")),
            phi_tail, phi_sig, phi_driver, k, b, p_chance, genes, is_driver, driver,
            n_never_tail, weight_tail, signature_null, flags)
 }
@@ -855,8 +852,8 @@ if (nrow(score_table) > 0) {
 
   pl_factors = score_table %>%
     filter(!is_clonal) %>%
-    pivot_longer(cols=any_of(c("q_size", "q_purity", "q_CN", "q_support", "q_mode", "q_fit"))) %>%
-    mutate(name=factor(name, levels=c("q_size", "q_purity", "q_CN", "q_support", "q_mode", "q_fit"))) %>%
+    pivot_longer(cols=any_of(c("q_size", "q_support", "q_mode", "q_fit"))) %>%
+    mutate(name=factor(name, levels=c("q_size", "q_support", "q_mode", "q_fit"))) %>%
     ggplot(aes(x=name, y=cluster_tool, fill=value)) +
     geom_tile(color="white") +
     geom_text(aes(label=ifelse(is.na(value), "n/c", sprintf("%.2f", value))), size=3) +
