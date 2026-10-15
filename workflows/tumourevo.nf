@@ -163,7 +163,11 @@ main:
                         SIGNATURE_DECONVOLUTION.out.sigprofiler_out,
                         SIGNATURE_DECONVOLUTION.out.sparsesignature_assign_cosmic,
                         SUBCLONAL_DECONVOLUTION.out.ctree_viber_rds,
-                        SUBCLONAL_DECONVOLUTION.out.ctree_pyclone_rds
+                        SUBCLONAL_DECONVOLUTION.out.ctree_pyclone_rds,
+                        SUBCLONAL_DECONVOLUTION.out.pyclone_best,
+                        params.viber_heuristic ? SUBCLONAL_DECONVOLUTION.out.viber_results_heuristic : SUBCLONAL_DECONVOLUTION.out.viber_results,
+                        SUBCLONAL_DECONVOLUTION.out.mobster_results,
+                        ASSIGN_SIGNATURE.out.joint_table
                         )
     } else {
         GENOME_INTERPRETER(
@@ -180,7 +184,11 @@ main:
                         SIGNATURE_DECONVOLUTION.out.sigprofiler_out,
                         SIGNATURE_DECONVOLUTION.out.sparsesignature_assign_cosmic,
                         SUBCLONAL_DECONVOLUTION.out.ctree_viber_rds,
-                        SUBCLONAL_DECONVOLUTION.out.ctree_pyclone_rds
+                        SUBCLONAL_DECONVOLUTION.out.ctree_pyclone_rds,
+                        SUBCLONAL_DECONVOLUTION.out.pyclone_best,
+                        params.viber_heuristic ? SUBCLONAL_DECONVOLUTION.out.viber_results_heuristic : SUBCLONAL_DECONVOLUTION.out.viber_results,
+                        SUBCLONAL_DECONVOLUTION.out.mobster_results,
+                        ASSIGN_SIGNATURE.out.joint_table
                         )
     }
 

@@ -1,0 +1,264 @@
+{
+    "subclonal_interpretation - pyclone-vi, viber, mobster - stub": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "D_P1",
+                            "dataset": "D",
+                            "patient": "P1"
+                        },
+                        "D_P1_scores_clusters.pdf:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "1": [
+                    [
+                        {
+                            "id": "D_P1",
+                            "dataset": "D",
+                            "patient": "P1"
+                        },
+                        "D_P1_signature_clusters.pdf:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "2": [
+                    [
+                        {
+                            "id": "D_P1",
+                            "dataset": "D",
+                            "patient": "P1"
+                        },
+                        "D_P1_scores.rds:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "3": [
+                    [
+                        {
+                            "id": "D_P1",
+                            "dataset": "D",
+                            "patient": "P1"
+                        },
+                        "D_P1_table_signature.rds:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "4": [
+                    [
+                        {
+                            "id": "D_P1",
+                            "dataset": "D",
+                            "patient": "P1"
+                        },
+                        "D_P1_scores.tsv:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "5": [
+                    [
+                        {
+                            "id": "D_P1",
+                            "dataset": "D",
+                            "patient": "P1"
+                        },
+                        "D_P1_sample_quality.tsv:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "rds_score": [
+                    [
+                        {
+                            "id": "D_P1",
+                            "dataset": "D",
+                            "patient": "P1"
+                        },
+                        "D_P1_scores.rds:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "rds_signature": [
+                    [
+                        {
+                            "id": "D_P1",
+                            "dataset": "D",
+                            "patient": "P1"
+                        },
+                        "D_P1_table_signature.rds:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "report_score": [
+                    [
+                        {
+                            "id": "D_P1",
+                            "dataset": "D",
+                            "patient": "P1"
+                        },
+                        "D_P1_scores_clusters.pdf:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "report_signature": [
+                    [
+                        {
+                            "id": "D_P1",
+                            "dataset": "D",
+                            "patient": "P1"
+                        },
+                        "D_P1_signature_clusters.pdf:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "tsv_sample_quality": [
+                    [
+                        {
+                            "id": "D_P1",
+                            "dataset": "D",
+                            "patient": "P1"
+                        },
+                        "D_P1_sample_quality.tsv:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "tsv_score": [
+                    [
+                        {
+                            "id": "D_P1",
+                            "dataset": "D",
+                            "patient": "P1"
+                        },
+                        "D_P1_scores.tsv:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-10-15T15:35:19.078763",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.10.0"
+        }
+    },
+    "subclonal_interpretation - no fits, no joint table - stub": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "D_P1",
+                            "dataset": "D",
+                            "patient": "P1"
+                        },
+                        "D_P1_scores_clusters.pdf:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "1": [
+                    [
+                        {
+                            "id": "D_P1",
+                            "dataset": "D",
+                            "patient": "P1"
+                        },
+                        "D_P1_signature_clusters.pdf:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "2": [
+                    [
+                        {
+                            "id": "D_P1",
+                            "dataset": "D",
+                            "patient": "P1"
+                        },
+                        "D_P1_scores.rds:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "3": [
+                    [
+                        {
+                            "id": "D_P1",
+                            "dataset": "D",
+                            "patient": "P1"
+                        },
+                        "D_P1_table_signature.rds:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "4": [
+                    [
+                        {
+                            "id": "D_P1",
+                            "dataset": "D",
+                            "patient": "P1"
+                        },
+                        "D_P1_scores.tsv:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "5": [
+                    [
+                        {
+                            "id": "D_P1",
+                            "dataset": "D",
+                            "patient": "P1"
+                        },
+                        "D_P1_sample_quality.tsv:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "rds_score": [
+                    [
+                        {
+                            "id": "D_P1",
+                            "dataset": "D",
+                            "patient": "P1"
+                        },
+                        "D_P1_scores.rds:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "rds_signature": [
+                    [
+                        {
+                            "id": "D_P1",
+                            "dataset": "D",
+                            "patient": "P1"
+                        },
+                        "D_P1_table_signature.rds:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "report_score": [
+                    [
+                        {
+                            "id": "D_P1",
+                            "dataset": "D",
+                            "patient": "P1"
+                        },
+                        "D_P1_scores_clusters.pdf:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "report_signature": [
+                    [
+                        {
+                            "id": "D_P1",
+                            "dataset": "D",
+                            "patient": "P1"
+                        },
+                        "D_P1_signature_clusters.pdf:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "tsv_sample_quality": [
+                    [
+                        {
+                            "id": "D_P1",
+                            "dataset": "D",
+                            "patient": "P1"
+                        },
+                        "D_P1_sample_quality.tsv:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "tsv_score": [
+                    [
+                        {
+                            "id": "D_P1",
+                            "dataset": "D",
+                            "patient": "P1"
+                        },
+                        "D_P1_scores.tsv:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-10-15T15:35:22.967039",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.10.0"
+        }
+    }
+}

@@ -24,6 +24,10 @@ workflow GENOME_INTERPRETER {
     sparsesignature_assign_cosmic
     ctree_viber
     ctree_pyclone
+    fit_pyclone   // tuple val(meta), path(best_fit.txt)
+    fit_viber     // tuple val(meta), path(rds)
+    fit_mobster   // tuple val(meta), path(rds), one per sample
+    joint_table   // tuple val(meta), path(tsv)
 
     main:
     ch_versions = Channel.empty()
@@ -33,6 +37,8 @@ workflow GENOME_INTERPRETER {
     summary_report_pdf = null
     report_score = null
     report_signature = null
+    score_table = null
+    sample_quality_table = null
     mutation_report = null
     cohort_signatures_pdf = null
     cohort_signatures_rds = null
@@ -106,12 +112,41 @@ workflow GENOME_INTERPRETER {
               [meta, file_lists.flatten()]
           }
 
+      ch_fit_pyclone = requested_tools.contains("pyclone-vi")
+          ? fit_pyclone.map { meta, fit -> [meta, [fit]] }
+          : channel.empty()
+
+      ch_fit_viber = requested_tools.contains("viber")
+          ? fit_viber.map { meta, fit -> [meta, [fit]] }
+          : channel.empty()
+
+      ch_fit_mobster = fit_mobster
+          .map { meta, fit ->
+              def key = meta.subMap('dataset', 'patient') + [id: "${meta.dataset}_${meta.patient}"]
+              [key, fit]
+          }
+          .groupTuple(by: 0)
+
+      fits_ch = ch_fit_mobster
+          .mix(ch_fit_pyclone)
+          .mix(ch_fit_viber)
+          .groupTuple(by: 0)
+          .map { meta, file_lists -> [meta, file_lists.flatten()] }
+
+      joint_table_ch = joint_table ?: channel.empty()
+
       subclonal_input = mutation_tables_ch
           .combine(results_sigprofiler_ch, by: 0)
+          .join(fits_ch, by: 0, remainder: true)
+          .join(joint_table_ch, by: 0, remainder: true)
+          .filter { row -> row[1] != null }
+          .map { meta, tables, results, fits, joint -> [meta, tables, results, fits ?: [], joint ?: []] }
 
       SUBCLONAL_INTERPRETATION(subclonal_input)
       report_score = SUBCLONAL_INTERPRETATION.out.report_score
       report_signature = SUBCLONAL_INTERPRETATION.out.report_signature
+      score_table = SUBCLONAL_INTERPRETATION.out.tsv_score
+      sample_quality_table = SUBCLONAL_INTERPRETATION.out.tsv_sample_quality
 
       input_clone_tree = SUBCLONAL_INTERPRETATION.out.rds_score
         .join(SUBCLONAL_INTERPRETATION.out.rds_signature)
@@ -203,6 +238,8 @@ workflow GENOME_INTERPRETER {
     mutation_report
     report_score
     report_signature
+    score_table
+    sample_quality_table
     cohort_signatures_pdf
     cohort_signatures_rds
     cohort_signatures_table

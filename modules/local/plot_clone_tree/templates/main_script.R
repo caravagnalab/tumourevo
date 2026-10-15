@@ -280,17 +280,10 @@ tier_colors <- c(
 )
 
 
+# Tiers are assigned by SUBCLONAL_INTERPRETATION on the final score (evidence x reliability)
 score = readRDS("$rds_score")[['score']] %>%
-  dplyr::rename(cluster = cluster_tool,
-                is_clonal_tool = is_clonal) %>%
-  mutate(tier=case_when(
-    is_clonal_tool                         ~ 'Tier 1',
-    score_all >= .9                        ~ 'Tier 1',
-    score_all >= .55 & score_all <.9       ~ 'Tier 2',
-    score_all >= .2  & score_all <.55      ~ 'Tier 3',
-    score_all <  .2                        ~ 'Tier 4'
-  )) %>%
-  select(cluster,tier,score_all, tool)
+  dplyr::rename(cluster = cluster_tool) %>%
+  select(cluster, tier, score_all = score_final, tool)
 
 driver = readRDS("$rds_score")[['driver']]
 

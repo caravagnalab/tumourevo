@@ -1,0 +1,76 @@
+nextflow_process {
+
+    name "Test Process SUBCLONAL_INTERPRETATION"
+    script "../main.nf"
+    process "SUBCLONAL_INTERPRETATION"
+
+    tag "modules"
+    tag "modules_local"
+    tag "subclonal_interpretation"
+
+    test("subclonal_interpretation - pyclone-vi, viber, mobster - stub") {
+
+        options "-stub"
+
+        when {
+            process {
+                """
+                input[0] = [
+                    [ id:'D_P1', dataset:'D', patient:'P1' ],
+                    [
+                        file("${moduleTestDir}/data/D_P1_S1_mobster.txt", checkIfExists: true),
+                        file("${moduleTestDir}/data/D_P1_pyclonevi.txt", checkIfExists: true),
+                        file("${moduleTestDir}/data/D_P1_viber.txt", checkIfExists: true)
+                    ],
+                    [ file("${moduleTestDir}/data/D_P1_pyclonevi", checkIfExists: true) ],
+                    [
+                        file("${moduleTestDir}/data/fits/D_P1_S1_mobster_best_fit.rds", checkIfExists: true),
+                        file("${moduleTestDir}/data/fits/D_P1_best_fit.txt", checkIfExists: true),
+                        file("${moduleTestDir}/data/fits/D_P1_viber_best_fit.rds", checkIfExists: true)
+                    ],
+                    file("${moduleTestDir}/data/joint/D_P1_joint_table.tsv", checkIfExists: true)
+                ]
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert snapshot(process.out).match() }
+            )
+        }
+
+    }
+
+    test("subclonal_interpretation - no fits, no joint table - stub") {
+
+        options "-stub"
+
+        when {
+            process {
+                """
+                input[0] = [
+                    [ id:'D_P1', dataset:'D', patient:'P1' ],
+                    [
+                        file("${moduleTestDir}/data/D_P1_S1_mobster.txt", checkIfExists: true),
+                        file("${moduleTestDir}/data/D_P1_pyclonevi.txt", checkIfExists: true)
+                    ],
+                    [ file("${moduleTestDir}/data/D_P1_pyclonevi", checkIfExists: true) ],
+                    [],
+                    []
+                ]
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert snapshot(process.out).match() }
+            )
+        }
+
+    }
+
+}

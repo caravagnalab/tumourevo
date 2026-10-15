@@ -544,6 +544,173 @@
             },
             "fa_icon": "fas fa-briefcase"
         },
+        "genome_interpreter": {
+            "title": "Genome interpreter",
+            "type": "object",
+            "description": "Subclonal expansion score: evidence components, data-quality and fit reliability factors.",
+            "default": "",
+            "properties": {
+                "interpreter_w_driver": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "Weight of the driver component (phi_driver) in the evidence score. 0 removes it."
+                },
+                "interpreter_w_signature": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "Weight of the signature component (phi_signature) in the evidence score. 0 removes it."
+                },
+                "interpreter_w_tail": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "Weight of the tail component (phi_tail) in the evidence score. 0 removes it; it is also removed when MOBSTER is not run."
+                },
+                "interpreter_missing_value": {
+                    "type": "number",
+                    "default": 0.5,
+                    "description": "Value taken by an evidence component that is not estimable. The component keeps its weight."
+                },
+                "interpreter_tier_thresholds": {
+                    "type": "string",
+                    "default": "0.9,0.55,0.2",
+                    "description": "Comma-separated lower bounds of Tier 1, 2 and 3 on the final score; lower scores are Tier 4."
+                },
+                "interpreter_clonal_min_ccf": {
+                    "type": "number",
+                    "default": 0.9,
+                    "description": "Clonal anchor: the clonal cluster is the largest cluster whose median CCF is at least this value in every sample."
+                },
+                "interpreter_truncal_drivers": {
+                    "type": "string",
+                    "default": "APC,KRAS,TP53,SMAD4",
+                    "description": "Comma-separated genes flagged when they fall in a non-clonal cluster."
+                },
+                "interpreter_read_support": {
+                    "type": "number",
+                    "default": 6,
+                    "description": "Target number of reads supporting a subclonal mutation (a*). q_support = min(1, expected reads / a*)."
+                },
+                "interpreter_min_cluster_size": {
+                    "type": "integer",
+                    "default": 100,
+                    "description": "Minimum cluster size in mutations; q_size = min(1, n / max(min_cluster_size, min_cluster_frac x mutations in the fit))."
+                },
+                "interpreter_min_cluster_frac": {
+                    "type": "number",
+                    "default": 0.02,
+                    "description": "Minimum cluster size as a fraction of the mutations in the fit (see min_cluster_size)."
+                },
+                "interpreter_qmode_bootstrap": {
+                    "type": "integer",
+                    "default": 200,
+                    "description": "Bootstrap resamples used for q_mode."
+                },
+                "interpreter_qmode_dip": {
+                    "type": "number",
+                    "default": 0.1,
+                    "description": "Minimum dip between two density maxima, as a fraction of the lower peak, for both to count as modes."
+                },
+                "interpreter_qmode_scale": {
+                    "type": "string",
+                    "default": "ccf",
+                    "description": "Scale for the q_mode density: 'ccf' (all karyotypes) or 'vaf_1_1' (VAF of 1:1 mutations only).",
+                    "enum": [
+                        "ccf",
+                        "vaf_1_1"
+                    ]
+                },
+                "interpreter_qfit_tv_low": {
+                    "type": "number",
+                    "default": 0.05,
+                    "description": "Total-variation distance at or below which q_fit = 1."
+                },
+                "interpreter_qfit_tv_high": {
+                    "type": "number",
+                    "default": 0.15,
+                    "description": "Total-variation distance at or above which q_fit = 0."
+                },
+                "interpreter_qfit_bin_width": {
+                    "type": "number",
+                    "default": 0.02,
+                    "description": "VAF bin width of the histograms compared by q_fit."
+                },
+                "interpreter_qfit_noise_correction": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Subtract the total-variation distance expected from sampling noise alone before computing q_fit."
+                },
+                "interpreter_qfit_nonconverged_cap": {
+                    "type": "number",
+                    "default": 0.5,
+                    "description": "Upper bound of q_fit when the clustering fit reports it did not converge."
+                },
+                "interpreter_tail_min_mutations": {
+                    "type": "integer",
+                    "default": 1000,
+                    "description": "Below this number of mutations given to MOBSTER, phi_tail is not estimable in that sample."
+                },
+                "interpreter_tail_min_clonal_ratio": {
+                    "type": "number",
+                    "default": 3,
+                    "description": "phi_tail is not estimable when the clonal VAF peak is below this multiple of the MOBSTER VAF floor."
+                },
+                "interpreter_tail_shape_bin_width": {
+                    "type": "number",
+                    "default": 0.01,
+                    "description": "VAF bin width of the tail-shape check."
+                },
+                "interpreter_tail_shape_min_bins": {
+                    "type": "integer",
+                    "default": 3,
+                    "description": "Minimum run of consecutive bins with excess tail mutations for the tail-shape check."
+                },
+                "interpreter_tail_shape_z": {
+                    "type": "number",
+                    "default": 3,
+                    "description": "z-score above which a bin has more tail mutations than the fitted tail predicts."
+                },
+                "interpreter_tail_shape_min_frac": {
+                    "type": "number",
+                    "default": 0.02,
+                    "description": "Minimum fraction of tail mutations in a flagged run for the tail-shape check."
+                },
+                "interpreter_driver_chance": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Multiply phi_driver by the probability that the cluster's driver count is not expected by chance."
+                },
+                "interpreter_signature_null": {
+                    "type": "string",
+                    "default": "refit",
+                    "description": "Null for phi_signature: 'refit' (resampled clonal spectra refitted to exposures), 'spectrum' (96-channel spectra only) or 'exposure' (resampled clonal exposures).",
+                    "enum": [
+                        "refit",
+                        "spectrum",
+                        "exposure"
+                    ]
+                },
+                "interpreter_signature_null_draws": {
+                    "type": "integer",
+                    "default": 200,
+                    "description": "Null draws used for phi_signature."
+                },
+                "interpreter_signature_min_mutations": {
+                    "type": "integer",
+                    "default": 100,
+                    "description": "Below this number of SBS mutations in a cluster, phi_signature is not estimable."
+                },
+                "interpreter_artefact_signatures": {
+                    "type": "string",
+                    "default": "SBS27,SBS43,SBS45-SBS60,SBS95",
+                    "description": "Comma-separated signatures (ranges allowed) dropped before computing signature divergence."
+                },
+                "interpreter_seed": {
+                    "type": "integer",
+                    "default": 42,
+                    "description": "Random seed for the bootstrap and null draws."
+                }
+            }
+        },
         "generic_options": {
             "title": "Generic options",
             "type": "object",
@@ -688,6 +855,9 @@
         },
         {
             "$ref": "#/$defs/tinc"
+        },
+        {
+            "$ref": "#/$defs/genome_interpreter"
         },
         {
             "$ref": "#/$defs/generic_options"
