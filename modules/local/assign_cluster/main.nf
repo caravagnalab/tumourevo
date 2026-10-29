@@ -5,8 +5,8 @@ process ASSIGN_CLUSTER {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/3e/3e160064566f2529f87874cfc606b160d9f58c606fbb1842ca46023da2afe8d3/data':
-        'community.wave.seqera.io/library/pip_sigprofilerassignment_sigprofilerextractor_sigprofilermatrixgenerator_pruned:02a3f95da35d8c9a' }"
+        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/09/09ecb3e224694943f4849f8f0e475be9523c70ff5041d90219a698b0bb51ae68/data':
+        'community.wave.seqera.io/library/pip_pandas_sigprofilerassignment_sigprofilermatrixgenerator:0ba12561ae69bd17' }"
 
     input:
     tuple val(meta), path(table), val(meta2), path(results), path(genome_installed_path)
@@ -64,20 +64,29 @@ process ASSIGN_CLUSTER {
     table_path = os.path.join(out, "${table}")
     os.rename("${table}", table_path)
 
+
     if opt.get("download_genome_sigprofiler", True):
-        print(f"Installing genome {genome} via SigProfilerMatrixGenerator...")
-        install_genome = f"SigProfilerMatrixGenerator install {genome} -v {opt['volume']}"
-        subprocess.run(install_genome, shell=True)
+    	volume = os.path.abspath(opt["volume"])
+
+    	subprocess.run(
+        	["SigProfilerMatrixGenerator", "install", genome,
+         	"--volume", volume],
+        	check=True,
+    	)
     else:
-        if not opt.get("genome_installed_path"):
-            raise ValueError("download_genome_sigprofiler is False but no genome_installed_path was provided.")
-        print(f"Using pre-installed genome at: {opt['genome_installed_path']}")
+    	volume = opt.get("genome_installed_path")
+    	if not volume or volume == "null":
+       		raise ValueError(
+            	"A valid genome_installed_path is required."
+        	)
+    	volume = os.path.abspath(volume)
+
 
     # Mutation counts matrix generation
     generate_count_matrix = (
         f"SigProfilerMatrixGenerator matrix_generator {name} {genome} {out} --volume {opt['volume']}"
     )
-    subprocess.run(generate_count_matrix, shell=True)
+    subprocess.run(generate_count_matrix, shell=True, check=True)
 
     catalog_sbs = 'SBS96/SBS96/Suggested_Solution/COSMIC_SBS96_Decomposed_Solution/Signatures/COSMIC_SBS96_Signatures.txt'
     catalog_id = 'ID83/ID83/Suggested_Solution/COSMIC_ID83_Decomposed_Solution/Signatures/COSMIC_ID83_Signatures.txt'
