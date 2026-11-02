@@ -5,8 +5,8 @@ process ASSIGN_CLUSTER {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/09/09ecb3e224694943f4849f8f0e475be9523c70ff5041d90219a698b0bb51ae68/data':
-        'community.wave.seqera.io/library/pip_pandas_sigprofilerassignment_sigprofilermatrixgenerator:0ba12561ae69bd17' }"
+        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/5f/5fb22903af2da5fd1747c02f514afcd9878809760f9f32543b11a0f233d8aa83/data' :
+        'community.wave.seqera.io/library/python_pip_sigprofilerassignment_sigprofilerextractor_pruned:ba7b67176e1074c6'}"
 
     input:
     tuple val(meta), path(table), val(meta2), path(results), path(genome_installed_path)

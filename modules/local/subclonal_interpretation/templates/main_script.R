@@ -92,6 +92,8 @@ if (length(mobster_files)>0){
   } else {
     w_tail = 0
   }
+} else {
+  w_tail = 0
 }
 
 
